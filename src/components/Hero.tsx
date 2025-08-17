@@ -34,16 +34,16 @@ const Hero = () => {
             </div>
             
             <h1 className="text-6xl lg:text-7xl font-display font-bold leading-tight">
-              <span className="text-neutral-800">Luxury</span>
+              <span className="text-neutral-800">Premium</span>
               <br />
-              <span className="luxury-gradient">Dry Fruits</span>
+              <span className="tamoor-gradient">TAMOOR</span>
               <br />
-              <span className="text-neutral-600 text-5xl lg:text-6xl">& Artisan Nuts</span>
+              <span className="text-neutral-600 text-5xl lg:text-6xl">Luxury Dry Fruits</span>
             </h1>
             
             <p className="text-xl text-neutral-600 leading-relaxed max-w-lg font-medium">
-              Discover our curated collection of the world's finest dry fruits and nuts, 
-              handpicked from premium orchards and delivered with uncompromising quality.
+              Experience TAMOOR's curated collection of the world's finest dry fruits and nuts, 
+              handpicked from premium orchards and delivered with luxury packaging.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 pt-4">

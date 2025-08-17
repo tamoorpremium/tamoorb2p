@@ -13,12 +13,12 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-8">
             <div>
-              <h3 className="text-3xl font-display font-bold luxury-gradient mb-4">
-                NutriLux Premium
+              <h3 className="text-3xl font-display font-bold tamoor-gradient mb-4">
+                TAMOOR
               </h3>
               <p className="text-neutral-400 leading-relaxed font-medium">
                 Your trusted destination for the world's finest dry fruits and nuts, 
-                curated with passion and delivered with excellence.
+                curated with passion and delivered with luxury excellence.
               </p>
             </div>
             
@@ -143,7 +143,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="border-t border-neutral-800 mt-12 pt-8 text-center">
           <p className="text-neutral-400 font-medium">
-            © 2024 NutriLux Premium. All rights reserved. Crafted with ❤️ for healthy luxury living.
+            © 2024 TAMOOR Premium. All rights reserved. Crafted with ❤️ for luxury healthy living.
           </p>
         </div>
       </div>

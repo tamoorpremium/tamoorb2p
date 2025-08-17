@@ -35,23 +35,29 @@ const Header = () => {
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
           <div className="flex items-center group">
-            <h1 className="text-3xl font-display font-bold luxury-gradient">
-              NutriLux
+            <h1 className="text-3xl font-display font-bold tamoor-gradient">
+              TAMOOR
             </h1>
-            <span className="ml-2 text-sm text-luxury-gold font-medium bg-luxury-gold/10 px-2 py-1 rounded-full">
+            <span className="ml-2 text-sm text-luxury-gold font-medium bg-luxury-gold/10 px-3 py-1 rounded-full">
               Premium
             </span>
           </div>
 
           {/* Navigation - Desktop */}
           <nav className="hidden md:flex items-center space-x-8">
-            {['Home', 'Products', 'Categories', 'About', 'Contact'].map((item) => (
+            {[
+              { name: 'Home', href: '/' },
+              { name: 'Products', href: '/products' },
+              { name: 'Categories', href: '/categories' },
+              { name: 'About', href: '/about' },
+              { name: 'Contact', href: '/contact' }
+            ].map((item) => (
               <a 
-                key={item}
-                href="#" 
+                key={item.name}
+                href={item.href} 
                 className="text-neutral-700 hover:text-luxury-gold font-medium transition-all duration-300 relative group"
               >
-                {item}
+                {item.name}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-luxury-gold to-luxury-gold-light transition-all duration-300 group-hover:w-full"></span>
               </a>
             ))}
@@ -72,15 +78,17 @@ const Header = () => {
             {[
               { icon: Heart, count: null },
               { icon: User, count: null },
-              { icon: ShoppingCart, count: 3 }
+              { icon: ShoppingCart, count: 0 }
             ].map(({ icon: Icon, count }, index) => (
               <button 
                 key={index}
-                className="p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group luxury-card"
+                className={`p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group luxury-card ${
+                  index === 2 ? 'cart-button' : ''
+                }`}
               >
                 <Icon className="w-6 h-6 text-neutral-600 group-hover:text-luxury-gold transition-colors duration-300" />
-                {count && (
-                  <span className="absolute -top-1 -right-1 bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium shadow-lg">
+                {count !== null && (
+                  <span className="cart-count absolute -top-1 -right-1 bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium shadow-lg">
                     {count}
                   </span>
                 )}
@@ -109,13 +117,19 @@ const Header = () => {
                   className="bg-transparent flex-1 outline-none text-neutral-700 placeholder-neutral-400"
                 />
               </div>
-              {['Home', 'Products', 'Categories', 'About', 'Contact'].map((item) => (
+              {[
+                { name: 'Home', href: '/' },
+                { name: 'Products', href: '/products' },
+                { name: 'Categories', href: '/categories' },
+                { name: 'About', href: '/about' },
+                { name: 'Contact', href: '/contact' }
+              ].map((item) => (
                 <a 
-                  key={item}
-                  href="#" 
+                  key={item.name}
+                  href={item.href} 
                   className="text-neutral-700 hover:text-luxury-gold font-medium transition-colors duration-300 py-2"
                 >
-                  {item}
+                  {item.name}
                 </a>
               ))}
             </div>

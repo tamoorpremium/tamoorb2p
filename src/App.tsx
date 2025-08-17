@@ -1,23 +1,49 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
-import Hero from './components/Hero';
-import Categories from './components/Categories';
-import FeaturedProducts from './components/FeaturedProducts';
-import Features from './components/Features';
-import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
+import Home from './pages/Home';
+import Products from './pages/Products';
+import Categories from './pages/Categories';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import Cart from './pages/Cart';
+import Profile from './pages/Profile';
+import Checkout from './pages/Checkout';
+import Confirmation from './pages/Confirmation';
+import Wishlist from './pages/Wishlist';
+import Auth from './pages/Auth';
+import FAQ from './pages/FAQ';
+import Certifications from './pages/Certifications';
+import Offers from './pages/Offers';
+import { CartProvider } from './context/CartContext';
 
 function App() {
   return (
-    <div className="min-h-screen">
-      <Header />
-      <Hero />
-      <Categories />
-      <FeaturedProducts />
-      <Features />
-      <Newsletter />
-      <Footer />
-    </div>
+    <CartProvider>
+      <Router>
+        <div className="min-h-screen">
+          <Header />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/confirmation" element={<Confirmation />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/certifications" element={<Certifications />} />
+            <Route path="/offers" element={<Offers />} />
+          </Routes>
+          <Footer />
+        </div>
+      </Router>
+    </CartProvider>
   );
 }
 

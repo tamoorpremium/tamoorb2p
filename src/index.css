@@ -7,6 +7,16 @@
 @import '@fontsource/poppins/600.css';
 @import '@fontsource/poppins/700.css';
 
+/* TAMOOR Brand Variables */
+:root {
+  --tamoor-gold: #d4af37;
+  --tamoor-gold-light: #ffd700;
+  --tamoor-gold-dark: #b8860b;
+  --tamoor-cream: #faf8f3;
+  --tamoor-sage: #87a96b;
+  --tamoor-charcoal: #2c2c2c;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -89,7 +99,15 @@ html {
 
 /* Luxury gradient text */
 .luxury-gradient {
-  background: linear-gradient(135deg, #d4af37 0%, #ffd700 50%, #b8860b 100%);
+  background: linear-gradient(135deg, var(--tamoor-gold) 0%, var(--tamoor-gold-light) 50%, var(--tamoor-gold-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* TAMOOR Brand Gradient */
+.tamoor-gradient {
+  background: linear-gradient(135deg, var(--tamoor-gold) 0%, var(--tamoor-gold-light) 50%, var(--tamoor-gold-dark) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -97,14 +115,68 @@ html {
 
 /* Premium button styles */
 .btn-premium {
-  background: linear-gradient(135deg, #d4af37 0%, #ffd700 50%, #b8860b 100%);
-  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+  background: linear-gradient(135deg, var(--tamoor-gold) 0%, var(--tamoor-gold-light) 50%, var(--tamoor-gold-dark) 100%);
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-premium::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.6s;
 }
 
 .btn-premium:hover {
   transform: translateY(-2px);
-  box-shadow: 0 20px 40px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 20px 40px rgba(212, 175, 55, 0.5);
+}
+
+.btn-premium:hover::before {
+  left: 100%;
+}
+
+/* Burst animation for cart */
+@keyframes burst {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.animate-burst {
+  animation: burst 0.3s ease-out;
+}
+
+/* Floating animation for cart items */
+@keyframes floatToCart {
+  0% { 
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% { 
+    transform: translateY(-100px) translateX(200px) scale(0.3);
+    opacity: 0;
+  }
+}
+
+.animate-float-to-cart {
+  animation: floatToCart 0.8s ease-out forwards;
+}
+
+/* Confetti animation */
+@keyframes confetti {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.animate-confetti {
+  animation: confetti 3s ease-out infinite;
 }
 
 /* Parallax container */

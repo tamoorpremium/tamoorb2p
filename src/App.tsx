@@ -7,16 +7,7 @@ import Products from './pages/Products';
 import Categories from './pages/Categories';
 import About from './pages/About';
 import Contact from './pages/Contact';
-import Cart from './pages/Cart';
-import Profile from './pages/Profile';
-import Checkout from './pages/Checkout';
-import Confirmation from './pages/Confirmation';
-import Wishlist from './pages/Wishlist';
-import Auth from './pages/Auth';
-import FAQ from './pages/FAQ';
-import Certifications from './pages/Certifications';
-import Offers from './pages/Offers';
-import { CartProvider } from './context/CartContext';
+
 
 function App() {
   return (

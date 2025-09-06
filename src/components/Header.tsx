@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Search, ShoppingCart, User, Menu, X, Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -76,12 +79,13 @@ const Header = () => {
           {/* Right icons */}
           <div className="flex items-center space-x-2">
             {[
-              { icon: Heart, count: null },
-              { icon: User, count: null },
-              { icon: ShoppingCart, count: 0 }
-            ].map(({ icon: Icon, count }, index) => (
-              <button 
+              { icon: Heart, count: null, to: '/wishlist' },
+              { icon: User, count: null, to: '/profile' },
+              { icon: ShoppingCart, count: 0, to: '/cart' }
+            ].map(({ icon: Icon, count, to }, index) => (
+              <Link 
                 key={index}
+                to={to}
                 className={`p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group luxury-card ${
                   index === 2 ? 'cart-button' : ''
                 }`}
@@ -92,7 +96,7 @@ const Header = () => {
                     {count}
                   </span>
                 )}
-              </button>
+              </Link>
             ))}
             
             {/* Mobile menu button */}

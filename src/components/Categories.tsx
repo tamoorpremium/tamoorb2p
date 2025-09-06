@@ -12,6 +12,8 @@ const Categories = () => {
             cards.forEach((card, index) => {
               setTimeout(() => {
                 card.classList.add('animate-slide-up');
+                card.classList.remove('opacity-0');
+                card.classList.add('opacity-100');
               }, index * 100);
             });
           }

@@ -1,31 +1,304 @@
-import React, { useState } from 'react';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Gift, Truck } from 'lucide-react';
-import { useCart } from '../context/CartContext';
+import React, { useState, useEffect } from 'react';
+import { Minus, Plus, Trash2, ShoppingBag, Gift, Truck } from 'lucide-react';
+import { useCart, normalizeWeight, Promo } from '../context/CartContext';
+import { supabase } from '../utils/supabaseClient';
+import { toast } from "react-toastify";
+import { useNavigate } from 'react-router-dom';
+
 
 const Cart = () => {
-  const { cartItems, updateQuantity, removeFromCart, cartTotal, cartCount } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, cartTotal, cartCount, setCartItems, refresh , setBilling, promo, setPromo } = useCart();
   const [removingItem, setRemovingItem] = useState<number | null>(null);
+  const navigate = useNavigate();
+  // Promo states
   const [promoCode, setPromoCode] = useState('');
-  const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
+  //const [appliedPromo, setAppliedPromo] = useState<any>(null); // full promo object
 
-  const handleRemoveItem = (id: number) => {
-    setRemovingItem(id);
-    setTimeout(() => {
-      removeFromCart(id);
-      setRemovingItem(null);
-    }, 300);
+  const getCartItemPrice = (item: { price: number; weight?: string | null; quantity: number; measurement_unit?: string | null }) => {
+  let total = 0;
+
+  if (item.measurement_unit === 'pieces') {
+    total = item.price * item.quantity;
+  } else if (!item.weight) {
+    total = item.price * item.quantity;
+  } else {
+    const weightStr = item.weight.toLowerCase();
+    const grams = parseInt(weightStr.replace(/\D/g, ''), 10);
+    const validGrams = isNaN(grams) ? 1000 : grams;
+    const pricePerGram = item.price / 1000;
+    total = pricePerGram * validGrams * item.quantity;
+  }
+
+  return Math.round(total); // ✅ Always returns integer
+};
+
+
+  const displayWeight = (weight: string | undefined, measurementUnit?: string | undefined): string => {
+    if (!weight || weight === 'default') return measurementUnit === 'pieces' ? 'piece' : '';
+    if (measurementUnit === 'pieces') {
+      const grams = parseInt(weight, 10);
+      return isNaN(grams) ? 'piece' : `${grams} g`;
+    }
+    if (weight.toLowerCase().includes('g') || weight.toLowerCase().includes('kg')) return weight;
+    if (measurementUnit === 'kilograms') {
+      const grams = parseInt(weight, 10);
+      if (grams < 1000) return `${grams} g`;
+      const kgVal = grams / 1000;
+      return (kgVal % 1 === 0) ? `${kgVal} kg` : `${kgVal.toFixed(1)} kg`;
+    }
+    return weight;
   };
 
-  const handleApplyPromo = () => {
-    if (promoCode.toLowerCase() === 'tamoor15') {
-      setAppliedPromo('TAMOOR15');
-      setPromoCode('');
+  const getLocalCart = (): any[] => {
+    const cartString = localStorage.getItem('cart');
+    if (!cartString) return [];
+    try { return JSON.parse(cartString); } catch { return []; }
+  };
+
+  const saveLocalCart = (items: any[]) => localStorage.setItem('cart', JSON.stringify(items));
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) saveLocalCart(cartItems); else localStorage.removeItem('cart');
+    })();
+  }, [cartItems]);
+
+  const handleRemoveItem = async (id: number, weight: string, measurementUnit?: string) => {
+    const normalizedWeight = normalizeWeight(weight, measurementUnit);
+    setRemovingItem(id);
+    await removeFromCart(id, normalizedWeight, measurementUnit);
+    setRemovingItem(null);
+    toast.info("Item removed from cart", {autoClose: 2000,});
+  };
+
+  const mergeCarts = (localCart: any[], dbCart: any[]) => {
+    const merged: Record<string, any> = {};
+    function normWeight(w: string | undefined, unit: string | undefined) {
+      if (unit === 'pieces') return w?.trim() || 'invalid';
+      return w?.trim() || 'default';
+    }
+    for (const item of dbCart) {
+      const key = `${item.product_id}-${normWeight(item.weight, item.measurement_unit)}`;
+      merged[key] = { ...item, id: item.product_id, weight: item.weight };
+    }
+    for (const item of localCart) {
+      const key = `${item.id}-${normWeight(item.weight, item.measurement_unit)}`;
+      if (merged[key]) merged[key].quantity += item.quantity;
+      else merged[key] = { ...item, id: item.id };
+    }
+    return Object.values(merged);
+  };
+
+  useEffect(() => {
+    const fetchAndMergeCart = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const localCart = getLocalCart();
+      if (user) {
+        const { data: dbCartItems, error } = await supabase.from('cart').select('*').eq('user_id', user.id);
+        if (error) { setCartItems(localCart); return; }
+
+        let products: any[] = [];
+        if (dbCartItems && dbCartItems.length > 0) {
+          const productIds = dbCartItems.map(i => i.product_id);
+          const { data: prodData, error: prodErr } = await supabase
+            .from('products')
+            .select('id, name, image, price, measurement_unit')
+            .in('id', productIds);
+          if (!prodErr) products = prodData || [];
+        }
+
+        const dbWithDetails = dbCartItems.map(cartItem => {
+          const prod = products.find(p => p.id === cartItem.product_id) || {};
+          return { ...cartItem, ...prod, id: cartItem.product_id };
+        });
+
+        const mergedCart = mergeCarts(localCart, dbWithDetails);
+        setCartItems(mergedCart);
+        localStorage.removeItem('cart');
+      } else setCartItems(localCart);
+    };
+    fetchAndMergeCart();
+  }, [setCartItems]);
+
+  const handleIncreaseQuantity = (item: any) => {
+    updateQuantity(
+      item.id,
+      normalizeWeight(item.weight, item.measurement_unit),
+      item.quantity + 1,
+      item.measurement_unit
+    );
+    toast.success("Quantity increased 🛒", { autoClose: 2000 });
+  };
+
+  const handleDecreaseQuantity = (item: any) => {
+    if (item.quantity > 1) {
+      updateQuantity(
+        item.id,
+        normalizeWeight(item.weight, item.measurement_unit),
+        item.quantity - 1,
+        item.measurement_unit
+      );
+      toast.info("Quantity decreased 🛒", { autoClose: 2000 });
+    } else {
+      toast.error("Minimum 1 item required ⚠️", { autoClose: 2000 });
     }
   };
 
-  const discount = appliedPromo ? cartTotal * 0.15 : 0;
-  const shipping = cartTotal > 499 ? 0 : 49;
-  const finalTotal = cartTotal - discount + shipping;
+
+  const handleApplyPromo = async () => {
+  if (!promoCode.trim()) return;
+
+  try {
+    const { data: promoData, error } = await supabase
+      .from('promo_codes')
+      .select('*')
+      .ilike('code', promoCode.trim())
+      .single();
+
+    if (error || !promoData) {
+      toast.error("Invalid promo code", { autoClose: 2000 });
+      return;
+    }
+
+    const now = new Date();
+    if (
+      !promoData.enabled ||
+      new Date(promoData.valid_from) > now ||
+      new Date(promoData.valid_to) < now
+    ) {
+      toast.error("This promo code is not active or expired", { autoClose: 2000 });
+      return;
+    }
+
+    if (promoData.usage_limit && promoData.used_count >= promoData.usage_limit) {
+      toast.error("This promo code has reached its usage limit", { autoClose: 2000 });
+      return;
+    }
+
+    if (promoData.first_order_only) {
+      const { data: orders } = await supabase
+        .from("orders")
+        .select("*")
+        .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
+
+      if (orders && orders.length > 0) {
+        toast.error("Promo valid only for first order", { autoClose: 2000 });
+        return;
+      }
+    }
+
+    // ✅ Only keep the fields you actually use
+    const cleanPromo: Promo = {
+      id: promoData.id,
+      code: promoData.code,
+      type: promoData.type,
+      value: promoData.value,
+      used_count: promoData.used_count,
+      usage_limit: promoData.usage_limit,
+      enabled: promoData.enabled,
+      valid_from: promoData.valid_from,
+      valid_to: promoData.valid_to,
+      first_order_only: promoData.first_order_only,
+    };
+
+    setPromo(cleanPromo);
+    setPromoCode("");
+    toast.success("Promo code applied!", { autoClose: 2000 });
+
+  } catch {
+    toast.error("Failed to apply promo!", { autoClose: 2000 });
+  }
+};
+
+
+
+  const roundedSubtotal = Math.round(cartTotal);
+  const discount = React.useMemo(() => {
+  if (!promo) return 0;
+
+  let d = 0;
+  if (promo.type === "percentage") {
+    d = roundedSubtotal * (promo.value / 100);
+  } else if (promo.type === "fixed") {
+    d = promo.value;
+  }
+
+  // cap discount at subtotal
+  if (d > roundedSubtotal) d = roundedSubtotal;
+
+  return Math.round(d); // ✅ round off
+}, [promo, roundedSubtotal]);
+
+const finalTotal = React.useMemo(() => {
+  return Math.round(roundedSubtotal - discount);
+}, [roundedSubtotal, discount]);
+
+const shipping = finalTotal > 999 ? 0 : 49;
+
+const shiptotal = finalTotal + shipping; // ✅ also an integer now
+
+
+  const handleProceedToCheckout = async () => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      // Redirect to login if not authenticated
+      navigate('/auth?redirect=/checkout');
+      return;
+    }
+
+    // Get DB cart and local cart
+    const { data: dbCartItems } = await supabase
+      .from('cart')
+      .select('*')
+      .eq('user_id', user.id);
+
+    const localCart = getLocalCart();
+    const mergedCart = mergeCarts(localCart, dbCartItems || []);
+
+    // Sync cart to DB
+    await Promise.all(
+      mergedCart.map(item =>
+        supabase.from('cart').upsert({
+          user_id: user.id,
+          product_id: item.id,
+          quantity: item.quantity,
+          weight: item.weight,
+        })
+      )
+    );
+
+    // Remove local cart
+    localStorage.removeItem('cart');
+
+    // Increment promo usage count if applied
+    //if (promo) {
+      //const { error } = await supabase
+        //.from('promo_codes')
+        //.update({ used_count: promo.used_count + 1 })
+        //.eq('id', promo.id);
+      //if (error) console.error('Failed to update promo usage count:', error);
+    //}
+
+    // Update billing context
+    setBilling({
+      subtotal: roundedSubtotal,
+      discount,
+      shipping,
+      finalTotal,
+      promo: promo ?? null,
+    });
+
+    // Navigate to checkout
+    navigate('/checkout');
+  } catch (err) {
+    console.error('Error during checkout:', err);
+    toast.error('Something went wrong during checkout. Please try again.');
+  }
+};
+
 
   if (cartItems.length === 0) {
     return (
@@ -70,54 +343,35 @@ const Cart = () => {
             {cartItems.map((item) => (
               <div
                 key={`${item.id}-${item.weight}`}
-                className={`luxury-card glass rounded-3xl p-8 transition-all duration-300 ${
-                  removingItem === item.id ? 'opacity-50 scale-95' : ''
-                }`}
+                className={`luxury-card glass rounded-3xl p-8 transition-all duration-300 ${removingItem === item.id ? 'opacity-50 scale-95' : ''}`}
               >
                 <div className="flex items-center space-x-6">
                   <div className="relative overflow-hidden rounded-2xl">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-24 h-24 object-cover"
-                    />
+                    <img src={item.image} alt={item.name} className="w-24 h-24 object-cover" />
                   </div>
-
                   <div className="flex-1">
-                    <h3 className="font-display font-semibold text-xl text-neutral-800 mb-2">
-                      {item.name}
-                    </h3>
-                    <p className="text-neutral-600 font-medium mb-3">
-                      Weight: {item.weight}
-                    </p>
-                    <div className="text-2xl font-display font-bold tamoor-gradient">
-                      ₹{item.price}
-                    </div>
+                    <h3 className="font-display font-semibold text-xl text-neutral-800 mb-2">{item.name}</h3>
+                    <p className="text-neutral-600 font-medium mb-3">Weight: {displayWeight(item.weight, item.measurement_unit)}</p>
+                    <div className="text-2xl font-display font-bold tamoor-gradient">₹{getCartItemPrice(item)}</div>
                   </div>
-
                   <div className="flex items-center space-x-4">
-                    {/* Quantity Controls */}
                     <div className="flex items-center space-x-3 neomorphism rounded-full p-2">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => handleDecreaseQuantity(item)}
                         className="p-2 hover:bg-white/20 rounded-full transition-all duration-300"
                       >
                         <Minus className="w-4 h-4" />
                       </button>
-                      <span className="w-12 text-center font-semibold text-lg">
-                        {item.quantity}
-                      </span>
+                      <span className="w-12 text-center font-semibold text-lg">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => handleIncreaseQuantity(item)}
                         className="p-2 hover:bg-white/20 rounded-full transition-all duration-300"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
                     </div>
-
-                    {/* Remove Button */}
                     <button
-                      onClick={() => handleRemoveItem(item.id)}
+                      onClick={() => handleRemoveItem(item.id, normalizeWeight(item.weight, item.measurement_unit), item.measurement_unit)}
                       className="p-3 hover:bg-red-50 text-red-500 rounded-full transition-all duration-300 hover:scale-110"
                     >
                       <Trash2 className="w-5 h-5" />
@@ -131,79 +385,60 @@ const Cart = () => {
           {/* Order Summary */}
           <div className="space-y-6">
             {/* Promo Code */}
-            <div className="luxury-card glass rounded-3xl p-8">
-              <h3 className="font-display font-semibold text-xl mb-6">Promo Code</h3>
-              <div className="flex space-x-3">
-                <input
-                  type="text"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                  placeholder="Enter promo code"
-                  className="flex-1 p-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50"
-                />
-                <button
-                  onClick={handleApplyPromo}
-                  className="btn-premium text-white px-6 py-4 rounded-xl font-semibold"
-                >
-                  Apply
-                </button>
-              </div>
-              {appliedPromo && (
-                <div className="mt-4 p-3 bg-luxury-sage/10 text-luxury-sage rounded-xl text-sm font-medium">
-                  ✓ {appliedPromo} applied - 15% off!
+              <div className="luxury-card glass rounded-3xl p-8">
+                <h3 className="font-display font-semibold text-xl mb-6">Promo Code</h3>
+                <div className="flex space-x-3">
+                  <input
+                    type="text"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
+                    placeholder="Enter promo code"
+                    className="flex-1 p-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50"
+                  />
+                  <button
+                    onClick={handleApplyPromo}
+                    className="btn-premium text-white px-6 py-4 rounded-xl font-semibold"
+                  >
+                    Apply
+                  </button>
                 </div>
-              )}
-            </div>
 
-            {/* Order Summary */}
+                {promo && (
+                  <div className="flex justify-between items-center text-luxury-sage mt-3">
+                    <span className="font-medium">Discount ({promo.code})</span>
+                    <div className="flex items-center space-x-2">
+                      <span className="font-semibold">-₹{discount}</span>
+                      <button
+                        onClick={() => {
+                          setPromo(null);
+                          toast.info("Promo code removed", { autoClose: 2000 });
+                        }}
+
+                        className="text-red-500 font-medium px-2 py-1 rounded hover:bg-red-50 transition"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+
             <div className="luxury-card glass rounded-3xl p-8 sticky top-32">
               <h3 className="font-display font-semibold text-xl mb-6">Order Summary</h3>
-              
               <div className="space-y-4 mb-6">
-                <div className="flex justify-between">
-                  <span className="text-neutral-600 font-medium">Subtotal</span>
-                  <span className="font-semibold">₹{cartTotal}</span>
-                </div>
-                
-                {appliedPromo && (
-                  <div className="flex justify-between text-luxury-sage">
-                    <span className="font-medium">Discount ({appliedPromo})</span>
-                    <span className="font-semibold">-₹{discount.toFixed(0)}</span>
-                  </div>
-                )}
-                
-                <div className="flex justify-between">
-                  <span className="text-neutral-600 font-medium flex items-center">
-                    <Truck className="w-4 h-4 mr-2" />
-                    Shipping
-                  </span>
-                  <span className="font-semibold">
-                    {shipping === 0 ? 'FREE' : `₹${shipping}`}
-                  </span>
-                </div>
-                
-                {shipping === 0 && (
-                  <div className="text-sm text-luxury-sage font-medium flex items-center">
-                    <Gift className="w-4 h-4 mr-2" />
-                    Free shipping on orders above ₹499
-                  </div>
-                )}
+                <div className="flex justify-between"><span className="text-neutral-600 font-medium">Subtotal</span><span className="font-semibold">₹{roundedSubtotal}</span></div>
+                {promo && <div className="flex justify-between text-luxury-sage"><span className="font-medium">Discount ({promo.code})</span><span className="font-semibold">-₹{discount}</span></div>}
+                <div className="flex justify-between"><span className="text-neutral-600 font-medium flex items-center"><Truck className="w-4 h-4 mr-2" />Shipping</span><span className="font-semibold">{shipping === 0 ? 'FREE' : `₹${shipping}`}</span></div>
+                {shipping === 0 && <div className="text-sm text-luxury-sage font-medium flex items-center"><Gift className="w-4 h-4 mr-2" />Free shipping on orders above ₹999</div>}
               </div>
-
-              <div className="border-t border-white/20 pt-4 mb-8">
-                <div className="flex justify-between items-center">
-                  <span className="text-xl font-display font-semibold">Total</span>
-                  <span className="text-3xl font-display font-bold tamoor-gradient">
-                    ₹{finalTotal.toFixed(0)}
-                  </span>
-                </div>
+              <div className="border-t border-white/20 pt-4 mb-8 flex justify-between items-center">
+                <span className="text-xl font-display font-semibold">Total</span>
+                <span className="text-3xl font-display font-bold tamoor-gradient">₹{shiptotal}</span>
               </div>
-
-              <button className="w-full btn-premium text-white py-4 rounded-full font-semibold text-lg flex items-center justify-center group">
+              <button onClick={handleProceedToCheckout} className="w-full btn-premium text-white py-4 rounded-full font-semibold text-lg flex items-center justify-center">
                 Proceed to Checkout
-                <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
               </button>
-
               <div className="mt-6 text-center">
                 <div className="flex items-center justify-center space-x-4 text-sm text-neutral-500">
                   <span>🔒 Secure Checkout</span>

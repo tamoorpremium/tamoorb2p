@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import { supabase } from '../../utils/supabaseClient';
 
+
 interface OrderItem {
   id: number;
   product_id: number;
@@ -46,6 +47,8 @@ interface OrderDetails {
   shipment?: ShipmentInfo | null;
   address?: any;
 }
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 const ORDER_STATUSES = [
   'pending',
@@ -101,6 +104,19 @@ const AdminOrderDetails: React.FC = () => {
   const [saving, setSaving] = useState(false);
 
   const prevTrackingStatus = useRef<string | null>(null);
+
+  const generateInvoice = async (orderId: number) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/invoice?orderId=${orderId}`);
+      if (!res.ok) throw new Error("Failed to generate invoice");
+      const data = await res.json();
+      alert(`✅ Invoice generated and saved: ${data.file}`);
+    } catch (err) {
+      console.error("Error generating invoice:", err);
+      alert("❌ Failed to generate invoice");
+    }
+  };
+
 
   const fetchOrderDetails = async () => {
     if (!id) return;
@@ -394,6 +410,96 @@ const AdminOrderDetails: React.FC = () => {
             )}
           </div>
         )}
+
+{/* Invoice Actions */}
+<div className="mt-6 bg-tamoor-white/40 rounded-xl shadow p-4 border border-slate-200">
+  <h2 className="text-xl font-semibold text-tamoor-charcoal mb-2">Invoice</h2>
+  <div className="flex gap-4">
+
+    {/* Generate Invoice */}
+    <button
+      onClick={async () => {
+        console.log(`[Invoice] Generating invoice for order ${order.id}...`);
+        try {
+          const res = await fetch(`${API_BASE}/api/invoice?orderId=${order.id}`, {
+            method: 'POST', // make POST if your server expects it
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          console.log('[Invoice] Raw response:', res);
+
+          if (!res.ok) {
+            const text = await res.text();
+            console.error('[Invoice] Server responded with error:', text);
+            throw new Error(text || "Failed to generate invoice");
+          }
+
+          const data = await res.json();
+          console.log('[Invoice] Success response data:', data);
+
+          toast.success(`✅ Invoice generated & saved: ${data.file}`);
+        } catch (err: any) {
+          console.error('[Invoice] Generate invoice error:', err);
+
+          if (err.message === 'Failed to fetch') {
+            toast.error('⚠️ Could not reach invoice server (CORS or network issue)');
+            console.log('[Invoice] Likely CORS issue. Make sure your API server allows localhost or your dev domain.');
+          } else if (err.message.includes('401')) {
+            toast.error('❌ Unauthorized. Check your API keys or authentication.');
+          } else {
+            toast.error(`❌ Generate failed: ${err.message}`);
+          }
+        }
+      }}
+      className="btn-premium"
+    >
+      Generate Invoice
+    </button>
+
+    {/* Download Invoice */}
+    <button
+      onClick={async () => {
+        console.log(`[Invoice] Fetching signed invoice URL for order ${order.id}...`);
+        try {
+          const res = await fetch(`${API_BASE}/api/get-invoice-link?orderId=${order.id}`, {
+            method: 'GET',
+          });
+
+          console.log('[Invoice] Raw response:', res);
+
+          if (!res.ok) {
+            const text = await res.text();
+            console.error('[Invoice] Server responded with error:', text);
+            throw new Error(text || "Invoice not found");
+          }
+
+          const { url } = await res.json();
+          console.log('[Invoice] Signed URL received:', url);
+
+          window.open(url, "_blank"); // open invoice in new tab
+        } catch (err: any) {
+          console.error('[Invoice] Download invoice error:', err);
+
+          if (err.message === 'Failed to fetch') {
+            toast.error('⚠️ Could not reach invoice server (CORS or network issue)');
+            console.log('[Invoice] Likely CORS issue. Make sure your API server allows localhost or your dev domain.');
+          } else {
+            toast.error(`❌ Download failed: ${err.message}`);
+          }
+        }
+      }}
+      className="btn-premium"
+    >
+      Download Invoice
+    </button>
+
+  </div>
+</div>
+
+
+
 
         <p className="mt-6 font-semibold text-tamoor-charcoal"><strong>Total Amount:</strong> ₹{order.total.toFixed(2)}</p>
         <button onClick={() => navigate('/admin/orders')} className="btn-premium mt-6">Back to Orders</button>

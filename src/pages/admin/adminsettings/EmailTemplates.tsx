@@ -164,6 +164,7 @@ const EmailTemplates: React.FC = () => {
         endpoint = `${supabaseUrl}/send-order-confirmation`;
         payload = { orderId: testOrderId };
       }
+    //
 
       const resp = await fetch(endpoint, {
         method: "POST",

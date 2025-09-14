@@ -158,9 +158,13 @@ const EmailTemplates: React.FC = () => {
           testEmail: useAdminEmail ? "tamoorpremium@gmail.com" : null,
         };
       } else if (mode === "invoice") {
-        endpoint = `${supabaseUrl}/send-invoice-email`;
-        payload = { orderId: testOrderId };
-      } else if (mode === "confirmation") {
+  endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-invoice-email`;
+  payload = {
+    orderId: testOrderId,
+    testEmail: useAdminEmail ? "tamoorpremium@gmail.com" : null,
+  };
+}
+       else if (mode === "confirmation") {
         endpoint = `${supabaseUrl}/send-order-confirmation`;
         payload = { orderId: testOrderId };
       }

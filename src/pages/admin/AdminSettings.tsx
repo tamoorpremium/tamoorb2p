@@ -11,6 +11,9 @@ import NotificationSettings from './adminsettings/NotificationSettings';
 import IntegrationSettings from './adminsettings/IntegrationSettings';
 import PrivacySettings from './adminsettings/PrivacySettings';
 import PromoCodesAdmin from './adminsettings/PromoCodesAdmin'; // adjust path if needed
+import EmailAutomation from './adminsettings/EmailAutomation';
+import EmailTemplates from './adminsettings/EmailTemplates';
+
 
 const tabs = [
   { id: 'store', name: 'Store', component: StoreSettings },
@@ -23,6 +26,8 @@ const tabs = [
   { id: 'integration', name: 'Integrations', component: IntegrationSettings },
   { id: 'privacy', name: 'Privacy', component: PrivacySettings },
   { id: 'promo', name: 'Promo Codes', component: PromoCodesAdmin }, // <-- new tab
+  { id: 'emailAutomation', name: 'Email Automation', component: EmailAutomation }, // new tab
+  { id: 'emailTemplates', name: 'Email Templates', component: EmailTemplates },
 ];
 
 const AdminSettingsPage = () => {

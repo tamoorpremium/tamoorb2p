@@ -495,6 +495,37 @@ const AdminOrderDetails: React.FC = () => {
       Download Invoice
     </button>
 
+    {/* Send Invoice Email */}
+    <button
+      onClick={async () => {
+        console.log(`[Invoice] Sending invoice email for order ${order.id}...`);
+        try {
+          const res = await fetch(`${API_BASE}/send-invoice-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              orderId: order.id,
+              testEmail: 'tamoorpremium@gmail.com', // use test or customer email
+              //testEmail: order.address?.email, // real customer email
+            }),
+          });
+
+          if (!res.ok) throw new Error(await res.text());
+
+          const data = await res.json();
+          toast.success(`📧 Invoice email sent to: ${data.sentTo || 'customer email'}`);
+        } catch (err: any) {
+          console.error('[Invoice] Send email error:', err);
+          toast.error(`❌ Sending email failed: ${err.message}`);
+        }
+      }}
+      className="btn-premium"
+    >
+      Send Invoice Email
+    </button>
+
   </div>
 </div>
 

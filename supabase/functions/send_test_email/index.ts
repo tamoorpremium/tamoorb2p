@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.181.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import Handlebars from "https://esm.sh/handlebars@4.7.8";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,7 +9,7 @@ const corsHeaders = {
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
 serve(async (req: Request) => {
@@ -32,31 +33,39 @@ serve(async (req: Request) => {
       .select("*")
       .eq("id", templateId)
       .single();
-
     if (templateError || !template) throw templateError;
 
-    // 2. Get order + customer
+    // 2. Get order
     const { data: order, error: orderError } = await supabase
       .from("orders")
-      .select("id, total, subtotal, discount, delivery_fee, customer_email, customer_name")
+      .select("id, total, subtotal, discount, delivery_fee, user_id")
       .eq("id", orderId)
       .single();
-
     if (orderError || !order) throw orderError;
 
-    // 3. Replace placeholders
-    let body = template.body
-      .replace("{{customerName}}", order.customer_name)
-      .replace("{{orderId}}", order.id.toString())
-      .replace("{{total}}", order.total.toString())
-      .replace("{{subtotal}}", order.subtotal.toString())
-      .replace("{{discount}}", order.discount.toString())
-      .replace("{{deliveryFee}}", order.delivery_fee.toString());
+    // 3. Get customer profile
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .eq("id", order.user_id)
+      .single();
+    if (profileError || !profile) throw profileError;
 
-    // 4. Choose recipient
-    const toEmail = testEmail || order.customer_email;
+    // 4. Compile template body with Handlebars
+    const templateFn = Handlebars.compile(template.body);
+    const body = templateFn({
+      customer_name: profile.full_name,
+      order_id: order.id,
+      total: order.total,
+      subtotal: order.subtotal,
+      discount: order.discount,
+      delivery_fee: order.delivery_fee,
+    });
 
-    // 5. Send email via Resend API
+    // 5. Choose recipient
+    const toEmail = testEmail || profile.email;
+
+    // 6. Send email via Resend API
     const resendRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -64,7 +73,7 @@ serve(async (req: Request) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "onboarding@resend.dev", // replace later with your domain sender
+        from: "onboarding@resend.dev", // replace with verified sender
         to: [toEmail],
         subject: template.subject,
         html: body,
@@ -74,9 +83,7 @@ serve(async (req: Request) => {
     const resendText = await resendRes.text();
     console.log("Resend API response:", resendText);
 
-    if (!resendRes.ok) {
-      throw new Error(`Resend API error: ${resendText}`);
-    }
+    if (!resendRes.ok) throw new Error(`Resend API error: ${resendText}`);
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -61,6 +61,9 @@ const ORDER_STATUSES = [
   'cancelled',
 ];
 
+const projectRef = "bvnjxbbwxsibslembmty"; // <-- your Supabase project ref
+const supabaseUrl = `https://${projectRef}.functions.supabase.co`;
+
 const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-yellow-400 text-gray-900',
   confirmed: 'bg-blue-500 text-white',
@@ -496,35 +499,42 @@ const AdminOrderDetails: React.FC = () => {
     </button>
 
     {/* Send Invoice Email */}
-    <button
-      onClick={async () => {
-        console.log(`[Invoice] Sending invoice email for order ${order.id}...`);
-        try {
-          const res = await fetch(`${API_BASE}/send-invoice-email`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              orderId: order.id,
-              testEmail: 'tamoorpremium@gmail.com', // use test or customer email
-              //testEmail: order.address?.email, // real customer email
-            }),
-          });
-
-          if (!res.ok) throw new Error(await res.text());
-
-          const data = await res.json();
-          toast.success(`📧 Invoice email sent to: ${data.sentTo || 'customer email'}`);
-        } catch (err: any) {
-          console.error('[Invoice] Send email error:', err);
-          toast.error(`❌ Sending email failed: ${err.message}`);
+<button
+  onClick={async () => {
+    console.log(`[Invoice] Sending invoice email for order ${order.id}...`);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-invoice-email`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            orderId: order.id,
+            testEmail: 'tamoorpremium@gmail.com', // test email
+            // testEmail: order.address?.email, // use customer email in prod
+          }),
         }
-      }}
-      className="btn-premium"
-    >
-      Send Invoice Email
-    </button>
+      );
+
+      if (!res.ok) throw new Error(await res.text());
+
+      const data = await res.json();
+      toast.success(
+        `📧 Invoice email sent to: ${data.sentTo || order.address?.email}`
+      );
+    } catch (err: any) {
+      console.error('[Invoice] Send email error:', err);
+      toast.error(`❌ Sending email failed: ${err.message}`);
+    }
+  }}
+  className="btn-premium"
+>
+  Send Invoice Email
+</button>
+
 
   </div>
 </div>

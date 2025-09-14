@@ -14,6 +14,9 @@ type Template = {
   automation_enabled: boolean | null;
 };
 
+const projectRef = "bvnjxbbwxsibslembmty"; // <-- your Supabase project ref
+const supabaseUrl = `https://${projectRef}.functions.supabase.co`;
+
 const PLACEHOLDERS: Record<string, string[]> = {
   order_confirmation: [
     "{{customerName}}",
@@ -147,23 +150,25 @@ const EmailTemplates: React.FC = () => {
       let payload: any = {};
 
       if (mode === "test") {
-        endpoint = "/api/send_test_email";
+        endpoint = `${supabaseUrl}/send-test-email`;
         payload = {
           templateId,
           orderId: testOrderId,
           testEmail: useAdminEmail ? "tamoorpremium@gmail.com" : null,
         };
       } else if (mode === "invoice") {
-        endpoint = "/api/send_invoice_email";
+        endpoint = `${supabaseUrl}/send-invoice-email`;
         payload = { orderId: testOrderId };
       } else if (mode === "confirmation") {
-        endpoint = "/api/send_order_confirmation";
+        endpoint = `${supabaseUrl}/send-order-confirmation`;
         payload = { orderId: testOrderId };
       }
 
       const resp = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
         body: JSON.stringify(payload),
       });
 

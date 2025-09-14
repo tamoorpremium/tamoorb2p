@@ -183,6 +183,7 @@ const triggerEmail = async (
 
     const resp = await fetch(endpoint, {
       method: "POST",
+      mode: "cors", // explicitly tell the browser it's a cross-origin request
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,

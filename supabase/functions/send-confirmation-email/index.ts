@@ -16,9 +16,14 @@ const supabase = createClient(
 
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
-
+  return new Response("ok", {
+    status: 200,
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+    },
+  });
+}
   try {
     const { orderId, testEmail } = await req.json();
     if (!orderId) {

@@ -14,15 +14,36 @@ const supabase = createClient(
 );
 
 serve(async (req: Request) => {
+  // 1. Handle CORS preflight
   if (req.method === "OPTIONS") {
-  return new Response("ok", {
-    status: 200,
-    headers: {
-      ...corsHeaders,
-      "Content-Type": "application/json",
-    },
-  });
-}
+    return new Response("ok", {
+      status: 200,
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
+  // 2. Only allow POST
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: corsHeaders,
+    });
+  }
+
+  // 3. Your POST logic here
+  try {
+    const { orderId, mode, testEmail } = await req.json();
+    // ...rest of your logic
+  } catch (err: any) {
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500,
+      headers: corsHeaders,
+    });
+  }
+
 
   try {
     const { templateId, orderId, testEmail } = await req.json();

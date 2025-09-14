@@ -140,7 +140,10 @@ const EmailTemplates: React.FC = () => {
 
   // 🔹 General trigger function for all email modes
   // 🔹 General trigger function for all email modes
-const triggerEmail = async (mode: "test" | "invoice" | "confirmation") => {
+const triggerEmail = async (
+  templateId: number,
+  mode: "test" | "invoice" | "confirmation"
+) => {
   if (!testOrderId) {
     alert("Please enter an Order ID before testing.");
     return;
@@ -153,6 +156,7 @@ const triggerEmail = async (mode: "test" | "invoice" | "confirmation") => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        templateId,                 // include templateId
         orderId: testOrderId,
         mode,
         testEmail: useAdminEmail ? "tamoorpremium@gmail.com" : null,

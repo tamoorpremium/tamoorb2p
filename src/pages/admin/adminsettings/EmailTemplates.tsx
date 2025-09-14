@@ -140,58 +140,27 @@ const EmailTemplates: React.FC = () => {
 
   // 🔹 General trigger function for all email modes
   // 🔹 General trigger function for all email modes
-const triggerEmail = async (
-  templateId: number,
-  mode: "test" | "invoice" | "confirmation"
-) => {
+const triggerEmail = async (mode: "test" | "invoice" | "confirmation") => {
   if (!testOrderId) {
     alert("Please enter an Order ID before testing.");
     return;
   }
+
   setSendingTest(true);
 
   try {
-    let endpoint = "";
-    let payload: any = {};
-
-    switch (mode) {
-      case "test":
-        endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-test-email`;
-        payload = {
-          templateId,
-          orderId: testOrderId,
-          testEmail: useAdminEmail ? "tamoorpremium@gmail.com" : null,
-        };
-        break;
-
-      case "invoice":
-        endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-invoice-email`;
-        payload = {
-          orderId: testOrderId,
-          testEmail: useAdminEmail ? "tamoorpremium@gmail.com" : null,
-        };
-        break;
-
-      case "confirmation":
-        endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-order-confirmation`;
-        payload = {
-          orderId: testOrderId,
-          testEmail: useAdminEmail ? "tamoorpremium@gmail.com" : null,
-        };
-        break;
-    }
-
-    const resp = await fetch(endpoint, {
+    const resp = await fetch("/api/send-email", {
       method: "POST",
-      mode: "cors", // explicitly tell the browser it's a cross-origin request
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-      },
-      body: JSON.stringify(payload),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderId: testOrderId,
+        mode,
+        testEmail: useAdminEmail ? "tamoorpremium@gmail.com" : null,
+      }),
     });
 
     const result = await resp.json();
+
     if (!resp.ok) throw new Error(result.error || "Failed to send email");
 
     alert(`✅ ${mode} email sent successfully to ${result.sentTo || "customer email"}`);

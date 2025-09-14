@@ -15,7 +15,8 @@ type Template = {
 };
 
 const projectRef = "bvnjxbbwxsibslembmty"; // <-- your Supabase project ref
-const supabaseUrl = `https://${projectRef}.functions.supabase.co`;
+const supabaseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
+
 
 const PLACEHOLDERS: Record<string, string[]> = {
   order_confirmation: [

@@ -71,60 +71,72 @@ const AdminEmailTemplates: React.FC = () => {
   };
 
   const handleSave = async () => {
-    if (!editing) return;
-    setSaving(true);
+  if (!editing) return;
+  setSaving(true);
 
-    let banner_url = editing.banner_url;
+  let banner_url = editing.banner_url;
 
-    // Upload banner if new file selected
-    if (bannerFile) {
-      const { data, error } = await supabase.storage
-        .from("email-banners")
-        .upload(`banner_${Date.now()}_${bannerFile.name}`, bannerFile, { upsert: true });
-      if (error) {
-        alert("Banner upload failed: " + error.message);
-        setSaving(false);
-        return;
-      }
-      banner_url = data?.path ?? null;
+  // Upload banner if new file selected
+  if (bannerFile) {
+    const { data, error } = await supabase.storage
+      .from("email-banners")
+      .upload(`banner_${Date.now()}_${bannerFile.name}`, bannerFile, { upsert: true });
+    if (error) {
+      alert("Banner upload failed: " + error.message);
+      setSaving(false);
+      return;
+    }
+    banner_url = data?.path ?? null;
+  }
+
+  try {
+    const payload = {
+      name: editing.name,
+      type: editing.type,
+      subject: editing.subject,
+      body: editing.body,
+      banner_url,
+      is_active: editing.is_active ?? false,
+      automation_enabled: editing.automation_enabled ?? false
+    };
+
+    if (editing.id) {
+      // Update existing template
+      const { error } = await supabase
+        .from("email_templates")
+        .update(payload)
+        .eq("id", editing.id);
+      if (error) throw error;
+    } else {
+      // Insert new template
+      const { data: newTemplate, error } = await supabase
+        .from("email_templates")
+        .insert([payload])
+        .select()
+        .single();
+      if (error) throw error;
+      editing.id = newTemplate?.id;
     }
 
-    try {
-      if (editing.id) {
-        // Update existing template
-        await supabase.from("email_templates").update({ ...editing, banner_url }).eq("id", editing.id);
-      } else {
-        // Create new template
-        const insertData = { ...editing, banner_url };
-        delete insertData.id; // ensure id is not sent
-        const { data: newTemplate, error } = await supabase
-          .from("email_templates")
-          .insert([insertData])
-          .select()
-          .single();
-
-        if (error) throw error;
-        editing.id = newTemplate?.id;
-      }
-
-      // Ensure only one active template per type
-      if (editing.is_active) {
-        await supabase
-          .from("email_templates")
-          .update({ is_active: false })
-          .neq("id", editing.id)
-          .eq("type", editing.type);
-      }
-
-      setEditing(null);
-      setBannerFile(null);
-      fetchTemplates();
-    } catch (err: any) {
-      alert("Error saving template: " + err.message);
+    // Ensure only one active template per type
+    if (editing.is_active) {
+      await supabase
+        .from("email_templates")
+        .update({ is_active: false })
+        .neq("id", editing.id)
+        .eq("type", editing.type);
     }
 
-    setSaving(false);
-  };
+    setEditing(null);
+    setBannerFile(null);
+    fetchTemplates();
+  } catch (err: any) {
+    alert("Error saving template: " + err.message);
+  }
+
+  setSaving(false);
+};
+
 
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this template?")) return;

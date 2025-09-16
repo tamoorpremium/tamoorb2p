@@ -15,10 +15,29 @@ type Template = {
 };
 
 const PLACEHOLDERS: Record<string, string[]> = {
-  order_confirmation: ["{{customerName}}", "{{orderId}}", "{{total}}", "{{deliveryOption}}"],
-  invoice: ["{{customerName}}", "{{orderId}}", "{{subtotal}}", "{{discount}}", "{{deliveryFee}}", "{{total}}"],
-  custom: ["{{customerName}}", "{{orderId}}"],
+  order_confirmation: [
+    "{{customerName}}", // from profiles.full_name
+    "{{orderId}}",      // from orders.id
+    "{{total}}",        // from orders.total
+    "{{deliveryOption}}", // from orders.delivery_option
+    "{{paymentMethod}}"   // from orders.payment_method
+  ],
+  invoice: [
+    "{{customerName}}", // from profiles.full_name
+    "{{orderId}}",      // from orders.id
+    "{{subtotal}}",     // from orders.subtotal
+    "{{discount}}",     // from orders.discount
+    "{{deliveryFee}}",  // from orders.delivery_fee
+    "{{total}}",        // from orders.total
+    "{{paymentMethod}}" // from orders.payment_method
+  ],
+  custom: [
+    "{{customerName}}",
+    "{{orderId}}",
+    "{{total}}"
+  ],
 };
+
 
 const getPublicUrl = (path: string | null) => {
   if (!path) return null;

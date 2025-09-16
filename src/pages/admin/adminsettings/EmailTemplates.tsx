@@ -227,11 +227,11 @@ const EmailTemplates: React.FC = () => {
       </button>
 
       {/* Templates List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="flex gap-6 overflow-x-auto pb-4">
         {templates.map((t) => (
           <div
             key={t.id}
-            className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/10 flex flex-col justify-between"
+            className="min-w-[300px] bg-white/10 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/10 flex flex-col justify-between"
           >
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-lg font-semibold text-white">{t.name}</h3>

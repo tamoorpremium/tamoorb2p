@@ -227,7 +227,7 @@ const AdminEmailTemplates: React.FC = () => {
       </button>
 
 {/* Templates List */}
-<div className="flex flex-col gap-6 items-center pb-4">
+<div className="flex flex-col gap-6 items-start pb-4">
   {templates.map((t) => (
     <div
       key={t.id}

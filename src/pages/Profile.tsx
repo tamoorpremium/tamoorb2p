@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { User, Package, Heart, Settings, Edit3, Save, X, Star, Truck, Phone } from 'lucide-react';
 import { supabase } from '../utils/supabaseClient';
 import { LogOut } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
+
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -15,6 +17,8 @@ const Profile = () => {
   state: '',
   pincode: ''
 });
+
+const navigate = useNavigate();
 
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -497,9 +501,7 @@ const handleSave = async () => {
                             <span className="text-2xl font-display font-bold tamoor-gradient">
                               ₹{item.price}
                             </span>
-                            <button className="btn-premium text-white px-6 py-2 rounded-full font-semibold text-sm">
-                              Add to Cart
-                            </button>
+            
                           </div>
                         </div>
                       </div>
@@ -538,9 +540,13 @@ const handleSave = async () => {
                   <div className="neomorphism rounded-2xl p-6">
                     <h3 className="font-display font-semibold text-lg mb-4">Privacy</h3>
                     <div className="space-y-4">
-                      <button className="w-full text-left p-4 hover:bg-white/20 rounded-xl transition-all duration-300">
-                        Change Password
-                      </button>
+                      <button
+                        onClick={() => navigate("/reset-password")}
+                        className="w-full text-left p-4 hover:bg-white/20 rounded-xl transition-all duration-300"
+                      >
+                        Change Password
+                      </button>
+
                       <button className="w-full text-left p-4 hover:bg-white/20 rounded-xl transition-all duration-300">
                         Download My Data
                       </button>

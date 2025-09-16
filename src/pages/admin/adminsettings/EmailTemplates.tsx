@@ -227,58 +227,58 @@ const EmailTemplates: React.FC = () => {
       </button>
 
       {/* Templates List */}
-      <div className="flex gap-6 overflow-x-auto pb-4">
-        {templates.map((t) => (
-          <div
-            key={t.id}
-            className="min-w-[300px] bg-white/10 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/10 flex flex-col justify-between"
+<div className="flex gap-6 overflow-x-auto pb-4">
+  {templates.map((t) => (
+    <div
+      key={t.id}
+      className="min-w-[320px] bg-white/10 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/10 flex flex-col justify-between shrink-0"
+    >
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-lg font-semibold text-white">{t.name}</h3>
+        <div className="flex gap-2">
+          <button
+            onClick={() => startEditing(t)}
+            className="text-green-400 hover:text-green-500"
           >
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-lg font-semibold text-white">{t.name}</h3>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => startEditing(t)}
-                  className="text-green-400 hover:text-green-500"
-                >
-                  <Save className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => handleDelete(t.id)}
-                  className="text-red-400 hover:text-red-500"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-            <p className="text-sm text-white/70 mb-1">Type: {t.type}</p>
-            <p className="text-sm text-white/70 mb-1">Subject: {t.subject}</p>
-            <p className="text-sm text-white/70 mb-2 truncate">Body: {t.body}</p>
-            {t.banner_url && (
-              <img
-                src={getPublicUrl(t.banner_url) || ""}
-                alt="Banner"
-                className="rounded-lg mt-2"
-              />
-            )}
-            <div className="flex gap-2 mt-2">
-              <span
-                className={`px-2 py-1 rounded-lg text-sm ${
-                  t.is_active ? "bg-green-600" : "bg-gray-500"
-                }`}
-              >
-                Active
-              </span>
-              <span
-                className={`px-2 py-1 rounded-lg text-sm ${
-                  t.automation_enabled ? "bg-blue-600" : "bg-gray-500"
-                }`}
-              >
-                Automation
-              </span>
-            </div>
+            <Save className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => handleDelete(t.id)}
+            className="text-red-400 hover:text-red-500"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+      <p className="text-sm text-white/70 mb-1">Type: {t.type}</p>
+      <p className="text-sm text-white/70 mb-1">Subject: {t.subject}</p>
+      <p className="text-sm text-white/70 mb-2 truncate">Body: {t.body}</p>
+      {t.banner_url && (
+        <img
+          src={getPublicUrl(t.banner_url) || ""}
+          alt="Banner"
+          className="rounded-lg mt-2"
+        />
+      )}
+      <div className="flex gap-2 mt-2">
+        <span
+          className={`px-2 py-1 rounded-lg text-sm ${
+            t.is_active ? "bg-green-600" : "bg-gray-500"
+          }`}
+        >
+          Active
+        </span>
+        <span
+          className={`px-2 py-1 rounded-lg text-sm ${
+            t.automation_enabled ? "bg-blue-600" : "bg-gray-500"
+          }`}
+        >
+          Automation
+        </span>
+      </div>
 
-            {/* --- Test Section --- */}
-            <div className="mt-4 bg-black/30 p-3 rounded-xl text-white/80 text-sm">
+      {/* --- Test Section --- */}
+      <div className="mt-4 bg-black/30 p-3 rounded-xl text-white/80 text-sm">
               <p className="mb-2 font-semibold">Test this Template</p>
               <input
                 type="text"

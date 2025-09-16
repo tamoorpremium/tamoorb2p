@@ -158,7 +158,7 @@ const EmailTemplates: React.FC = () => {
 
       switch (mode) {
         case "test":
-          fnName = "send-template-email"; // your test email function
+          fnName = "send_test_email"; // your test email function
           payload = {
             templateId,
             orderId: testOrderId,

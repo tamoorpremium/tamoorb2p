@@ -539,51 +539,70 @@ const handleSave = async () => {
 
 
             {activeTab === 'settings' && (
-              <div className="luxury-card glass rounded-3xl p-8">
-                <h2 className="text-3xl font-display font-bold text-neutral-800 mb-8">
-                  Account Settings
-                </h2>
-                
-                <div className="space-y-8">
-                  <div className="neomorphism rounded-2xl p-6">
-                    <h3 className="font-display font-semibold text-lg mb-4">Notifications</h3>
-                    <div className="space-y-4">
-                      {[
-                        'Email notifications for orders',
-                        'SMS updates for delivery',
-                        'Marketing emails and offers',
-                        'New product announcements'
-                      ].map((setting, index) => (
-                        <div key={index} className="flex items-center justify-between">
-                          <span className="text-neutral-700 font-medium">{setting}</span>
-                          <button className="w-12 h-6 bg-luxury-gold rounded-full relative transition-all duration-300">
-                            <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 transition-all duration-300"></div>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="neomorphism rounded-2xl p-6">
-                    <h3 className="font-display font-semibold text-lg mb-4">Privacy</h3>
-                    <div className="space-y-4">
-                      <button
-                        onClick={() => navigate("/reset-password")}
-                        className="w-full text-left p-4 hover:bg-white/20 rounded-xl transition-all duration-300"
-                      >
-                        Change Password
-                      </button>
+            <div className="luxury-card glass rounded-3xl p-8">
+              <h2 className="text-3xl font-display font-bold text-neutral-800 mb-8">
+                Account Settings
+              </h2>
 
-                      <button className="w-full text-left p-4 hover:bg-white/20 rounded-xl transition-all duration-300">
-                        Download My Data
-                      </button>
-                      <button className="w-full text-left p-4 hover:bg-red-50 text-red-600 rounded-xl transition-all duration-300">
-                        Delete Account
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+              <div className="space-y-8">
+                {/* Notifications Section with Dummy Toggles */}
+                <div className="neomorphism rounded-2xl p-6">
+                  <h3 className="font-display font-semibold text-lg mb-4">Notifications</h3>
+                  <div className="space-y-4">
+                    {[
+                      'Email notifications for orders',
+                      'SMS updates for delivery',
+                      'Marketing emails and offers',
+                      'New product announcements'
+                    ].map((setting, index) => {
+                      const [enabled, setEnabled] = useState(false); // local toggle state
+
+                      return (
+                        <div key={index} className="flex items-center justify-between">
+                          <span className="text-neutral-700 font-medium">{setting}</span>
+                          <button
+                            onClick={() => setEnabled(!enabled)}
+                            className={`w-12 h-6 rounded-full relative transition-all duration-300 ${
+                              enabled ? 'bg-luxury-gold' : 'bg-neutral-300'
+                            }`}
+                          >
+                            <div
+                              className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all duration-300 ${
+                                enabled ? 'left-6' : 'left-0.5'
+                              }`}
+                            ></div>
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Privacy Section */}
+                <div className="neomorphism rounded-2xl p-6">
+                  <h3 className="font-display font-semibold text-lg mb-4">Privacy</h3>
+                  <div className="space-y-4">
+                    <button
+                      onClick={() => navigate("/reset-password")}
+                      className="w-full text-left p-4 hover:bg-white/20 rounded-xl transition-all duration-300"
+                    >
+                      Change Password
+                    </button>
+                    <button
+                      onClick={() =>
+                        alert(
+                          "⚠️ Account deletion is not supported for now due to security concerns.\nThis feature will be available in the future. Stay updated!"
+                        )
+                      }
+                      className="w-full text-left p-4 hover:bg-red-50 text-red-600 rounded-xl transition-all duration-300"
+                    >
+                      Delete Account
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
             <button
               onClick={handleLogout}
               className="w-full mt-6 flex items-center justify-center space-x-2 p-3 rounded-2xl bg-white/20 backdrop-blur-md text-red-600 font-semibold hover:bg-red-600 hover:text-white transition-colors duration-300 shadow-lg"

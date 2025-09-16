@@ -270,7 +270,7 @@ const OrderTracking: React.FC = () => {
                       <td className="p-4 text-right">
                         {item.price.toFixed(2)}
                       </td>
-                      <td className="p-4 text-right">{item.weight}</td>
+                      <td className="p-4 text-right">{item.weight}grams</td>
                     </tr>
                   ))}
                 </tbody>

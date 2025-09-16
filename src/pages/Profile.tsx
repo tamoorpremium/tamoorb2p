@@ -436,7 +436,11 @@ const handleSave = async () => {
                   ) : (
                   <div className="space-y-6">
                    {orders.map((order) => (
-  <div key={order.id} className="neomorphism rounded-2xl p-6">
+ <div
+  key={order.id}
+  onClick={() => navigate(`/order-tracking/${order.id}`)}
+  className="neomorphism rounded-2xl p-6 cursor-pointer hover:shadow-xl transition-shadow duration-300"
+>
     <div className="flex items-center justify-between mb-4">
       <div>
         <h3 className="font-display font-semibold text-lg text-neutral-800">

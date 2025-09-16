@@ -122,7 +122,7 @@ function App() {
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/order/:id" element={<OrderTracking />} />
+            <Route path="/order-tracking/:id" element={<OrderTracking />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
 

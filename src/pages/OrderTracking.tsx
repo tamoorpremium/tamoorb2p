@@ -3,8 +3,15 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../utils/supabaseClient";
 import { toast, ToastContainer } from "react-toastify";
+import {
+  Package,
+  MapPin,
+  CreditCard,
+  Truck,
+  FileText,
+  ArrowLeft,
+} from "lucide-react";
 
-// ---------- Interfaces ----------
 interface OrderItem {
   id: number;
   product_id: number;
@@ -41,30 +48,8 @@ interface OrderDetails {
   address?: any;
 }
 
-// ---------- Constants ----------
-const SHIPMENT_STEPS = [
-  "Packed",
-  "Picked",
-  "Shipped",
-  "Out for Delivery",
-  "Arriving Early",
-  "Delivery Delayed",
-  "Delivered",
-];
-
-const SHIPMENT_COLORS: Record<string, string> = {
-  Packed: "bg-purple-600",
-  Picked: "bg-blue-500",
-  Shipped: "bg-orange-500",
-  "Out for Delivery": "bg-indigo-600",
-  "Arriving Early": "bg-green-500",
-  "Delivery Delayed": "bg-red-600",
-  Delivered: "bg-green-800",
-};
-
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-// ---------- Component ----------
 const OrderTracking: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -136,53 +121,77 @@ const OrderTracking: React.FC = () => {
     }
   };
 
-  if (loading) return <p className="text-center">Loading...</p>;
-  if (!order) return <p className="text-center">Order not found</p>;
+  if (loading)
+    return (
+      <p className="text-center text-lg font-medium animate-pulse text-luxury-gold">
+        Loading your order...
+      </p>
+    );
+  if (!order)
+    return (
+      <p className="text-center text-lg font-medium text-red-500">
+        Order not found
+      </p>
+    );
 
   return (
-    <section className="relative min-h-screen bg-gradient-to-br from-luxury-cream via-white to-luxury-cream-dark py-20">
+    <section className="relative min-h-screen bg-gradient-to-br from-luxury-cream via-white to-luxury-cream-dark py-20 px-4">
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="max-w-4xl mx-auto glass luxury-card p-10 rounded-3xl shadow-xl">
-        <h1 className="text-3xl font-display font-bold mb-6">Order Details</h1>
+      <div className="max-w-5xl mx-auto glass backdrop-blur-xl p-10 rounded-3xl shadow-[10px_10px_30px_rgba(0,0,0,0.15),-10px_-10px_30px_rgba(255,255,255,0.6)] border border-white/30">
+        <h1 className="text-4xl font-display font-bold text-center text-luxury-gold drop-shadow-md mb-10">
+          Order Tracking
+        </h1>
 
         {/* Order Info */}
-        <p>
-          <strong>Order ID:</strong> {order.id}
-        </p>
-        <p>
-          <strong>Order Date:</strong>{" "}
-          {new Date(order.placed_at).toLocaleString()}
-        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="p-6 rounded-2xl bg-white/60 shadow-neumorph border border-white/40">
+            <div className="flex items-center gap-2 mb-3 text-luxury-gold">
+              <Package /> <h2 className="font-semibold text-xl">Order Info</h2>
+            </div>
+            <p>
+              <strong>Order ID:</strong> #{order.id}
+            </p>
+            <p>
+              <strong>Date:</strong>{" "}
+              {new Date(order.placed_at).toLocaleString()}
+            </p>
+            <p>
+              <strong>Status:</strong>{" "}
+              <span className="capitalize">{order.status}</span>
+            </p>
+          </div>
 
-        {/* Customer Info */}
-        <div className="mt-6">
-          <h2 className="font-semibold text-xl">Customer Details</h2>
-          <p>
-            <strong>Name:</strong> {order.address?.full_name}
-          </p>
-          <p>
-            <strong>Phone:</strong> {order.address?.phone}
-          </p>
-          <p>
-            <strong>Address:</strong>
-          </p>
-          <address className="whitespace-pre-line ml-4">
-            {[
-              order.address?.address,
-              order.address?.city,
-              order.address?.state,
-              order.address?.pincode,
-            ]
-              .filter(Boolean)
-              .join("\n")}
-          </address>
+          <div className="p-6 rounded-2xl bg-white/60 shadow-neumorph border border-white/40">
+            <div className="flex items-center gap-2 mb-3 text-luxury-gold">
+              <MapPin />{" "}
+              <h2 className="font-semibold text-xl">Customer Details</h2>
+            </div>
+            <p>
+              <strong>Name:</strong> {order.address?.full_name}
+            </p>
+            <p>
+              <strong>Phone:</strong> {order.address?.phone}
+            </p>
+            <p className="whitespace-pre-line">
+              {[
+                order.address?.address,
+                order.address?.city,
+                order.address?.state,
+                order.address?.pincode,
+              ]
+                .filter(Boolean)
+                .join(", ")}
+            </p>
+          </div>
         </div>
 
         {/* Items */}
-        <div className="mt-6">
-          <h2 className="font-semibold text-xl">Items</h2>
-          <table className="w-full mt-2 border border-gray-200 rounded-lg">
-            <thead className="bg-luxury-gold-light text-white">
+        <div className="p-6 rounded-2xl bg-white/60 shadow-neumorph border border-white/40 mb-8">
+          <div className="flex items-center gap-2 mb-3 text-luxury-gold">
+            <FileText /> <h2 className="font-semibold text-xl">Items</h2>
+          </div>
+          <table className="w-full mt-2 border border-white/40 rounded-lg overflow-hidden">
+            <thead className="bg-gradient-to-r from-luxury-gold to-yellow-400 text-white">
               <tr>
                 <th className="p-3 text-left">Product ID</th>
                 <th className="p-3 text-right">Quantity</th>
@@ -190,12 +199,14 @@ const OrderTracking: React.FC = () => {
                 <th className="p-3 text-right">Weight</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="bg-white/40">
               {order.items.map((item) => (
-                <tr key={item.id} className="border-t">
+                <tr key={item.id} className="border-t border-white/30">
                   <td className="p-3">{item.product_id}</td>
                   <td className="p-3 text-right">{item.quantity}</td>
-                  <td className="p-3 text-right">{item.price.toFixed(2)}</td>
+                  <td className="p-3 text-right">
+                    {item.price.toFixed(2)}
+                  </td>
                   <td className="p-3 text-right">{item.weight}</td>
                 </tr>
               ))}
@@ -204,8 +215,10 @@ const OrderTracking: React.FC = () => {
         </div>
 
         {/* Shipment */}
-        <div className="mt-6">
-          <h2 className="font-semibold text-xl">Shipment Details</h2>
+        <div className="p-6 rounded-2xl bg-white/60 shadow-neumorph border border-white/40 mb-8">
+          <div className="flex items-center gap-2 mb-3 text-luxury-gold">
+            <Truck /> <h2 className="font-semibold text-xl">Shipment</h2>
+          </div>
           <p>
             <strong>Shipment ID:</strong>{" "}
             {order.shipment?.shipment_id || "N/A"}
@@ -215,43 +228,22 @@ const OrderTracking: React.FC = () => {
             {order.shipment?.tracking_id || "N/A"}
           </p>
           <p>
-            <strong>Courier:</strong> {order.shipment?.courier_company || "N/A"}
+            <strong>Courier:</strong>{" "}
+            {order.shipment?.courier_company || "N/A"}
           </p>
           <p>
             <strong>Status:</strong>{" "}
             {order.shipment?.tracking_status || "N/A"}
           </p>
-
-          {/* Shipment Tracking Timeline */}
-          <div className="mt-4">
-            <h3 className="font-semibold text-lg mb-2">Tracking Progress</h3>
-            <div className="space-y-3">
-              {SHIPMENT_STEPS.map((step) => {
-                const isActive = order.shipment?.tracking_status === step;
-                return (
-                  <div
-                    key={step}
-                    className={`flex items-center justify-between p-3 rounded-xl neomorphism transition ${
-                      isActive
-                        ? `${SHIPMENT_COLORS[step]} text-white`
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    <span>{step}</span>
-                    {isActive && (
-                      <span className="text-sm font-semibold">Current</span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         </div>
 
         {/* Payment */}
         {order.payment && (
-          <div className="mt-6">
-            <h2 className="font-semibold text-xl">Payment Details</h2>
+          <div className="p-6 rounded-2xl bg-white/60 shadow-neumorph border border-white/40 mb-8">
+            <div className="flex items-center gap-2 mb-3 text-luxury-gold">
+              <CreditCard />{" "}
+              <h2 className="font-semibold text-xl">Payment</h2>
+            </div>
             <p>
               <strong>Method:</strong> {order.payment.payment_method}
             </p>
@@ -268,19 +260,30 @@ const OrderTracking: React.FC = () => {
         )}
 
         {/* Invoice */}
-        <div className="mt-6">
-          <h2 className="font-semibold text-xl">Invoice</h2>
-          <button onClick={downloadInvoice} className="btn-premium mt-3">
+        <div className="p-6 rounded-2xl bg-white/60 shadow-neumorph border border-white/40 text-center">
+          <h2 className="font-semibold text-xl text-luxury-gold mb-4">
+            Invoice
+          </h2>
+          <button
+            onClick={downloadInvoice}
+            className="btn-premium px-6 py-2 rounded-full shadow-lg hover:scale-105 transition-transform"
+          >
             Download Invoice
           </button>
         </div>
 
-        <p className="mt-6 font-semibold">
-          Total Amount: ₹{order.total.toFixed(2)}
+        <p className="mt-8 text-2xl font-semibold text-center text-luxury-gold">
+          Total: ₹{order.total.toFixed(2)}
         </p>
-        <button onClick={() => navigate("/profile")} className="btn-premium mt-6">
-          Back to Orders
-        </button>
+
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={() => navigate("/profile")}
+            className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-luxury-gold to-yellow-400 text-white shadow-lg hover:scale-105 transition-transform"
+          >
+            <ArrowLeft /> Back to Orders
+          </button>
+        </div>
       </div>
     </section>
   );

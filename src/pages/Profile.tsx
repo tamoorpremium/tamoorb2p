@@ -4,6 +4,20 @@ import { supabase } from '../utils/supabaseClient';
 import { LogOut } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 
+type OrderItem = {
+  name: string;
+  quantity: number;
+};
+
+type Order = {
+  id: number;
+  date: string;
+  status: string;
+  statusColor: string;
+  total: number;
+  items: OrderItem[];
+};
+
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -20,7 +34,7 @@ const Profile = () => {
 
 const navigate = useNavigate();
 
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -421,41 +435,49 @@ const handleSave = async () => {
                     <div className="text-neutral-500">No orders placed yet.</div>
                   ) : (
                   <div className="space-y-6">
-                    {orders.map((order) => (
-                      <div key={order.id} className="neomorphism rounded-2xl p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <h3 className="font-display font-semibold text-lg text-neutral-800">
-                              Order #{order.id}
-                            </h3>
-                            <p className="text-neutral-600 font-medium">
-                              Placed on {order.date}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${order.statusColor}`}>
-                              <Truck className="w-4 h-4 mr-2" />
-                              {order.status}
-                            </div>
-                            <div className="text-2xl font-display font-bold tamoor-gradient mt-2">
-                              ₹{order.total}
-                            </div>
-                          </div>
-                        </div>
+                   {orders.map((order) => (
+  <div key={order.id} className="neomorphism rounded-2xl p-6">
+    <div className="flex items-center justify-between mb-4">
+      <div>
+        <h3 className="font-display font-semibold text-lg text-neutral-800">
+          Order #{order.id}
+        </h3>
+        <p className="text-neutral-600 font-medium">
+          Placed on {order.date}
+        </p>
+      </div>
+      <div className="text-right">
+        <div
+          className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${order.statusColor}`}
+        >
+          <Truck className="w-4 h-4 mr-2" />
+          {order.status}
+        </div>
+        <div className="text-2xl font-display font-bold tamoor-gradient mt-2">
+          ₹{order.total}
+        </div>
+      </div>
+    </div>
 
-                        {/* Show items if you add order_items logic */}
-                        {/* <div className="border-t border-neutral-200 pt-4">
-                          <p className="text-neutral-600 font-medium mb-2">Items:</p>
-                          <div className="flex flex-wrap gap-2">
-                            {order.items.map((item, idx) => (
-                              <span key={idx} className="bg-luxury-gold/10 text-luxury-gold px-3 py-1 rounded-full text-sm font-medium">
-                                {item}
-                              </span>
-                            ))}
-                          </div>
-                        </div> */}
-                      </div>
-                    ))}
+    {/* Order Items */}
+    {order.items && order.items.length > 0 && (
+      <div className="border-t border-neutral-200 pt-4">
+        <p className="text-neutral-600 font-medium mb-2">Items:</p>
+        <div className="flex flex-wrap gap-2">
+          {order.items.map((item: { name: string; quantity: number }, idx: number) => (
+            <span
+              key={idx}
+              className="bg-luxury-gold/10 text-luxury-gold px-3 py-1 rounded-full text-sm font-medium"
+            >
+              {item.name} × {item.quantity}
+            </span>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+))}
+
                   </div>
                   )}
                 </div>

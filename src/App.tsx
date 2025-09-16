@@ -36,6 +36,7 @@ import AdminCategoryEdit from './pages/admin/AdminCategoryEdit';
 import AdminUsers from './pages/admin/adminsettings/AdminUsers';
 import SettingsPage from './pages/admin/AdminSettings';
 import { User } from '@supabase/supabase-js';
+import OrderTracking from './pages/OrderTracking';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -121,6 +122,7 @@ function App() {
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/order/:id" element={<OrderTracking />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
 

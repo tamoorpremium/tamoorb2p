@@ -527,7 +527,7 @@ const AdminOrderDetails: React.FC = () => {
       );
     } catch (err: any) {
       console.error('[Invoice] Send email error:', err);
-      toast.error(`❌ Sending email failed: ${err.message}`);
+      toast.error(`❌ Sending email failed: ${err.message} , check if you have generated the invoice before sending`);
     }
   }}
   className="btn-premium"

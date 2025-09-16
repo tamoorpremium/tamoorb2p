@@ -182,6 +182,23 @@ export const useRazorpay = (
             // 🔑 Reset promo + checkoutData after success
             localStorage.removeItem("checkoutData");
             setPromo(null);
+
+            // Trigger confirmation email
+            try {
+              const { data: emailData, error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
+                body: JSON.stringify({
+                  orderId: data.internal_order_id,
+                  email: "tamoorpremium@gmail.com", // TESTING EMAIL
+                  // email: formData.email, // Uncomment in production to send to actual customer
+                }),
+              });
+
+              if (emailError) console.error('❌ Failed to send confirmation email:', emailError);
+              else console.log('✅ Confirmation email triggered:', emailData);
+            } catch (err) {
+              console.error('❌ Unexpected error sending confirmation email:', err);
+            }
+
             console.log('[useRazorpay] 🛒 Navigating to confirmation page...');
             navigate(`/order-confirmation?orderId=${data.internal_order_id}`);
           } else {

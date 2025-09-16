@@ -520,6 +520,20 @@ const onPlaceOrderClicked = async () => {
       // Navigate to order confirmation page
       localStorage.removeItem('checkoutData');
       setPromo(null)
+
+      // After order is created successfully
+try {
+  await supabase.functions.invoke('send-confirmation-email', {
+    body: JSON.stringify({
+      orderId: orderData.id,
+      email: "tamoorpremium@gmail.com", // TESTING
+      // email: customerEmail, // Uncomment in production
+    }),
+  });
+} catch (err) {
+  console.error('❌ COD confirmation email failed:', err);
+}
+
       console.log("Redirecting to order confirmation page");
       navigate(`/order-confirmation?orderId=${orderData.id}`);
 

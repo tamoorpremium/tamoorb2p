@@ -148,7 +148,8 @@ const OrderTracking: React.FC = () => {
           {/* Shipment Timeline */}
           <div className="mb-12">
             <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
-              <Truck className="w-6 h-6 mr-2 text-luxury-gold" /> Tracking Progress
+              <Truck className="w-6 h-6 mr-2 text-luxury-gold" /> Tracking
+              Progress
             </h2>
             <div className="relative pl-8">
               <div className="absolute top-0 left-2 w-1 h-full bg-gradient-to-b from-luxury-gold/80 to-neutral-200 rounded-full"></div>
@@ -166,7 +167,9 @@ const OrderTracking: React.FC = () => {
                       ></div>
                       <span
                         className={`ml-4 font-medium ${
-                          isActive ? "text-luxury-gold" : "text-neutral-500"
+                          isActive
+                            ? "text-luxury-gold"
+                            : "text-neutral-500"
                         }`}
                       >
                         {step}
@@ -183,12 +186,51 @@ const OrderTracking: React.FC = () => {
             </div>
           </div>
 
+          {/* Shipment Details */}
+          {order.shipment && (
+            <div className="luxury-card glass rounded-2xl p-6 mb-8">
+              <h2 className="text-2xl font-display font-bold mb-4 text-luxury-gold">
+                Shipment Details
+              </h2>
+              <p>
+                <strong>Shipment ID:</strong>{" "}
+                {order.shipment.shipment_id || "N/A"}
+              </p>
+              <p>
+                <strong>Tracking ID:</strong>{" "}
+                {order.shipment.tracking_id || "N/A"}
+              </p>
+              <p>
+                <strong>Courier Company:</strong>{" "}
+                {order.shipment.courier_company || "N/A"}
+              </p>
+              <p>
+                <strong>AWB No:</strong> {order.shipment.awb_no || "N/A"}
+              </p>
+              <p>
+                <strong>Status:</strong>{" "}
+                {order.shipment.tracking_status || "N/A"}
+              </p>
+              {order.shipment.last_tracking_update && (
+                <p>
+                  <strong>Last Update:</strong>{" "}
+                  {new Date(
+                    order.shipment.last_tracking_update
+                  ).toLocaleString()}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Address */}
           <div className="luxury-card glass rounded-2xl p-6 mb-8">
             <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
-              <MapPin className="w-6 h-6 mr-2 text-luxury-gold" /> Customer Details
+              <MapPin className="w-6 h-6 mr-2 text-luxury-gold" /> Customer
+              Details
             </h2>
-            <p><strong>{order.address?.full_name}</strong></p>
+            <p>
+              <strong>{order.address?.full_name}</strong>
+            </p>
             <p>{order.address?.phone}</p>
             <p className="whitespace-pre-line text-neutral-600 mt-2">
               {[
@@ -196,7 +238,9 @@ const OrderTracking: React.FC = () => {
                 order.address?.city,
                 order.address?.state,
                 order.address?.pincode,
-              ].filter(Boolean).join("\n")}
+              ]
+                .filter(Boolean)
+                .join("\n")}
             </p>
           </div>
 
@@ -217,10 +261,15 @@ const OrderTracking: React.FC = () => {
                 </thead>
                 <tbody>
                   {order.items.map((item) => (
-                    <tr key={item.id} className="border-t border-neutral-200">
+                    <tr
+                      key={item.id}
+                      className="border-t border-neutral-200"
+                    >
                       <td className="p-4">{item.product_id}</td>
                       <td className="p-4 text-right">{item.quantity}</td>
-                      <td className="p-4 text-right">{item.price.toFixed(2)}</td>
+                      <td className="p-4 text-right">
+                        {item.price.toFixed(2)}
+                      </td>
                       <td className="p-4 text-right">{item.weight}</td>
                     </tr>
                   ))}
@@ -235,10 +284,18 @@ const OrderTracking: React.FC = () => {
               <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
                 <CreditCard className="w-6 h-6 mr-2 text-luxury-gold" /> Payment
               </h2>
-              <p><strong>Method:</strong> {order.payment.payment_method}</p>
-              <p><strong>Status:</strong> {order.payment.payment_status}</p>
-              <p><strong>Txn ID:</strong> {order.payment.transaction_id}</p>
-              <p><strong>Amount:</strong> ₹{order.payment.amount.toFixed(2)}</p>
+              <p>
+                <strong>Method:</strong> {order.payment.payment_method}
+              </p>
+              <p>
+                <strong>Status:</strong> {order.payment.payment_status}
+              </p>
+              <p>
+                <strong>Txn ID:</strong> {order.payment.transaction_id}
+              </p>
+              <p>
+                <strong>Amount:</strong> ₹{order.payment.amount.toFixed(2)}
+              </p>
             </div>
           )}
 

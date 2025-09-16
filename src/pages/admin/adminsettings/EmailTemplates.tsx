@@ -227,11 +227,11 @@ const AdminEmailTemplates: React.FC = () => {
       </button>
 
 {/* Templates List */}
-<div className="flex flex-col gap-6 pb-4">
+<div className="flex flex-col gap-6 items-center pb-4">
   {templates.map((t) => (
     <div
       key={t.id}
-      className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/10 flex flex-col justify-between"
+      className="w-full max-w-2xl bg-white/10 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/10 flex flex-col justify-between"
     >
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-lg font-semibold text-white">{t.name}</h3>

@@ -76,16 +76,12 @@ const AdminEmailTemplates: React.FC = () => {
 
   let banner_url = editing.banner_url;
 
-  // Upload banner if new file selected
+  // Upload new banner if selected
   if (bannerFile) {
     const { data, error } = await supabase.storage
       .from("email-banners")
       .upload(`banner_${Date.now()}_${bannerFile.name}`, bannerFile, { upsert: true });
-    if (error) {
-      alert("Banner upload failed: " + error.message);
-      setSaving(false);
-      return;
-    }
+    if (error) { alert("Banner upload failed: " + error.message); setSaving(false); return; }
     banner_url = data?.path ?? null;
   }
 

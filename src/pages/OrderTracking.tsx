@@ -3,15 +3,9 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../utils/supabaseClient";
 import { toast, ToastContainer } from "react-toastify";
-import {
-  Package,
-  MapPin,
-  CreditCard,
-  Truck,
-  FileText,
-  ArrowLeft,
-} from "lucide-react";
+import { Package, Truck, CreditCard, MapPin, FileText } from "lucide-react";
 
+// ---------- Interfaces ----------
 interface OrderItem {
   id: number;
   product_id: number;
@@ -19,7 +13,6 @@ interface OrderItem {
   price: number;
   weight: string;
 }
-
 interface PaymentInfo {
   payment_method: string;
   payment_status: string;
@@ -27,7 +20,6 @@ interface PaymentInfo {
   amount: number;
   paid_at?: string;
 }
-
 interface ShipmentInfo {
   shipment_id: string | null;
   tracking_id: string | null;
@@ -36,7 +28,6 @@ interface ShipmentInfo {
   awb_no: string | null;
   last_tracking_update?: string;
 }
-
 interface OrderDetails {
   id: number;
   placed_at: string;
@@ -48,6 +39,25 @@ interface OrderDetails {
   address?: any;
 }
 
+// ---------- Constants ----------
+const SHIPMENT_STEPS = [
+  "Packed",
+  "Picked",
+  "Shipped",
+  "Out for Delivery",
+  "Arriving Early",
+  "Delivery Delayed",
+  "Delivered",
+];
+const SHIPMENT_COLORS: Record<string, string> = {
+  Packed: "bg-purple-600",
+  Picked: "bg-blue-500",
+  Shipped: "bg-orange-500",
+  "Out for Delivery": "bg-indigo-600",
+  "Arriving Early": "bg-green-500",
+  "Delivery Delayed": "bg-red-600",
+  Delivered: "bg-green-800",
+};
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 const OrderTracking: React.FC = () => {
@@ -104,11 +114,10 @@ const OrderTracking: React.FC = () => {
     if (!order) return;
     if (order.status !== "delivered") {
       toast.info(
-        "Invoice will be available after the order is successfully delivered. If still facing issues contact support team at tamoorpremium@gmail.com"
+        "Invoice will be available after delivery. Contact tamoorpremium@gmail.com for help."
       );
       return;
     }
-
     try {
       const res = await fetch(
         `${API_BASE}/api/get-invoice-link?orderId=${order.id}`
@@ -121,171 +130,142 @@ const OrderTracking: React.FC = () => {
     }
   };
 
-  if (loading)
-    return (
-      <p className="text-center text-lg font-medium animate-pulse text-luxury-gold">
-        Loading your order...
-      </p>
-    );
-  if (!order)
-    return (
-      <p className="text-center text-lg font-medium text-red-500">
-        Order not found
-      </p>
-    );
+  if (loading) return <p className="text-center">Loading...</p>;
+  if (!order) return <p className="text-center">Order not found</p>;
 
   return (
-    <section className="relative min-h-screen bg-gradient-to-br from-luxury-cream via-white to-luxury-cream-dark py-20 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-32">
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="max-w-5xl mx-auto glass backdrop-blur-xl p-10 rounded-3xl shadow-[10px_10px_30px_rgba(0,0,0,0.15),-10px_-10px_30px_rgba(255,255,255,0.6)] border border-white/30">
-        <h1 className="text-4xl font-display font-bold text-center text-luxury-gold drop-shadow-md mb-10">
-          Order Tracking
-        </h1>
+      <div className="container mx-auto px-4 pb-20">
+        <div className="luxury-card glass rounded-3xl p-10">
+          <h1 className="text-5xl font-display font-bold mb-8 text-neutral-800">
+            Order <span className="tamoor-gradient">#{order.id}</span>
+          </h1>
+          <p className="text-lg text-neutral-600 mb-8">
+            Placed on {new Date(order.placed_at).toLocaleString()}
+          </p>
 
-        {/* Order Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="p-6 rounded-2xl bg-white/60 shadow-neumorph border border-white/40">
-            <div className="flex items-center gap-2 mb-3 text-luxury-gold">
-              <Package /> <h2 className="font-semibold text-xl">Order Info</h2>
+          {/* Shipment Timeline */}
+          <div className="mb-12">
+            <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
+              <Truck className="w-6 h-6 mr-2 text-luxury-gold" /> Tracking Progress
+            </h2>
+            <div className="relative pl-8">
+              <div className="absolute top-0 left-2 w-1 h-full bg-gradient-to-b from-luxury-gold/80 to-neutral-200 rounded-full"></div>
+              <div className="space-y-6">
+                {SHIPMENT_STEPS.map((step) => {
+                  const isActive = order.shipment?.tracking_status === step;
+                  return (
+                    <div key={step} className="relative flex items-center">
+                      <div
+                        className={`w-4 h-4 rounded-full border-2 ${
+                          isActive
+                            ? "bg-luxury-gold border-luxury-gold shadow-lg"
+                            : "bg-white border-neutral-400"
+                        }`}
+                      ></div>
+                      <span
+                        className={`ml-4 font-medium ${
+                          isActive ? "text-luxury-gold" : "text-neutral-500"
+                        }`}
+                      >
+                        {step}
+                      </span>
+                      {isActive && (
+                        <span className="ml-2 text-xs font-semibold text-luxury-gold">
+                          Current
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <p>
-              <strong>Order ID:</strong> #{order.id}
-            </p>
-            <p>
-              <strong>Date:</strong>{" "}
-              {new Date(order.placed_at).toLocaleString()}
-            </p>
-            <p>
-              <strong>Status:</strong>{" "}
-              <span className="capitalize">{order.status}</span>
-            </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white/60 shadow-neumorph border border-white/40">
-            <div className="flex items-center gap-2 mb-3 text-luxury-gold">
-              <MapPin />{" "}
-              <h2 className="font-semibold text-xl">Customer Details</h2>
-            </div>
-            <p>
-              <strong>Name:</strong> {order.address?.full_name}
-            </p>
-            <p>
-              <strong>Phone:</strong> {order.address?.phone}
-            </p>
-            <p className="whitespace-pre-line">
+          {/* Address */}
+          <div className="luxury-card glass rounded-2xl p-6 mb-8">
+            <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
+              <MapPin className="w-6 h-6 mr-2 text-luxury-gold" /> Customer Details
+            </h2>
+            <p><strong>{order.address?.full_name}</strong></p>
+            <p>{order.address?.phone}</p>
+            <p className="whitespace-pre-line text-neutral-600 mt-2">
               {[
                 order.address?.address,
                 order.address?.city,
                 order.address?.state,
                 order.address?.pincode,
-              ]
-                .filter(Boolean)
-                .join(", ")}
+              ].filter(Boolean).join("\n")}
             </p>
           </div>
-        </div>
 
-        {/* Items */}
-        <div className="p-6 rounded-2xl bg-white/60 shadow-neumorph border border-white/40 mb-8">
-          <div className="flex items-center gap-2 mb-3 text-luxury-gold">
-            <FileText /> <h2 className="font-semibold text-xl">Items</h2>
-          </div>
-          <table className="w-full mt-2 border border-white/40 rounded-lg overflow-hidden">
-            <thead className="bg-gradient-to-r from-luxury-gold to-yellow-400 text-white">
-              <tr>
-                <th className="p-3 text-left">Product ID</th>
-                <th className="p-3 text-right">Quantity</th>
-                <th className="p-3 text-right">Price (₹)</th>
-                <th className="p-3 text-right">Weight</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white/40">
-              {order.items.map((item) => (
-                <tr key={item.id} className="border-t border-white/30">
-                  <td className="p-3">{item.product_id}</td>
-                  <td className="p-3 text-right">{item.quantity}</td>
-                  <td className="p-3 text-right">
-                    {item.price.toFixed(2)}
-                  </td>
-                  <td className="p-3 text-right">{item.weight}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Shipment */}
-        <div className="p-6 rounded-2xl bg-white/60 shadow-neumorph border border-white/40 mb-8">
-          <div className="flex items-center gap-2 mb-3 text-luxury-gold">
-            <Truck /> <h2 className="font-semibold text-xl">Shipment</h2>
-          </div>
-          <p>
-            <strong>Shipment ID:</strong>{" "}
-            {order.shipment?.shipment_id || "N/A"}
-          </p>
-          <p>
-            <strong>Tracking ID:</strong>{" "}
-            {order.shipment?.tracking_id || "N/A"}
-          </p>
-          <p>
-            <strong>Courier:</strong>{" "}
-            {order.shipment?.courier_company || "N/A"}
-          </p>
-          <p>
-            <strong>Status:</strong>{" "}
-            {order.shipment?.tracking_status || "N/A"}
-          </p>
-        </div>
-
-        {/* Payment */}
-        {order.payment && (
-          <div className="p-6 rounded-2xl bg-white/60 shadow-neumorph border border-white/40 mb-8">
-            <div className="flex items-center gap-2 mb-3 text-luxury-gold">
-              <CreditCard />{" "}
-              <h2 className="font-semibold text-xl">Payment</h2>
+          {/* Items */}
+          <div className="luxury-card glass rounded-2xl p-6 mb-8">
+            <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
+              <Package className="w-6 h-6 mr-2 text-luxury-gold" /> Items
+            </h2>
+            <div className="overflow-hidden rounded-2xl border border-neutral-200">
+              <table className="w-full">
+                <thead className="bg-luxury-gold/90 text-white">
+                  <tr>
+                    <th className="p-4 text-left">Product ID</th>
+                    <th className="p-4 text-right">Qty</th>
+                    <th className="p-4 text-right">Price (₹)</th>
+                    <th className="p-4 text-right">Weight</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {order.items.map((item) => (
+                    <tr key={item.id} className="border-t border-neutral-200">
+                      <td className="p-4">{item.product_id}</td>
+                      <td className="p-4 text-right">{item.quantity}</td>
+                      <td className="p-4 text-right">{item.price.toFixed(2)}</td>
+                      <td className="p-4 text-right">{item.weight}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <p>
-              <strong>Method:</strong> {order.payment.payment_method}
-            </p>
-            <p>
-              <strong>Status:</strong> {order.payment.payment_status}
-            </p>
-            <p>
-              <strong>Transaction ID:</strong> {order.payment.transaction_id}
-            </p>
-            <p>
-              <strong>Amount:</strong> ₹{order.payment.amount.toFixed(2)}
-            </p>
           </div>
-        )}
 
-        {/* Invoice */}
-        <div className="p-6 rounded-2xl bg-white/60 shadow-neumorph border border-white/40 text-center">
-          <h2 className="font-semibold text-xl text-luxury-gold mb-4">
-            Invoice
-          </h2>
-          <button
-            onClick={downloadInvoice}
-            className="btn-premium px-6 py-2 rounded-full shadow-lg hover:scale-105 transition-transform"
-          >
-            Download Invoice
-          </button>
-        </div>
+          {/* Payment */}
+          {order.payment && (
+            <div className="luxury-card glass rounded-2xl p-6 mb-8">
+              <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
+                <CreditCard className="w-6 h-6 mr-2 text-luxury-gold" /> Payment
+              </h2>
+              <p><strong>Method:</strong> {order.payment.payment_method}</p>
+              <p><strong>Status:</strong> {order.payment.payment_status}</p>
+              <p><strong>Txn ID:</strong> {order.payment.transaction_id}</p>
+              <p><strong>Amount:</strong> ₹{order.payment.amount.toFixed(2)}</p>
+            </div>
+          )}
 
-        <p className="mt-8 text-2xl font-semibold text-center text-luxury-gold">
-          Total: ₹{order.total.toFixed(2)}
-        </p>
+          {/* Invoice */}
+          <div className="luxury-card glass rounded-2xl p-6">
+            <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
+              <FileText className="w-6 h-6 mr-2 text-luxury-gold" /> Invoice
+            </h2>
+            <button onClick={downloadInvoice} className="btn-premium mt-3">
+              Download Invoice
+            </button>
+          </div>
 
-        <div className="flex justify-center mt-8">
-          <button
-            onClick={() => navigate("/profile")}
-            className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-luxury-gold to-yellow-400 text-white shadow-lg hover:scale-105 transition-transform"
-          >
-            <ArrowLeft /> Back to Orders
-          </button>
+          <div className="flex items-center justify-between mt-10">
+            <p className="text-2xl font-display font-bold tamoor-gradient">
+              Total: ₹{order.total.toFixed(2)}
+            </p>
+            <button
+              onClick={() => navigate("/profile")}
+              className="btn-premium px-8 py-3 rounded-full"
+            >
+              Back to Orders
+            </button>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

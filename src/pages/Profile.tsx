@@ -3,6 +3,7 @@ import { User, Package, Heart, Settings, Edit3, Save, X, Star, Truck, Phone } fr
 import { supabase } from '../utils/supabaseClient';
 import { LogOut } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from 'react-toastify';
 
 type OrderItem = {
   name: string;
@@ -592,8 +593,8 @@ const handleSave = async () => {
                     </button>
                     <button
                       onClick={() =>
-                        alert(
-                          "⚠️ Account deletion is not supported for now due to security concerns.\nThis feature will be available in the future. Stay updated!"
+                        toast.info(
+                          "⚠️ Account deletion is not supported yet. This feature will be available in the future."
                         )
                       }
                       className="w-full text-left p-4 hover:bg-red-50 text-red-600 rounded-xl transition-all duration-300"

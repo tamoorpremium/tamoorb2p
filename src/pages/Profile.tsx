@@ -40,6 +40,8 @@ const navigate = useNavigate();
 
   const [wishlistItems, setWishlistItems] = useState<any[]>([]);
   const [wishlistLoading, setWishlistLoading] = useState(true);
+  const [notificationToggles, setNotificationToggles] = useState<boolean[]>([
+  false, false, false, false,]);
 
 
   // Fetch user profile and orders on mount
@@ -547,36 +549,36 @@ const handleSave = async () => {
               <div className="space-y-8">
                 {/* Notifications Section with Dummy Toggles */}
                 <div className="neomorphism rounded-2xl p-6">
-                  <h3 className="font-display font-semibold text-lg mb-4">Notifications</h3>
-                  <div className="space-y-4">
-                    {[
-                      'Email notifications for orders',
-                      'SMS updates for delivery',
-                      'Marketing emails and offers',
-                      'New product announcements'
-                    ].map((setting, index) => {
-                      const [enabled, setEnabled] = useState(false); // local toggle state
-
-                      return (
-                        <div key={index} className="flex items-center justify-between">
-                          <span className="text-neutral-700 font-medium">{setting}</span>
-                          <button
-                            onClick={() => setEnabled(!enabled)}
-                            className={`w-12 h-6 rounded-full relative transition-all duration-300 ${
-                              enabled ? 'bg-luxury-gold' : 'bg-neutral-300'
-                            }`}
-                          >
-                            <div
-                              className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all duration-300 ${
-                                enabled ? 'left-6' : 'left-0.5'
-                              }`}
-                            ></div>
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
+                <h3 className="font-display font-semibold text-lg mb-4">Notifications</h3>
+                <div className="space-y-4">
+                  {[
+                    'Email notifications for orders',
+                    'SMS updates for delivery',
+                    'Marketing emails and offers',
+                    'New product announcements'
+                  ].map((setting, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <span className="text-neutral-700 font-medium">{setting}</span>
+                      <button
+                        onClick={() => {
+                          const updated = [...notificationToggles];
+                          updated[index] = !updated[index];
+                          setNotificationToggles(updated);
+                        }}
+                        className={`w-12 h-6 rounded-full relative transition-all duration-300 ${
+                          notificationToggles[index] ? 'bg-luxury-gold' : 'bg-neutral-300'
+                        }`}
+                      >
+                        <div
+                          className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all duration-300 ${
+                            notificationToggles[index] ? 'left-6' : 'left-0.5'
+                          }`}
+                        ></div>
+                      </button>
+                    </div>
+                  ))}
                 </div>
+              </div>
 
                 {/* Privacy Section */}
                 <div className="neomorphism rounded-2xl p-6">

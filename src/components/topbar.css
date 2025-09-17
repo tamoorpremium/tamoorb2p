@@ -1,0 +1,86 @@
+/* Background gradient animation */
+@keyframes bgGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-bg-gradient {
+  /* Keep header background consistent, subtle gradient */
+  background: linear-gradient(270deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05), rgba(255,255,255,0.1));
+  background-size: 600% 600%;
+  animation: bgGradient 15s ease infinite;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* Futuristic neon text */
+.futuristic-text {
+  color: #b37f00; /* darker gold for light header */
+  text-shadow: 
+    0 0 3px #b3800062, 
+    0 0 6px #ffae00, 
+    0 0 12px #ff9f00, 
+    0 0 18px #ff800096;
+  font-weight: 700;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  animation: shimmer 2s infinite alternate;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Neon shimmer */
+@keyframes shimmer {
+  0% { text-shadow: 0 0 3px #b37f00, 0 0 6px #ffae00, 0 0 12px #ff9f00, 0 0 18px #ff7f00; }
+  50% { text-shadow: 0 0 6px #b37f00, 0 0 12px #ffae00, 0 0 18px #ff9f00, 0 0 24px #ff7f00; }
+  100% { text-shadow: 0 0 3px #b37f00, 0 0 6px #ffae00, 0 0 12px #ff9f00, 0 0 18px #ff7f00; }
+}
+
+/* Scrolling text container */
+.relative.overflow-hidden {
+  overflow: hidden;
+}
+
+/* Scrolling text animation */
+@keyframes scroll {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-scroll {
+  display: flex;
+  width: max-content;
+  animation: scroll var(--scroll-duration) linear infinite;
+  z-index: 10;
+  position: relative;
+}
+
+/* Set responsive scroll speed */
+:root {
+  --scroll-duration: 30s; /* default for desktop */
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --scroll-duration: 25s; /* large tablets/laptops */
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --scroll-duration: 20s; /* tablets */
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --scroll-duration: 30s; /* mobile */
+  }
+}
+
+/* Extra spacing between repeated texts */
+.animate-scroll > span {
+  margin-right: 4rem; /* adjust spacing between repeats */
+}

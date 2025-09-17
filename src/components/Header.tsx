@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Search, ShoppingCart, User, Menu, X, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
+import './topbar.css';
+
 
 
 const Header = () => {
@@ -17,48 +19,74 @@ const Header = () => {
   }, []);
 
   return (
-    <header className={`sticky top-0 z-50 transition-all duration-500 ${
-      isScrolled 
-        ? 'glass backdrop-blur-xl shadow-luxury' 
-        : 'bg-white/95 backdrop-blur-sm'
-    }`}>
-      <div className="container mx-auto px-4">
-        {/* Top bar */}
-        <div className="flex items-center justify-between py-2 text-sm border-b border-neutral-200/50">
-          <div className="text-neutral-600 font-medium">
-            ✨ Free shipping on orders above ₹499
-          </div>
-          <div className="flex items-center space-x-6 text-neutral-600">
-            <button className="hover:text-luxury-gold transition-colors duration-300">Track Order</button>
-            <button className="hover:text-luxury-gold transition-colors duration-300">Help</button>
-          </div>
-        </div>
+    <header
+      className={`sticky top-0 z-50 transition-all duration-500 ${
+        isScrolled
+          ? "glass backdrop-blur-xl shadow-luxury"
+          : "bg-white/95 backdrop-blur-sm"
+      }`}
+    >
+      <div className="max-w-full w-full mx-auto px-4 overflow-x-hidden">
+        {/* Futuristic Top Bar */}
+       <div className="relative overflow-hidden py-2 border-b border-neutral-200/50">
+  <div className="relative overflow-hidden">
+    <div className="animate-scroll">
+      {/* Duplicate enough times for seamless loop */}
+      {Array(10).fill(
+        <span className="futuristic-text mx-8 text-sm font-bold">
+          ✨ Free shipping on orders above ₹999
+        </span>
+      )}
+    </div>
+  </div>
+</div>
 
-        {/* Main header */}
+
+
+
+
+       {/* Main header */}
         <div className="flex items-center justify-between py-4">
-          {/* Logo */}
-          <div className="flex items-center group">
-            <h1 className="text-3xl font-display font-bold tamoor-gradient">
+          {/* Mobile Logo (visible only on small screens) */}
+          <div className="flex items-center sm:hidden group">
+            <img
+              src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
+              alt="Tamoor Logo"
+              className="w-10 h-10 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
+            />
+            <h1 className="text-4xl font-display font-bold tamoor-gradient">
               TAMOOR
             </h1>
-            <span className="ml-2 text-sm text-luxury-gold font-medium bg-luxury-gold/10 px-3 py-1 rounded-full">
+          </div>
+
+          {/* Desktop Logo (hidden on small screens, visible from sm+) */}
+          <div className="hidden sm:flex items-start group ml-20">
+            <img
+              src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
+              alt="Tamoor Logo"
+              className="w-16 h-16 object-contain mr-3 transition-transform duration-300 group-hover:scale-110"
+            />
+            <h1 className="text-5xl sm:text-6xl font-display font-bold tamoor-gradient">
+              TAMOOR
+            </h1>
+            <span className="ml-3 text-sm sm:text-base text-luxury-gold font-medium bg-luxury-gold/10 px-3 py-1 rounded-full">
               Premium
             </span>
           </div>
 
           {/* Navigation - Desktop */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-8 lg:space-x-8">
             {[
-              { name: 'Home', href: '/' },
-              { name: 'Products', href: '/products' },
-              { name: 'Categories', href: '/categories' },
-              { name: 'About', href: '/about' },
-              { name: 'Contact', href: '/contact' }
+              { name: "Home", href: "/" },
+              { name: "Products", href: "/products" },
+              { name: "Categories", href: "/categories" },
+              { name: "About", href: "/about" },
+              { name: "Contact", href: "/contact" },
             ].map((item) => (
-              <a 
+              <a
                 key={item.name}
-                href={item.href} 
-                className="text-neutral-700 hover:text-luxury-gold font-medium transition-all duration-300 relative group"
+                href={item.href}
+                className="text-neutral-800 hover:text-luxury-gold font-semibold transition-all duration-300 relative group"
               >
                 {item.name}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-luxury-gold to-luxury-gold-light transition-all duration-300 group-hover:w-full"></span>
@@ -67,7 +95,7 @@ const Header = () => {
           </nav>
 
           {/* Search bar */}
-          <div className="hidden md:flex items-center glass rounded-full px-6 py-3 w-80 group hover:shadow-lg transition-all duration-300">
+          <div className="hidden md:flex items-center glass rounded-full px-4 py-2 w-full max-w-sm group hover:shadow-lg transition-all duration-300">
             <Search className="w-5 h-5 text-neutral-400 mr-3 group-hover:text-luxury-gold transition-colors duration-300" />
             <input
               type="text"
@@ -77,31 +105,31 @@ const Header = () => {
           </div>
 
           {/* Right icons */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1 sm:space-x-2 lg:mr-24">
             {[
-              { icon: Heart, count: null, to: '/wishlist' },
-              { icon: User, count: null, to: '/profile' },
-              { icon: ShoppingCart, count: 0, to: '/cart' }
+              { icon: Heart, count: null, to: "/wishlist" },
+              { icon: User, count: null, to: "/profile" },
+              { icon: ShoppingCart, count: 0, to: "/cart" },
             ].map(({ icon: Icon, count, to }, index) => (
-              <Link 
+              <Link
                 key={index}
                 to={to}
-                className={`p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group luxury-card ${
-                  index === 2 ? 'cart-button' : ''
+                className={`p-2 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group luxury-card ${
+                  index === 2 ? "cart-button" : ""
                 }`}
               >
-                <Icon className="w-6 h-6 text-neutral-600 group-hover:text-luxury-gold transition-colors duration-300" />
+                <Icon className="w-5 h-5 sm:w-7 sm:h-7 text-neutral-700 group-hover:text-luxury-gold transition-colors duration-300" />
                 {count !== null && (
-                  <span className="cart-count absolute -top-1 -right-1 bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium shadow-lg">
+                  <span className="cart-count absolute -top-2 -right-2 sm:-top-1 sm:-right-1 bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white text-xs sm:text-sm rounded-full w-7 h-7 flex items-center justify-center font-medium shadow-lg ">
                     {count}
                   </span>
                 )}
               </Link>
             ))}
-            
+
             {/* Mobile menu button */}
             <button
-              className="md:hidden p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
+              className="md:hidden p-2 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -113,7 +141,7 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden py-6 border-t border-neutral-200/50 animate-slide-up">
             <div className="flex flex-col space-y-6">
-              <div className="flex items-center glass rounded-full px-6 py-3">
+              <div className="flex items-center glass rounded-full px-4 py-2 w-full">
                 <Search className="w-5 h-5 text-neutral-400 mr-3" />
                 <input
                   type="text"
@@ -122,15 +150,15 @@ const Header = () => {
                 />
               </div>
               {[
-                { name: 'Home', href: '/' },
-                { name: 'Products', href: '/products' },
-                { name: 'Categories', href: '/categories' },
-                { name: 'About', href: '/about' },
-                { name: 'Contact', href: '/contact' }
+                { name: "Home", href: "/" },
+                { name: "Products", href: "/products" },
+                { name: "Categories", href: "/categories" },
+                { name: "About", href: "/about" },
+                { name: "Contact", href: "/contact" },
               ].map((item) => (
-                <a 
+                <a
                   key={item.name}
-                  href={item.href} 
+                  href={item.href}
                   className="text-neutral-700 hover:text-luxury-gold font-medium transition-colors duration-300 py-2"
                 >
                   {item.name}
@@ -141,6 +169,7 @@ const Header = () => {
         )}
       </div>
     </header>
+
   );
 };
 

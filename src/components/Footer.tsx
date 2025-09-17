@@ -7,8 +7,8 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-neutral-900 text-white relative">
-      <div className="container mx-auto px-4 py-20">
+    <footer className="bg-neutral-900 text-white relative overflow-x-hidden">
+      <div className="w-full max-w-screen-xl mx-auto px-4 py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Company Info */}
           <div className="space-y-8">
@@ -25,15 +25,15 @@ const Footer = () => {
             <div className="space-y-4">
               <div className="flex items-center text-neutral-400 hover:text-luxury-gold transition-colors duration-300 group">
                 <MapPin className="w-5 h-5 mr-4 text-luxury-gold group-hover:scale-110 transition-transform duration-300" />
-                <span className="font-medium">123 Premium Plaza, Mumbai, India 400001</span>
+                <span className="font-medium">Rahmania Complex, Doddapete, Kolar, India 563101</span>
               </div>
               <div className="flex items-center text-neutral-400 hover:text-luxury-gold transition-colors duration-300 group">
                 <Phone className="w-5 h-5 mr-4 text-luxury-gold group-hover:scale-110 transition-transform duration-300" />
-                <span className="font-medium">+91 98765 43210</span>
+                <span className="font-medium">+91 72599 66388</span>
               </div>
               <div className="flex items-center text-neutral-400 hover:text-luxury-gold transition-colors duration-300 group">
                 <Mail className="w-5 h-5 mr-4 text-luxury-gold group-hover:scale-110 transition-transform duration-300" />
-                <span className="font-medium">hello@nutriluxpremium.com</span>
+                <span className="font-medium">tamoorpremium@gmail.com</span>
               </div>
             </div>
           </div>
@@ -83,10 +83,10 @@ const Footer = () => {
 
         {/* Social Media & Awards */}
         <div className="border-t border-neutral-800 mt-16 pt-12">
-          <div className="flex flex-col lg:flex-row justify-between items-center space-y-8 lg:space-y-0">
-            <div className="flex items-center space-x-8">
+          <div className="flex flex-col lg:flex-row justify-between items-center gap-6 flex-wrap">
+            <div className="flex items-center flex-wrap gap-4">
               <span className="text-neutral-400 font-medium">Connect with us:</span>
-              <div className="flex space-x-4">
+              <div className="flex gap-3 flex-wrap">
                 {[
                   { icon: Facebook, color: 'hover:text-blue-500', bg: 'hover:bg-blue-500/10' },
                   { icon: Twitter, color: 'hover:text-blue-400', bg: 'hover:bg-blue-400/10' },
@@ -104,11 +104,11 @@ const Footer = () => {
               </div>
             </div>
 
-            <div className="flex items-center space-x-8">
+            <div className="flex items-center flex-wrap gap-4">
               <span className="text-neutral-400 font-medium">Secure payments:</span>
-              <div className="flex space-x-3">
+              <div className="flex flex-wrap gap-3">
                 {['💳', '🏦', '📱', '💰'].map((emoji, index) => (
-                  <div key={index} className="w-12 h-12 glass rounded-lg flex items-center justify-center text-lg hover:scale-110 transition-transform duration-300">
+                  <div key={index} className="w-8 h-8 md:w-12 md:h-12 glass rounded-lg flex items-center justify-center text-base md:text-lg hover:scale-110 transition-transform duration-300">
                     {emoji}
                   </div>
                 ))}
@@ -119,12 +119,12 @@ const Footer = () => {
 
         {/* Awards & Certifications */}
         <div className="border-t border-neutral-800 mt-12 pt-12">
-          <div className="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
-            <div className="flex items-center space-x-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 flex-wrap">
+            <div className="flex items-center flex-wrap gap-4">
               <span className="text-neutral-400 font-medium">Certified by:</span>
-              <div className="flex space-x-4">
+              <div className="flex flex-wrap gap-3">
                 {['🏆 ISO 9001', '🌱 Organic', '⭐ Premium', '🛡️ Safe'].map((cert, index) => (
-                  <div key={index} className="text-sm text-neutral-400 font-medium bg-neutral-800 px-4 py-2 rounded-full">
+                  <div key={index} className="text-sm text-neutral-400 font-medium bg-neutral-800 px-3 py-2 rounded-full">
                     {cert}
                   </div>
                 ))}
@@ -143,7 +143,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="border-t border-neutral-800 mt-12 pt-8 text-center">
           <p className="text-neutral-400 font-medium">
-            © 2024 TAMOOR Premium. All rights reserved. Crafted with ❤️ for luxury healthy living.
+            © 2025 TAMOOR Premium. All rights reserved. Crafted with ❤️ for luxury healthy living.
           </p>
         </div>
       </div>

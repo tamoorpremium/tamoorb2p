@@ -7,6 +7,44 @@
 @import '@fontsource/poppins/600.css';
 @import '@fontsource/poppins/700.css';
 @import './styles/toast.css';
+/* First group */
+@import '@fontsource/pacifico/400.css';
+@import '@fontsource/dancing-script/400.css';
+@import '@fontsource/satisfy/400.css';
+@import '@fontsource/great-vibes/400.css';
+@import '@fontsource/allura/400.css';
+
+/* Second group */
+@import '@fontsource/lobster/400.css';
+@import '@fontsource/cookie/400.css';
+@import '@fontsource/eagle-lake/400.css';
+@import '@fontsource/shizuru/400.css';
+@import '@fontsource/kablammo/400.css';
+@import '@fontsource/rubik-dirt/400.css';
+@import '@fontsource/rubik-puddles/400.css';
+@import '@fontsource/butcherman/400.css';
+@import '@fontsource/chokokutai/400.css';
+@import '@fontsource/henny-penny/400.css';
+@import '@fontsource/fontdiner-swanky/400.css';
+@import '@fontsource/chicle/400.css';
+@import '@fontsource/trade-winds/400.css';
+@import '@fontsource/ribeye/400.css';
+@import '@fontsource/federant/400.css';
+@import '@fontsource/michroma/400.css';
+@import '@fontsource/indie-flower/400.css';
+@import '@fontsource/permanent-marker/400.css';
+@import '@fontsource/bitcount-prop-single/400.css';
+@import '@fontsource/bitcount/400.css';
+@import '@fontsource/rye/400.css';
+@import '@fontsource/ma-shan-zheng/400.css';
+@import '@fontsource/calligraffitti/400.css';
+@import "@fontsource/lobster/400.css";
+@import "@fontsource/cookie/400.css";
+@import "@fontsource/eagle-lake/400.css";
+@import "@fontsource/fleur-de-leah/400.css";
+@import "@fontsource/imperial-script/400.css";
+
+
 
 
 /* TAMOOR Brand Variables */
@@ -17,6 +55,10 @@
   --tamoor-cream: #faf8f3;
   --tamoor-sage: #87a96b;
   --tamoor-charcoal: #2c2c2c;
+  --off-white: #faf8f3;         /* Example off-white shade */
+  --antique-gold: #d4af37;      /* Example antique gold shade */
+  --custom-red: #ff3b3f;        /* Vibrant red */
+  --custom-lavender: #d6baf8;   /* Soft lavender */
 }
 
 @tailwind base;
@@ -251,6 +293,14 @@ html {
   min-height: 100vh;
   width: 100vw;
   background: linear-gradient(120deg, var(--tamoor-gold-light) 0%, var(--tamoor-gold) 50%, var(--tamoor-gold-dark) 100%);
+}
+
+.stat-gradient {
+  background: linear-gradient(90deg, #ff5b5b, #ff3a3a, #b30000);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
 }
 
 .bg-dashboard-gradient1 {

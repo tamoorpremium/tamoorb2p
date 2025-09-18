@@ -114,7 +114,7 @@ const Header = () => {
               <Link
                 key={index}
                 to={to}
-                className={`p-2 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group luxury-card ${
+                className={`p-1 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group luxury-card ${
                   index === 2 ? "cart-button" : ""
                 }`}
               >

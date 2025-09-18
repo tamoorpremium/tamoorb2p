@@ -54,7 +54,7 @@ const Header = () => {
               alt="Tamoor Logo"
               className="w-10 h-10 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
             />
-            <h1 className="text-4xl font-display font-bold tamoor-gradient">
+            <h1 className="text-3xl font-display font-bold tamoor-gradient">
               TAMOOR
             </h1>
           </div>

@@ -64,7 +64,7 @@ const Header = () => {
             <img
               src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
               alt="Tamoor Logo"
-              className="w-16 h-16 object-contain mr-3 transition-transform duration-300 group-hover:scale-110"
+              className="w-16 h-16 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
             />
             <h1 className="text-4xl sm:text-6xl font-display font-bold tamoor-gradient">
               TAMOOR

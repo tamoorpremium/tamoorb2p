@@ -21,7 +21,7 @@ const Categories = () => {
           }
         });
       },
-      { threshold: 0.2 }
+      { threshold: 0.3 }
     );
 
     if (sectionRef.current) {

@@ -54,7 +54,7 @@ const Header = () => {
               alt="Tamoor Logo"
               className="w-10 h-10 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
             />
-            <h1 className="text-3xl font-display font-bold tamoor-gradient">
+            <h1 className="text-4xl font-display font-bold tamoor-gradient">
               TAMOOR
             </h1>
           </div>
@@ -120,7 +120,7 @@ const Header = () => {
               >
                 <Icon className="w-4 h-4 sm:w-7 sm:h-7 text-neutral-700 group-hover:text-luxury-gold transition-colors duration-300" />
                 {count !== null && (
-                  <span className="cart-count absolute -top-2 -right-2 sm:-top-1 sm:-right-1 bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white text-xs sm:text-sm rounded-full w-7 h-7 flex items-center justify-center font-medium shadow-lg ">
+                  <span className="cart-count absolute -top-1 -right-1 sm:-top-1 sm:-right-1 bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white text-xs sm:text-sm rounded-full w-7 h-7 flex items-center justify-center font-medium shadow-lg ">
                     {count}
                   </span>
                 )}

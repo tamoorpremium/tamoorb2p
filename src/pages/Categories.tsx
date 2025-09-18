@@ -1,229 +1,209 @@
-import React, { useEffect, useRef } from 'react';
-import { ArrowRight } from 'lucide-react';
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from '../utils/supabaseClient';
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  parent_id: number | null;
+}
+
+
+const subcategoryImages: Record<string, string> = {
+  // Premium Nuts
+  "almonds-badam": "https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "cashews-kaju": "https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "pistachios-pista": "https://images.pexels.com/photos/675951/pexels-photo-675951.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "walnuts-akhrot": "https://images.pexels.com/photos/117097/pexels-photo-117097.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "hazelnuts": "https://images.pexels.com/photos/1414873/pexels-photo-1414873.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "pecans": "https://images.pexels.com/photos/46252/pecans-nuts-healthy-food-46252.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "macadamia": "https://images.pexels.com/photos/1315187/pexels-photo-1315187.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "pine-nuts-chilgoza": "https://images.pexels.com/photos/46063/pine-nuts-food-46063.jpeg?auto=compress&cs=tinysrgb&w=600",
+
+  // Dried Fruits
+  "raisins-kishmish": "https://images.pexels.com/photos/66463/grapes-purple-raisin-dried-66463.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "figs-anjeer": "https://images.pexels.com/photos/41123/figs-fig-fruits-41123.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "apricots-khubani": "https://images.pexels.com/photos/247466/pexels-photo-247466.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "dates-khajoor": "https://images.pexels.com/photos/164631/pexels-photo-164631.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "prunes-dried-plums": "https://images.pexels.com/photos/17528/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=600",
+  "cranberries": "https://images.pexels.com/photos/357585/pexels-photo-357585.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "blueberries": "https://images.pexels.com/photos/340874/pexels-photo-340874.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "black-currants": "https://images.pexels.com/photos/708264/pexels-photo-708264.jpeg?auto=compress&cs=tinysrgb&w=600",
+
+  // Seeds & Others
+  "pumpkin-seeds": "https://images.pexels.com/photos/2113567/pexels-photo-2113567.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "sunflower-seeds": "https://images.pexels.com/photos/247241/pexels-photo-247241.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "chia-seeds": "https://images.pexels.com/photos/66295/pexels-photo-66295.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "flax-seeds": "https://images.pexels.com/photos/196643/pexels-photo-196643.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "mixed-seeds": "https://images.pexels.com/photos/357574/pexels-photo-357574.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "mixes": "https://images.pexels.com/photos/357581/pexels-photo-357581.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "trail-mix": "https://images.pexels.com/photos/357580/pexels-photo-357580.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "exotic-mix": "https://images.pexels.com/photos/357583/pexels-photo-357583.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "salted-mix": "https://images.pexels.com/photos/357579/pexels-photo-357579.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "roasted-mix": "https://images.pexels.com/photos/357578/pexels-photo-357578.jpeg?auto=compress&cs=tinysrgb&w=600",
+
+  // Chocolate
+  "dark-chocolate": "https://images.pexels.com/photos/520551/pexels-photo-520551.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "milk-chocolate": "https://images.pexels.com/photos/302478/pexels-photo-302478.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "white-chocolate": "https://images.pexels.com/photos/302479/pexels-photo-302479.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "chocolate-bars": "https://images.pexels.com/photos/302481/pexels-photo-302481.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "chocolate-truffles": "https://images.pexels.com/photos/302482/pexels-photo-302482.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "chocolate-covered-nuts-fruits": "https://images.pexels.com/photos/302484/pexels-photo-302484.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "hot-chocolate-powder": "https://images.pexels.com/photos/302485/pexels-photo-302485.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "swiss-chocolates": "https://images.pexels.com/photos/302486/pexels-photo-302486.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "belgian-chocolates": "https://images.pexels.com/photos/302487/pexels-photo-302487.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "luxury-chocolate-gift-packs": "https://images.pexels.com/photos/302488/pexels-photo-302488.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "imported-chocolates": "https://images.pexels.com/photos/302489/pexels-photo-302489.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "sugarfree-chocolates": "https://images.pexels.com/photos/302490/pexels-photo-302490.jpeg?auto=compress&cs=tinysrgb&w=600",
+
+  // Gift Hampers
+  "birthday-hampers": "https://images.pexels.com/photos/210551/pexels-photo-210551.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "anniversary-hampers": "https://images.pexels.com/photos/291528/pexels-photo-291528.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "wedding-hampers": "https://images.pexels.com/photos/295919/pexels-photo-295919.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "festival-hampers": "https://images.pexels.com/photos/302292/pexels-photo-302292.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "corporate-hampers": "https://images.pexels.com/photos/302291/pexels-photo-302291.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "dry-fruit-hampers": "https://images.pexels.com/photos/302290/pexels-photo-302290.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "chocolate-hampers": "https://images.pexels.com/photos/302289/pexels-photo-302289.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "mixed-hampers": "https://images.pexels.com/photos/302288/pexels-photo-302288.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "healthy-hampers": "https://images.pexels.com/photos/302287/pexels-photo-302287.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "premium-wooden-box": "https://images.pexels.com/photos/302286/pexels-photo-302286.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "basket-hampers": "https://images.pexels.com/photos/302285/pexels-photo-302285.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "designer-hampers": "https://images.pexels.com/photos/302284/pexels-photo-302284.jpeg?auto=compress&cs=tinysrgb&w=600",
+
+  // Juices
+  "fruit-juices": "https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "special-juices": "https://images.pexels.com/photos/96975/pexels-photo-96975.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "imported-juices": "https://images.pexels.com/photos/96976/pexels-photo-96976.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "soft-drinks": "https://images.pexels.com/photos/96977/pexels-photo-96977.jpeg?auto=compress&cs=tinysrgb&w=600",
+  "health-detox": "https://images.pexels.com/photos/96978/pexels-photo-96978.jpeg?auto=compress&cs=tinysrgb&w=600",
+};
+
+
+const subcategoryBadges: Record<string, string> = {
+  "almonds-badam": "Premium",
+  "cashews-kaju": "Bestseller",
+  "pistachios-pista": "New",
+  "walnuts-akhrot": "Luxury",
+};
 
 const Categories = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order("id", { ascending: true });
+      if (error) console.log(error);
+      else setCategories(data || []);
+    };
+    fetchCategories();
+  }, []);
+
+  // Animate cards on scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const cards = entry.target.querySelectorAll('.category-card');
+            const cards = entry.target.querySelectorAll(".category-card");
             cards.forEach((card, index) => {
               setTimeout(() => {
-                card.classList.add('animate-slide-up');
-                card.classList.remove('opacity-0');
-                card.classList.add('opacity-100');
-              }, index * 150);
+                card.classList.add("animate-slide-up");
+                card.classList.remove("opacity-0");
+                card.classList.add("opacity-100");
+              }, index * 300);
             });
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.3 }
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
+    if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
 
-  const categories = [
-    {
-      id: 'premium-nuts',
-      name: 'Premium Nuts',
-      description: 'Handpicked almonds, cashews, pistachios, and walnuts from the finest orchards worldwide',
-      image: 'https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600',
-      count: '45+ Products',
-      gradient: 'from-amber-500/20 to-orange-500/20',
-      hoverGradient: 'group-hover:from-amber-500/30 group-hover:to-orange-500/30',
-      icon: '🥜',
-      features: ['Rich in Protein', 'Heart Healthy', 'Premium Quality']
-    },
-    {
-      id: 'dried-fruits',
-      name: 'Exotic Dried Fruits',
-      description: 'Sun-dried dates, figs, apricots, and raisins bursting with natural sweetness',
-      image: 'https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600',
-      count: '38+ Products',
-      gradient: 'from-purple-500/20 to-pink-500/20',
-      hoverGradient: 'group-hover:from-purple-500/30 group-hover:to-pink-500/30',
-      icon: '🍇',
-      features: ['Natural Sweetness', 'High Fiber', 'Antioxidant Rich']
-    },
-    {
-      id: 'seeds-berries',
-      name: 'Superfood Seeds & Berries',
-      description: 'Nutrient-dense chia seeds, flax seeds, goji berries, and cranberries',
-      image: 'https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600',
-      count: '28+ Products',
-      gradient: 'from-blue-500/20 to-indigo-500/20',
-      hoverGradient: 'group-hover:from-blue-500/30 group-hover:to-indigo-500/30',
-      icon: '🫐',
-      features: ['Omega-3 Rich', 'Superfood Power', 'Energy Boost']
-    },
-    {
-      id: 'trail-mixes',
-      name: 'Artisan Trail Mixes',
-      description: 'Carefully crafted blends of nuts, fruits, and seeds for the perfect snack',
-      image: 'https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600',
-      count: '22+ Products',
-      gradient: 'from-green-500/20 to-emerald-500/20',
-      hoverGradient: 'group-hover:from-green-500/30 group-hover:to-emerald-500/30',
-      icon: '🥗',
-      features: ['Perfect Balance', 'On-the-Go', 'Custom Blends']
-    },
-    {
-      id: 'gift-hampers',
-      name: 'Luxury Gift Hampers',
-      description: 'Elegantly packaged premium collections perfect for gifting',
-      image: 'https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600',
-      count: '15+ Products',
-      gradient: 'from-red-500/20 to-rose-500/20',
-      hoverGradient: 'group-hover:from-red-500/30 group-hover:to-rose-500/30',
-      icon: '🎁',
-      features: ['Premium Packaging', 'Gift Ready', 'Curated Selection']
-    },
-    {
-      id: 'organic-range',
-      name: 'Certified Organic',
-      description: 'USDA certified organic dry fruits and nuts, naturally grown without chemicals',
-      image: 'https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600',
-      count: '32+ Products',
-      gradient: 'from-lime-500/20 to-green-500/20',
-      hoverGradient: 'group-hover:from-lime-500/30 group-hover:to-green-500/30',
-      icon: '🌱',
-      features: ['USDA Certified', 'Chemical Free', 'Sustainable']
-    }
-  ];
+  const parents = categories.filter((cat) => cat.parent_id === null);
+  const getSubcategories = (parentId: number) =>
+    categories.filter((cat) => cat.parent_id === parentId);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white">
-      {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-luxury-cream via-white to-luxury-cream-dark relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-64 h-64 bg-luxury-gold rounded-full blur-3xl animate-float"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-luxury-sage rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }}></div>
-        </div>
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center space-x-2 text-luxury-gold mb-6">
-              <div className="w-12 h-0.5 bg-gradient-to-r from-transparent to-luxury-gold"></div>
-              <span className="text-sm font-medium tracking-wider uppercase">Categories</span>
-              <div className="w-12 h-0.5 bg-gradient-to-l from-transparent to-luxury-gold"></div>
-            </div>
-            <h1 className="text-5xl md:text-6xl font-display font-bold text-neutral-800 mb-6">
-              Explore <span className="tamoor-gradient">TAMOOR</span> Categories
-            </h1>
-            <p className="text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed font-medium">
-              Discover our carefully curated categories of premium dry fruits and nuts, 
-              each selected for exceptional quality and taste.
-            </p>
-          </div>
-        </div>
-      </section>
+    <section ref={sectionRef} className="py-12 sm:py-24 bg-white">
+      <div className="container mx-auto px-4">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-neutral-800 mb-16 text-center">
+          Explore <span className="luxury-gradient">TAMOOR</span> Categories
+        </h1>
 
-      {/* Categories Grid */}
-      <section ref={sectionRef} className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {categories.map((category, index) => (
-              <div
-                key={category.id}
-                className="category-card luxury-card neomorphism rounded-3xl overflow-hidden group cursor-pointer opacity-0"
-              >
-                <div className="relative h-80 overflow-hidden">
-                  <img
-                    src={category.image}
-                    alt={category.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                  <div className={`absolute inset-0 bg-gradient-to-t ${category.gradient} ${category.hoverGradient} transition-all duration-500`}></div>
-                  
-                  {/* Category Icon */}
-                  <div className="absolute top-8 left-8">
-                    <div className="w-16 h-16 glass rounded-full flex items-center justify-center text-3xl group-hover:scale-125 transition-transform duration-300">
-                      {category.icon}
+        {parents.map((parent) => {
+          const subcategories = getSubcategories(parent.id);
+          if (!subcategories.length) return null;
+
+          return (
+            <div key={parent.id} className="mb-20">
+              {/* Parent Heading with Divider */}
+              <div className="flex items-center mb-12">
+                <div className="flex-1 h-1 bg-luxury-gold-light"></div>
+                <h2 className="px-6 text-2xl sm:text-3xl md:text-4xl font-bold text-luxury-sage-dark">
+                  {parent.name}
+                </h2>
+                <div className="flex-1 h-1 bg-luxury-gold-light"></div>
+              </div>
+
+              {/* Subcategory Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+                {subcategories.map((sub) => (
+                  <div
+                    key={sub.id}
+                    className="category-card luxury-card neomorphism rounded-2xl md:rounded-3xl overflow-hidden group opacity-100 cursor-pointer"
+                    onClick={() => navigate(`/products?categoryId=${sub.id}`)}
+                  >
+
+                    {/* Media Section */}
+                    <div className="relative overflow-hidden">
+                      <img
+                        src={subcategoryImages[sub.slug] || "https://via.placeholder.com/400x300"}
+                        alt={sub.name}
+                        className="w-full h-40 sm:h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                      {/* Gradient Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+
+                      {/* Badge */}
+                      {subcategoryBadges[sub.slug] && (
+                        <span className="absolute top-4 left-4 bg-luxury-gold text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                          {subcategoryBadges[sub.slug]}
+                        </span>
+                      )}
                     </div>
-                  </div>
 
-                  {/* Product Count */}
-                  <div className="absolute top-8 right-8">
-                    <div className="glass px-4 py-2 rounded-full text-sm font-semibold text-white">
-                      {category.count}
-                    </div>
-                  </div>
-
-                  {/* Category Info Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <div className="absolute bottom-8 left-8 right-8">
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {category.features.map((feature, idx) => (
-                          <span
-                            key={idx}
-                            className="text-xs bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full font-medium"
-                          >
-                            {feature}
-                          </span>
-                        ))}
-                      </div>
-                      <button className="flex items-center space-x-2 text-white font-semibold group/btn">
-                        <span>Explore Category</span>
-                        <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                    {/* Content */}
+                    <div className="p-4 sm:p-6 md:p-6 text-center">
+                      <h3 className="font-display font-semibold text-sm sm:text-base md:text-xl mb-2 sm:mb-3 text-neutral-800 group-hover:text-luxury-gold transition-colors duration-300">
+                        {sub.name}
+                      </h3>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/products?categoryId=${sub.id}`);
+                        }}
+                        className="w-full btn-premium text-white py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base md:text-lg flex items-center justify-center"
+                      >
+                        Explore
                       </button>
                     </div>
                   </div>
-                </div>
-
-                <div className="p-8">
-                  <h3 className="text-2xl font-display font-bold text-neutral-800 mb-4 group-hover:text-luxury-gold transition-colors duration-300">
-                    {category.name}
-                  </h3>
-                  <p className="text-neutral-600 leading-relaxed font-medium mb-6">
-                    {category.description}
-                  </p>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-neutral-500 font-medium">{category.count}</span>
-                    <button className="btn-premium text-white px-6 py-2 rounded-full font-semibold text-sm">
-                      View All
-                    </button>
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-neutral-900 via-neutral-800 to-luxury-charcoal text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-64 h-64 bg-luxury-gold rounded-full blur-3xl animate-float"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-luxury-sage rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }}></div>
-        </div>
-
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">
-            Can't Find What You're Looking For?
-          </h2>
-          <p className="text-xl text-neutral-300 mb-8 max-w-2xl mx-auto">
-            Browse our complete collection or contact our experts for personalized recommendations.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="btn-premium text-white px-8 py-4 rounded-full font-semibold text-lg">
-              View All Products
-            </button>
-            <button className="glass text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white/10 transition-all duration-300">
-              Contact Expert
-            </button>
-          </div>
-        </div>
-      </section>
-    </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 };
 

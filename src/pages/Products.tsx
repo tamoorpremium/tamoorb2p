@@ -2,13 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, Filter, Grid, List, Star, Heart, Eye, ShoppingCart, X } from 'lucide-react';
 //import { useCart } from '../context/CartContext';
 import { supabase } from '../utils/supabaseClient';
+import { Listbox } from "@headlessui/react"
+import { useLocation, useNavigate } from "react-router-dom";
+
 
 
 const Products = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState<string | number>("all");
   const [priceRange, setPriceRange] = useState([0, 3000]);
   const [sortBy, setSortBy] = useState('featured');
   const [viewMode, setViewMode] = useState('grid');
@@ -26,19 +29,75 @@ const Products = () => {
   const [wishlistMessage, setWishlistMessage] = useState<{ text: string; type: 'success' | 'remove' } | null>(null);
   const [cartMessage, setCartMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
+  const [showBar, setShowBar] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+ interface Category {
+  id: number | string;
+  name: string;
+  children?: Category[];
+}
+
+const [openParentCategory, setOpenParentCategory] = useState<string | number | null>(null);
 
 
-  
+const getCategoryIdsToFilter = (selected: string | number) => {
+  if (selected === "all") return categories.map((c) => c.id);
+
+  // if parent category → include its children
+  const parent = categories.find((c) => c.id === selected);
+  if (parent?.children?.length > 0) {
+    return [parent.id, ...parent.children.map((ch: any) => ch.id)];
+  }
+
+  // if subcategory → return just itself
+  return [selected];
+};
 
 
-  const categories = [
-    { id: 'all', name: 'All Products', count: 156 },
-    { id: 'nuts', name: 'Premium Nuts', count: 45 },
-    { id: 'dried-fruits', name: 'Dried Fruits', count: 38 },
-    { id: 'seeds', name: 'Seeds & Berries', count: 28 },
-    { id: 'trail-mix', name: 'Trail Mixes', count: 22 },
-    { id: 'organic', name: 'Organic Range', count: 23 }
-  ];
+
+
+ const [categories, setCategories] = useState<any[]>([]);
+
+useEffect(() => {
+  const fetchCategories = async () => {
+    const { data, error } = await supabase
+      .from("categories")
+      .select("*")
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching categories:", error);
+      setCategories([]);
+      return;
+    }
+
+    // Build hierarchical structure
+    const parentCategories = data.filter((cat: any) => !cat.parent_id);
+    const childCategories = data.filter((cat: any) => cat.parent_id);
+
+    const categoriesTree = parentCategories.map((parent: any) => ({
+      ...parent,
+      children: childCategories.filter((child: any) => child.parent_id === parent.id),
+    }));
+
+    setCategories([{ id: "all", name: "All Products", children: [] }, ...categoriesTree]);
+  };
+
+  fetchCategories();
+}, []);
+
+const location = useLocation();
+const params = new URLSearchParams(location.search);
+const categoryIdParam = params.get("categoryId");
+const subcategorySlug = params.get("subcategory");
+
+useEffect(() => {
+  if (categoryIdParam) {
+    setSelectedCategory(Number(categoryIdParam));
+  }
+}, [categoryIdParam]);
+
 
 
   const weightOptions = [
@@ -49,7 +108,22 @@ const Products = () => {
   ];
 
 
+useEffect(() => {
+  const handleScroll = () => {
+    if (window.scrollY > lastScrollY) {
+      setShowBar(false); // scrolling down → hide
+    } else {
+      setShowBar(true);  // scrolling up → show
+    }
+    setLastScrollY(window.scrollY);
+  };
+
+  window.addEventListener("scroll", handleScroll);
+  return () => window.removeEventListener("scroll", handleScroll);
+}, [lastScrollY]);
+
   // Fetch products from Supabase
+
 
 
   useEffect(() => {
@@ -132,6 +206,7 @@ const toggleWishlist = async (productId: number) => {
 };
 
 
+
 const calculateUnitPrice = (product: any, weight: number | 'custom', customWeight?: number) => {
   let grams: number;
 
@@ -182,21 +257,33 @@ const handleAddCartDirect = async (product: any, qty: number) => {
   setTimeout(() => setCartMessage(null), 3000);
 };
 
-// Filter, search, price range, sort by
+// Filter and sort products
 const filteredProducts = products
   .filter(product => {
+    // Search filter
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+
+    // Category filter
+    const categoryIds = getCategoryIdsToFilter(selectedCategory);
+    const matchesCategory =
+      selectedCategory === 'all' || categoryIds.includes(product.category_id);
+
+    // Price range filter
     const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
+
+    // Only include products that match all conditions
     return matchesSearch && matchesCategory && matchesPrice;
   })
   .sort((a, b) => {
+    // Sorting logic unchanged
     if (sortBy === 'price-low') return a.price - b.price;
     if (sortBy === 'price-high') return b.price - a.price;
     if (sortBy === 'rating') return b.rating - a.rating;
     if (sortBy === 'newest') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    return 0; // Featured/default
+    return 0;
   });
+
+
 
 const handleAddCart = async () => {
   if (!selectedProduct) return;
@@ -296,7 +383,7 @@ return (
     <section className="py-20 bg-gradient-to-br from-luxury-cream via-white to-luxury-cream-dark">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-display font-bold text-neutral-800 mb-6">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-neutral-800 mb-6">
             Premium <span className="tamoor-gradient">TAMOOR</span> Collection
           </h1>
           <p className="text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed font-medium">
@@ -306,115 +393,206 @@ return (
       </div>
     </section>
 
-    {/* Filters & Search */}
-    {/* ...next parts will continue */}
-        <section className="sticky top-20 z-40 glass backdrop-blur-xl border-b border-white/20 py-6">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
-          {/* Search Bar */}
-          <div className="flex-1 max-w-md">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
-              <input
-                type="text"
-                placeholder="Search premium dry fruits..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 glass rounded-full text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-luxury-gold/50"
-              />
+   {/* Filters & Search */}
+<section
+  className={`sticky top-20 z-40 glass backdrop-blur-xl border-b border-white/20 py-6
+    transition-transform duration-300 lg:translate-y-0 ${
+      showFilters || showBar ? "translate-y-0" : "-translate-y-full"
+    }`}
+>
+  <div className="container mx-auto px-4">
+    <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+      {/* Search Bar */}
+      <div className="flex-1 max-w-md">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+          <input
+            type="text"
+            placeholder="Search premium dry fruits..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 glass rounded-full text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-luxury-gold/50"
+          />
+        </div>
+      </div>
+
+      {/* Filter Controls */}
+      <div className="flex items-center space-x-4">
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="flex items-center space-x-2 glass px-6 py-3 rounded-full hover:bg-white/20 transition-all duration-300 relative"
+        >
+          <Filter className="w-5 h-5" />
+          <span className="font-medium">Filters</span>
+
+          {/* Show active filter badge */}
+          {(selectedCategory || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 3000) && (
+            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-luxury-gold text-white">
+              Active
+            </span>
+          )}
+        </button>
+
+       {/* Clear Filters button when active */}
+        {(selectedCategory !== "all" || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 3000) && (
+          <button
+            onClick={() => {
+              setSelectedCategory("all");   // Reset to "All Products"
+              setSortBy("featured");
+              setPriceRange([0, 3000]);
+            }}
+            className="text-sm text-red-500 hover:underline"
+          >
+            Clear All
+          </button>
+        )}
+
+
+        {/* Grid/List toggle */}
+        <div className="flex items-center space-x-2 flex-wrap glass rounded-full p-1">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`p-2 rounded-full transition-all duration-300 ${
+              viewMode === 'grid'
+                ? 'bg-luxury-gold text-white'
+                : 'text-neutral-600'
+            }`}
+          >
+            <Grid className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`p-2 rounded-full transition-all duration-300 ${
+              viewMode === 'list'
+                ? 'bg-luxury-gold text-white'
+                : 'text-neutral-600'
+            }`}
+          >
+            <List className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* Filter Panel */}
+    {showFilters && (
+      <div className="mt-6 glass rounded-2xl p-6 animate-slide-up flex flex-col max-h-[70vh]">
+        {/* Scrollable filter body */}
+        <div className="flex-1 overflow-y-auto pr-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Categories */}
+            <div>
+              <h3 className="font-display font-semibold text-lg mb-4">Categories</h3>
+              <div className="space-y-2">
+                {categories.map((category) => (
+                  <div key={category.id}>
+                    {/* Parent Category Button */}
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={() => setSelectedCategory(category.id)}
+                        className={`w-full text-left px-4 py-2 rounded-lg transition-all duration-300 ${
+                          selectedCategory === category.id ? "bg-luxury-gold text-white" : "hover:bg-white/20"
+                        }`}
+                      >
+                        <span className="font-medium">{category.name}</span>
+                      </button>
+
+                      {/* Dropdown toggle if parent has children */}
+                      {category.children?.length > 0 && (
+                        <button
+                          onClick={() =>
+                            setOpenParentCategory(openParentCategory === category.id ? null : category.id)
+                          }
+                          className="ml-2 text-sm text-neutral-400 hover:text-neutral-600"
+                        >
+                          {openParentCategory === category.id ? "▲" : "▼"}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Subcategories dropdown */}
+                    {category.children?.length > 0 && openParentCategory === category.id && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {category.children.map((child: any) => (
+                          <button
+                            key={child.id}
+                            onClick={() => setSelectedCategory(child.id)}
+                            className={`w-full text-left px-3 py-1 rounded-lg text-sm transition-all duration-300 ${
+                              selectedCategory === child.id ? "bg-luxury-gold text-white" : "hover:bg-white/10"
+                            }`}
+                          >
+                            {child.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+
             </div>
-          </div>
-          {/* Filter Controls */}
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center space-x-2 glass px-6 py-3 rounded-full hover:bg-white/20 transition-all duration-300"
-            >
-              <Filter className="w-5 h-5" />
-              <span className="font-medium">Filters</span>
-            </button>
-            <div className="flex items-center space-x-2 glass rounded-full p-1">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-full transition-all duration-300 ${
-                  viewMode === 'grid' ? 'bg-luxury-gold text-white' : 'text-neutral-600'
-                }`}
-              >
-                <Grid className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-full transition-all duration-300 ${
-                  viewMode === 'list' ? 'bg-luxury-gold text-white' : 'text-neutral-600'
-                }`}
-              >
-                <List className="w-5 h-5" />
-              </button>
+
+            {/* Price Range */}
+            <div>
+              <h3 className="font-display font-semibold text-lg mb-4">Price Range</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">₹{priceRange[0]}</span>
+                  <span className="text-sm">₹{priceRange[1]}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="3000"
+                  value={priceRange[1]}
+                  onChange={(e) =>
+                    setPriceRange([priceRange[0], parseInt(e.target.value)])
+                  }
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            {/* Sort By */}
+            <div className="relative">
+              <h3 className="font-display font-semibold text-lg mb-4">Sort By</h3>
+              <Listbox value={sortBy} onChange={setSortBy}>
+                <Listbox.Button className="w-full py-4 px-3 glass rounded-lg text-left cursor-pointer">
+                  {sortBy === "featured" && "Featured"}
+                  {sortBy === "price-low" && "Price: Low to High"}
+                  {sortBy === "price-high" && "Price: High to Low"}
+                  {sortBy === "rating" && "Highest Rated"}
+                  {sortBy === "newest" && "Newest First"}
+                </Listbox.Button>
+
+
+                <Listbox.Options className="absolute mt-2 w-full glass rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
+                  <Listbox.Option value="featured">Featured</Listbox.Option>
+                  <Listbox.Option value="price-low">Price: Low to High</Listbox.Option>
+                  <Listbox.Option value="price-high">Price: High to Low</Listbox.Option>
+                  <Listbox.Option value="rating">Highest Rated</Listbox.Option>
+                  <Listbox.Option value="newest">Newest First</Listbox.Option>
+                </Listbox.Options>
+              </Listbox>
             </div>
           </div>
         </div>
-        {/* Filter Panel */}
-        {showFilters && (
-          <div className="mt-6 glass rounded-2xl p-6 animate-slide-up">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Categories */}
-              <div>
-                <h3 className="font-display font-semibold text-lg mb-4">Categories</h3>
-                <div className="space-y-2">
-                  {categories.map((category) => (
-                    <button
-                      key={category.id}
-                      onClick={() => setSelectedCategory(category.id)}
-                      className={`w-full text-left px-4 py-2 rounded-lg transition-all duration-300 ${
-                        selectedCategory === category.id
-                          ? 'bg-luxury-gold text-white'
-                          : 'hover:bg-white/20'
-                      }`}
-                    >
-                      <span className="font-medium">{category.name}</span>
-                      <span className="text-sm opacity-70 ml-2">({category.count})</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {/* Price Range */}
-              <div>
-                <h3 className="font-display font-semibold text-lg mb-4">Price Range</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">₹{priceRange[0]}</span>
-                    <span className="text-sm">₹{priceRange[1]}</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="3000"
-                    value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-              {/* Sort By */}
-              <div>
-                <h3 className="font-display font-semibold text-lg mb-4">Sort By</h3>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full p-3 glass rounded-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold/50"
-                >
-                  <option value="featured">Featured</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="rating">Highest Rated</option>
-                  <option value="newest">Newest First</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
+
+        {/* Sticky footer Apply button */}
+        <div className="pt-4 border-t border-white/20">
+          <button
+            onClick={() => setShowFilters(false)}
+            className="w-full py-3 rounded-xl bg-luxury-gold text-white font-semibold shadow-md hover:bg-luxury-gold-dark transition"
+          >
+            Apply Filters
+          </button>
+        </div>
       </div>
-    </section>
+    )}
+  </div>
+</section>
+
 
     {/* Products Grid */}
     {/* Remaining parts coming up */}
@@ -444,7 +622,7 @@ return (
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
+                    className="w-full h-56 sm:h-64 md:h-72 object-cover group-hover:scale-110 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   {/* Badge */}
@@ -452,7 +630,7 @@ return (
                     {product.badge}
                   </div>
                   {/* Action buttons */}
-                  <div className="absolute top-6 right-6 flex flex-col space-y-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+                  <div className="absolute top-3 right-3 sm:top-6 sm:right-6 flex flex-col space-y-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
                     <button
                       onClick={() => toggleWishlist(product.id)}
                       className="p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
@@ -494,7 +672,7 @@ return (
                     </span>
                   </div>
                   <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                       <span className="text-2xl font-display font-bold tamoor-gradient">
                         ₹{product.price} / {product.measurement_unit === 'kilograms' ? 'kg' : 'pieces'}
                       </span>
@@ -542,7 +720,7 @@ return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass rounded-3xl p-8 max-w-md w-full animate-slide-up">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-display font-bold text-neutral-800">
+              <h3 className="text-2xl font-display font-bold text-amber-500">
                 Select Quantity
               </h3>
               <button
@@ -558,15 +736,15 @@ return (
                 alt={selectedProduct.name}
                 className="w-full h-32 object-cover rounded-2xl mb-4"
               />
-              <h4 className="font-display font-semibold text-lg">{selectedProduct.name}</h4>
-              <p className="text-neutral-600">{selectedProduct.description}</p>
+              <h4 className="font-display font-semibold text-lg text-luxury-gold-light">{selectedProduct.name}</h4>
+              <p className="text-lime-400">{selectedProduct.description}</p>
             </div>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-3">
+                <label className="block text-sm font-medium text-luxury-gold-light mb-3">
                   Weight Options
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {weightOptions.map(({ label, value }) => (
                     <button
                       key={value}
@@ -593,7 +771,7 @@ return (
                   Custom Weight (Min 50g)
                 </button>
                 {selectedWeight === 'custom' && (
-                  <div className="mt-3 flex items-center space-x-3">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                     <button
                       onClick={() => setCustomWeight(Math.max(50, customWeight - 50))}
                       className="p-2 glass rounded-lg hover:bg-white/20"
@@ -607,7 +785,7 @@ return (
                       className="flex-1 p-2 glass rounded-lg text-center"
                       min="50"
                     />
-                    <span className="text-sm text-neutral-600">grams</span>
+                    <span className="text-sm text-neutral-800">grams</span>
                     <button
                       onClick={() => setCustomWeight(customWeight + 50)}
                       className="p-2 glass rounded-lg hover:bg-white/20"

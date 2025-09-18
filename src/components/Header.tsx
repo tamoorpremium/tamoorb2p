@@ -118,7 +118,7 @@ const Header = () => {
                   index === 2 ? "cart-button" : ""
                 }`}
               >
-                <Icon className="w-5 h-5 sm:w-7 sm:h-7 text-neutral-700 group-hover:text-luxury-gold transition-colors duration-300" />
+                <Icon className="w-4 h-4 sm:w-7 sm:h-7 text-neutral-700 group-hover:text-luxury-gold transition-colors duration-300" />
                 {count !== null && (
                   <span className="cart-count absolute -top-2 -right-2 sm:-top-1 sm:-right-1 bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white text-xs sm:text-sm rounded-full w-7 h-7 flex items-center justify-center font-medium shadow-lg ">
                     {count}

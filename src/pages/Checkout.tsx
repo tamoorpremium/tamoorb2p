@@ -643,7 +643,7 @@ const handleSaveNewAddress = async () => {
     <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-32">
       <div className="container mx-auto px-4 pb-20">
         <div className="mb-12">
-          <h1 className="text-5xl font-display font-bold text-neutral-800 mb-4">
+          <h1 className="text-3xl sm:text-5xl font-display font-bold text-neutral-800 mb-4">
             Secure <span className="tamoor-gradient">Checkout</span>
           </h1>
           <p className="text-xl text-neutral-600 font-medium">
@@ -653,7 +653,7 @@ const handleSaveNewAddress = async () => {
 
         {/* Progress Bar */}
         <div className="luxury-card glass rounded-3xl p-8 mb-12">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between">
             {[{ id: 1, name: 'Address', icon: MapPin }, { id: 2, name: 'Delivery', icon: Truck },{ id: 3, name: 'Review', icon: Check }, { id: 4, name: 'Payment', icon: CreditCard }].map((step, i, arr) => (
               <div key={step.id} className="flex items-center">
                 <div className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 ${currentStep >= step.id ? 'bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white shadow-lg' : 'bg-neutral-200 text-neutral-500'}`}>
@@ -664,7 +664,7 @@ const handleSaveNewAddress = async () => {
                     {step.name}
                   </div>
                 </div>
-                {i < arr.length - 1 && <ChevronRight className="w-6 h-6 text-neutral-300 mx-8" />}
+                {i < arr.length - 1 && <ChevronRight className="w-6 h-6 text-neutral-300 mx-3 sm:mx-8" />}
               </div>
             ))}
           </div>
@@ -678,7 +678,7 @@ const handleSaveNewAddress = async () => {
           {/* Step 1: Address */}
               {currentStep === 1 && (
                 <div className="animate-slide-up">
-                  <h2 className="text-3xl font-display font-bold text-neutral-800 mb-8">Delivery Address</h2>
+                  <h2 className="text-2xl sm:text-3xl font-display font-bold text-neutral-800 mb-8">Delivery Address</h2>
 
                   {/* Saved Addresses Radio Buttons */}
                   {savedAddresses.length === 0 && <p>No saved addresses found.</p>}
@@ -744,7 +744,7 @@ const handleSaveNewAddress = async () => {
                             placeholder="PIN Code"
                           />
 
-                          <div className="flex space-x-4 mt-3">
+                          <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 mt-3">
                             <button
                               type="button"
                               className="btn-premium text-white px-6 py-3 rounded-full font-semibold flex-grow"
@@ -771,7 +771,7 @@ const handleSaveNewAddress = async () => {
 
                         </div>
                       ) : (
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-wrap items-center justify-between">
                           <label className="flex items-center cursor-pointer">
                             <input
                               type="radio"
@@ -780,7 +780,7 @@ const handleSaveNewAddress = async () => {
                               onChange={() => handleAddressSelect(addr.id)}
                               className="mr-2"
                             />
-                            <span>{addr.full_name}, {addr.address}, {addr.city}, {addr.state} - {addr.pincode}</span>
+                            <span className="break-words">{addr.full_name}, {addr.address}, {addr.city}, {addr.state} - {addr.pincode}</span>
                           </label>
 
                           <div className="flex items-center space-x-2">
@@ -909,7 +909,7 @@ const handleSaveNewAddress = async () => {
               {/* Step 2: Delivery */}
               {currentStep === 2 && (
                 <div className="animate-slide-up">
-                  <h2 className="text-3xl font-display font-bold text-neutral-800 mb-8">Delivery Options</h2>
+                  <h2 className="text-2xl sm:text-3xl font-display font-bold text-neutral-800 mb-8">Delivery Options</h2>
                   <div className="space-y-4">
                     {deliveryOptions.map(option => (
                       <div
@@ -920,7 +920,7 @@ const handleSaveNewAddress = async () => {
                         `}
                         onClick={() => option.enabled && setFormData(prev => ({ ...prev, deliveryOption: option.id }))}
                       >
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-wrap items-center justify-between">
                           <div className="flex items-center space-x-4">
                             <div className={`w-6 h-6 rounded-full border-2 transition-all duration-300
                               ${formData.deliveryOption === option.id ? 'border-luxury-gold bg-luxury-gold' : 'border-neutral-300'}
@@ -948,7 +948,7 @@ const handleSaveNewAddress = async () => {
               {/* Step 4: Payment */}
               {currentStep === 4 && (
                 <div className="animate-slide-up">
-                  <h2 className="text-3xl font-display font-bold text-neutral-800 mb-8">Payment Method</h2>
+                  <h2 className="text-2xl sm:text-3xl font-display font-bold text-neutral-800 mb-8">Payment Method</h2>
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {[{ id: 'card', name: 'Credit/Debit Card', icon: '💳' }, 
@@ -959,7 +959,7 @@ const handleSaveNewAddress = async () => {
                             key={method.id}
                             type="button"
                             onClick={() => setFormData(prev => ({ ...prev, paymentMethod: method.id }))}
-                            className={`glass rounded-2xl p-6 w-full cursor-pointer text-center transition-all duration-300 outline-none focus:outline-none
+                            className={`glass rounded-2xl p-6 w-full max-w-xs mx-auto sm:max-w-none cursor-pointer text-center transition-all duration-300 outline-none focus:outline-none
                         ${
                           formData.paymentMethod === method.id
                             ? 'ring-2 ring-red-600 bg-red-700 text-luxury-gold shadow-rose-600'
@@ -1031,13 +1031,13 @@ const handleSaveNewAddress = async () => {
               {/* Step 3: Review */}
               {currentStep === 3 && (
                 <div className="animate-slide-up">
-                  <h2 className="text-3xl font-display font-bold text-neutral-800 mb-8">Review Your Order</h2>
+                  <h2 className="text-2xl sm:text-3xl font-display font-bold text-neutral-800 mb-8">Review Your Order</h2>
                   <div className="space-y-6">
                     <div className="neomorphism rounded-2xl p-6">
                       <h3 className="font-display font-semibold text-lg mb-4">Order Items</h3>
                       <div className="space-y-4">
                         {cartItems.map((item) => (
-                          <div key={`${item.id}-${item.weight}`} className="flex items-center justify-between">
+                          <div key={`${item.id}-${item.weight}`} className="flex flex-col sm:flex-row sm:items-center justify-between">
                             <div className="flex items-center space-x-4">
                               <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-xl" />
                               <div>
@@ -1126,7 +1126,7 @@ const handleSaveNewAddress = async () => {
     <div className="border-t border-white/20 pt-4 mb-8">
       <div className="flex justify-between items-center">
         <span className="text-xl font-display font-semibold">Total</span>
-        <span className="text-3xl font-display font-bold tamoor-gradient">
+        <span className="text-2xl sm:text-3xl font-display font-bold tamoor-gradient">
           ₹{displayTotal.toFixed(2)}
         </span>
       </div>
@@ -1134,7 +1134,7 @@ const handleSaveNewAddress = async () => {
 
     {/* Secure Info */}
     <div className="text-center">
-      <div className="flex items-center justify-center space-x-4 text-sm text-neutral-500 mb-4">
+      <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0 text-neutral-500 mb-4">
         <span>🔒 Secure Payment</span>
         <span>📦 Fast Delivery</span>
       </div>

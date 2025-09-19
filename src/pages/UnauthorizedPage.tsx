@@ -6,13 +6,13 @@ const UnauthorizedPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    toast.error('Access denied! You are not authorized to view this page.');
+    toast.error('Access denied! You are not authorized to view this page.', { position: "top-center" });
   }, []);
 
   return (
     <div className="min-h-screen bg-tamoor-gray flex flex-col justify-center items-center p-6">
-      <div className="luxury-card glass p-10 rounded-3xl shadow-xl max-w-md w-full text-center">
-        <h1 className="text-4xl font-display font-bold text-tamoor-charcoal mb-6">Unauthorized</h1>
+      <div className="luxury-card glass p-6 sm:p-10 rounded-3xl shadow-xl max-w-md w-full text-center">
+        <h1 className="text-3xl sm:text-4xl font-display font-bold text-tamoor-charcoal mb-6">Unauthorized</h1>
         <p className="mb-8 text-tamoor-charcoal text-lg">
           You do not have permission to access this page.
         </p>

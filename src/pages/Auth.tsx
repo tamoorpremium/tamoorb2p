@@ -224,10 +224,10 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-luxury-cream via-white to-luxury-cream-dark flex items-center justify-center py-20 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-luxury-cream via-white to-luxury-cream-dark flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-display font-bold tamoor-gradient mb-4">TAMOOR</h1>
+          <h1 className="text-3xl sm:text-4xl font-display font-bold tamoor-gradient mb-4">TAMOOR</h1>
           <p className="text-neutral-600 font-medium">Premium Dry Fruits & Nuts</p>
         </div>
 
@@ -372,7 +372,7 @@ const Auth = () => {
             )}
 
             {/* Social Login Buttons */}
-            <div className="flex justify-center gap-4 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
               <button onClick={() => handleOAuthSignIn('google')} className="btn-social-google">Google</button>
               <button onClick={() => handleOAuthSignIn('facebook')} className="btn-social-facebook">Facebook</button>
               <button onClick={() => handleOAuthSignIn('apple')} className="btn-social-apple">Apple</button>
@@ -388,7 +388,7 @@ const Auth = () => {
               ) : (
                 <>
                   <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
-                  <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
+                  <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 active:translate-x-1 transition-transform duration-300" />
                 </>
               )}
             </button>
@@ -400,7 +400,7 @@ const Auth = () => {
         </div>
 
         <div className="text-center mt-8">
-          <div className="flex items-center justify-center space-x-6 text-sm text-neutral-500">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-neutral-500">
             <span>🔒 Secure & Encrypted</span>
             <span>⚡ Instant Access</span>
             <span>🎁 Welcome Bonus</span>

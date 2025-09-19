@@ -329,7 +329,7 @@ const shiptotal = finalTotal + shipping; // ✅ also an integer now
     <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-32">
       <div className="container mx-auto px-4 pb-20">
         <div className="mb-12">
-          <h1 className="text-5xl font-display font-bold text-neutral-800 mb-4">
+          <h1 className="text-3xl sm:text-5xl font-display font-bold text-neutral-800 mb-4">
             Shopping <span className="tamoor-gradient">Cart</span>
           </h1>
           <p className="text-xl text-neutral-600 font-medium">
@@ -345,12 +345,12 @@ const shiptotal = finalTotal + shipping; // ✅ also an integer now
                 key={`${item.id}-${item.weight}`}
                 className={`luxury-card glass rounded-3xl p-8 transition-all duration-300 ${removingItem === item.id ? 'opacity-50 scale-95' : ''}`}
               >
-                <div className="flex items-center space-x-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-4 sm:space-y-0">
                   <div className="relative overflow-hidden rounded-2xl">
-                    <img src={item.image} alt={item.name} className="w-24 h-24 object-cover" />
+                    <img src={item.image} alt={item.name} className="w-20 h-20 sm:w-24 sm:h-24" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-display font-semibold text-xl text-neutral-800 mb-2">{item.name}</h3>
+                    <h3 className="font-display font-semibold text-lg sm:text-xl truncate max-w-[200px] sm:max-w-none text-neutral-800 mb-2">{item.name}</h3>
                     <p className="text-neutral-600 font-medium mb-3">Weight: {displayWeight(item.weight, item.measurement_unit)}</p>
                     <div className="text-2xl font-display font-bold tamoor-gradient">₹{getCartItemPrice(item)}</div>
                   </div>
@@ -362,7 +362,7 @@ const shiptotal = finalTotal + shipping; // ✅ also an integer now
                       >
                         <Minus className="w-4 h-4" />
                       </button>
-                      <span className="w-12 text-center font-semibold text-lg">{item.quantity}</span>
+                      <span className="min-w-[3rem] text-center font-semibold text-lg">{item.quantity}</span>
                       <button
                         onClick={() => handleIncreaseQuantity(item)}
                         className="p-2 hover:bg-white/20 rounded-full transition-all duration-300"
@@ -387,7 +387,7 @@ const shiptotal = finalTotal + shipping; // ✅ also an integer now
             {/* Promo Code */}
               <div className="luxury-card glass rounded-3xl p-8">
                 <h3 className="font-display font-semibold text-xl mb-6">Promo Code</h3>
-                <div className="flex space-x-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <input
                     type="text"
                     value={promoCode}
@@ -440,7 +440,7 @@ const shiptotal = finalTotal + shipping; // ✅ also an integer now
                 Proceed to Checkout
               </button>
               <div className="mt-6 text-center">
-                <div className="flex items-center justify-center space-x-4 text-sm text-neutral-500">
+                <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0 text-sm text-neutral-500">
                   <span>🔒 Secure Checkout</span>
                   <span>📦 Fast Delivery</span>
                   <span>↩️ Easy Returns</span>

@@ -315,7 +315,7 @@ const Wishlist = () => {
       {/* Wishlist header and count */}
       <div className="container mx-auto px-4 pb-20">
         <div className="mb-12">
-          <h1 className="text-5xl font-display font-bold text-neutral-800 mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-neutral-800 mb-4">
             My <span className="tamoor-gradient">Wishlist</span>
           </h1>
           <p className="text-xl text-neutral-600 font-medium">
@@ -332,7 +332,7 @@ const Wishlist = () => {
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="relative overflow-hidden">
-                <img src={product.image} alt={product.name} className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700" />
+                <img src={product.image} alt={product.name} className="w-full h-48 sm:h-60 md:h-72 object-cover group-hover:scale-110 transition-transform duration-700" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                 <div className={`absolute top-6 left-6 ${product.badge_color || 'bg-gradient-to-r from-luxury-gold to-luxury-gold-light'} text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg`}>
@@ -346,7 +346,7 @@ const Wishlist = () => {
                 </div>
               </div>
 
-              <div className="p-8">
+              <div className="p-4 sm:p-6 md:p-8">
                 <h3 className="font-display font-semibold text-xl text-neutral-800 mb-3 group-hover:text-luxury-gold transition-colors duration-300">{product.name}</h3>
                 <p className="text-neutral-600 text-sm mb-4 font-medium">{product.description}</p>
 
@@ -359,7 +359,7 @@ const Wishlist = () => {
                   <span className="ml-3 text-sm text-neutral-600 font-medium">{product.rating} ({product.reviews} reviews)</span>
                 </div>
 
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
                   <div className="flex items-center space-x-3">
                     <span className="text-2xl font-display font-bold tamoor-gradient">₹{product.price}</span>
                     <span className="text-lg text-neutral-400 line-through font-medium">₹{product.original_price}</span>
@@ -385,7 +385,7 @@ const Wishlist = () => {
       {/* Quantity Selection Modal */}
       {showQuantityModal && selectedProduct && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass rounded-3xl p-8 max-w-md w-full animate-slide-up">
+          <div className="glass rounded-3xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto animate-slide-up">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-display font-bold text-neutral-800">
                 Select Quantity
@@ -402,7 +402,7 @@ const Wishlist = () => {
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-3">Weight Options</label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {[200, 250, 500, 1000].map((value) => (
                     <button
                       key={value}
@@ -448,7 +448,7 @@ const Wishlist = () => {
                   </div>
                 )}
               </div>
-              <div className="flex items-center justify-between pt-4 border-t border-white/20">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-6 pt-4 border-t border-white/20">
                 <div className="text-2xl font-display font-bold tamoor-gradient">
                   ₹{Math.round((selectedProduct.price / 1000) * (selectedWeight === 'custom' ? customWeight : selectedWeight as number))}
                 </div>
@@ -466,8 +466,8 @@ const Wishlist = () => {
       )}
 
       {popup && (
-        <div className={`fixed inset-0 flex items-start justify-center z-50`}>
-          <div className={`mt-32 px-8 py-4 rounded-2xl shadow-xl text-lg font-semibold animate-slide-up transition-all duration-300 ${popup.type === "success" ? "bg-green-500" : "bg-red-500"} text-white`}>
+        <div className="fixed bottom-6 inset-x-0 flex items-center justify-center px-4 z-50">
+          <div className={`px-6 py-3 rounded-xl shadow-lg text-base sm:text-lg font-semibold ${popup.type === "success" ? "bg-green-500" : "bg-red-500"} text-white`}>
             {popup.text}
           </div>
         </div>

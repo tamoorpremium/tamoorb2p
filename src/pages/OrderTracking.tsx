@@ -12,7 +12,11 @@ interface OrderItem {
   quantity: number;
   price: number;
   weight: string;
+  products?: {
+    name: string;
+  };
 }
+
 interface PaymentInfo {
   payment_method: string;
   payment_status: string;
@@ -78,10 +82,21 @@ const OrderTracking: React.FC = () => {
           .single();
         if (error || !orderData) throw error;
 
-        const { data: itemsData } = await supabase
+        const { data: itemsData, error: itemsError } = await supabase
           .from("order_items")
-          .select("*")
+          .select(
+            `
+            id,
+            product_id,
+            quantity,
+            price,
+            weight,
+            products ( name )
+          `
+          )
           .eq("order_id", id);
+
+        if (itemsError) throw itemsError;
 
         const { data: paymentData } = await supabase
           .from("payments")
@@ -137,8 +152,8 @@ const OrderTracking: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-32">
       <ToastContainer position="top-right" autoClose={3000} />
       <div className="container mx-auto px-4 pb-20">
-        <div className="luxury-card glass rounded-3xl p-10">
-          <h1 className="text-5xl font-display font-bold mb-8 text-neutral-800">
+        <div className="luxury-card glass rounded-3xl p-10 sm:p-6">
+          <h1 className="text-3xl sm:text-5xl font-display font-bold mb-8 text-neutral-800">
             Order <span className="tamoor-gradient">#{order.id}</span>
           </h1>
           <p className="text-lg text-neutral-600 mb-8">
@@ -151,7 +166,7 @@ const OrderTracking: React.FC = () => {
               <Truck className="w-6 h-6 mr-2 text-luxury-gold" /> Tracking
               Progress
             </h2>
-            <div className="relative pl-8">
+            <div className="relative pl-6 sm:pl-8">
               <div className="absolute top-0 left-2 w-1 h-full bg-gradient-to-b from-luxury-gold/80 to-neutral-200 rounded-full"></div>
               <div className="space-y-6">
                 {SHIPMENT_STEPS.map((step) => {
@@ -167,9 +182,7 @@ const OrderTracking: React.FC = () => {
                       ></div>
                       <span
                         className={`ml-4 font-medium ${
-                          isActive
-                            ? "text-luxury-gold"
-                            : "text-neutral-500"
+                          isActive ? "text-luxury-gold" : "text-neutral-500"
                         }`}
                       >
                         {step}
@@ -200,7 +213,7 @@ const OrderTracking: React.FC = () => {
                 <strong>Tracking ID:</strong>{" "}
                 {order.shipment.tracking_id || "N/A"}
               </p>
-              <p>
+              <p className="break-words">
                 <strong>Courier Company:</strong>{" "}
                 {order.shipment.courier_company || "N/A"}
               </p>
@@ -245,15 +258,16 @@ const OrderTracking: React.FC = () => {
           </div>
 
           {/* Items */}
+          {/* Items */}
           <div className="luxury-card glass rounded-2xl p-6 mb-8">
             <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
               <Package className="w-6 h-6 mr-2 text-luxury-gold" /> Items
             </h2>
-            <div className="overflow-hidden rounded-2xl border border-neutral-200">
-              <table className="w-full">
+            <div className="overflow-x-auto rounded-2xl border border-neutral-200">
+              <table className="w-full min-w-[500px]">
                 <thead className="bg-luxury-gold/90 text-white">
                   <tr>
-                    <th className="p-4 text-left">Product ID</th>
+                    <th className="p-4 text-left">Product</th>
                     <th className="p-4 text-right">Qty</th>
                     <th className="p-4 text-right">Price (₹)</th>
                     <th className="p-4 text-right">Weight</th>
@@ -261,16 +275,15 @@ const OrderTracking: React.FC = () => {
                 </thead>
                 <tbody>
                   {order.items.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="border-t border-neutral-200"
-                    >
-                      <td className="p-4">{item.product_id}</td>
+                    <tr key={item.id} className="border-t border-neutral-200">
+                      <td className="p-4">
+                        {item.products?.name || "Unknown Product"}
+                      </td>
                       <td className="p-4 text-right">{item.quantity}</td>
                       <td className="p-4 text-right">
                         {item.price.toFixed(2)}
                       </td>
-                      <td className="p-4 text-right">{item.weight}grams</td>
+                      <td className="p-4 text-right">{item.weight} grams</td>
                     </tr>
                   ))}
                 </tbody>
@@ -309,13 +322,13 @@ const OrderTracking: React.FC = () => {
             </button>
           </div>
 
-          <div className="flex items-center justify-between mt-10">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-10 gap-4">
             <p className="text-2xl font-display font-bold tamoor-gradient">
               Total: ₹{order.total.toFixed(2)}
             </p>
             <button
               onClick={() => navigate("/profile")}
-              className="btn-premium px-8 py-3 rounded-full"
+              className="btn-premium px-6 sm:px-8 py-3 rounded-full"
             >
               Back to Orders
             </button>

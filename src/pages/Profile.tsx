@@ -285,7 +285,7 @@ const handleSave = async () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="luxury-card glass rounded-3xl p-6 sticky top-32">
+            <div className="luxury-card glass rounded-3xl p-6 sticky lg:top-32 top-auto">
               <div className="text-center mb-8">
                 <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-luxury-gold to-luxury-gold-light flex items-center justify-center shadow-luxury">
                   <User className="w-12 h-12 text-white" />

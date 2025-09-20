@@ -306,7 +306,16 @@ const ProductDetails: React.FC = () => {
                   className="w-full h-full object-cover rounded-sm"
                 />
               </span>
+            </p>
+            <p className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
               - Make in INDIA initiative
+              <span className="inline-block w-6 h-4 flex-shrink-0">
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/en/4/46/Make_In_India.png"
+                  alt="India Flag"
+                  className="w-full h-full object-cover rounded-sm"
+                />
+              </span>
             </p>
           </div>
         </div>

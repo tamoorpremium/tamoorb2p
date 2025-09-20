@@ -700,9 +700,11 @@ return (
                 handleAddCartDirect(product, 1);
               }
             }}
-            className="w-full btn-premium text-white py-1 px-0.5 sm:py-4 sm:px-4 rounded-full font-semibold text-[8px] sm:text-lg flex items-center justify-center gap-1 sm:gap-3 mt-2 sm:mt-4"
+            className="w-full btn-premium text-white py-1 px-1 font-semibold text-[10px] sm:text-lg flex items-center justify-center gap-1 sm:gap-3 mt-2 sm:mt-4 !rounded-lg md:!rounded-full"
+
+
           >
-            <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+            <ShoppingCart className="w-3 h-3 sm:w-5 sm:h-5" />
             Add to Cart
           </button>
 
@@ -810,7 +812,7 @@ return (
                 </div>
                 <button
                   onClick={handleAddCart}
-                  className="w-full btn-premium text-white px-8 py-3 rounded-full font-semibold text-lg flex items-center justify-center group/btn"
+                  className="w-full btn-premium text-white px-8 py-3 font-semibold text-lg flex items-center justify-center group/btn"
                 >
                   <ShoppingCart className="w-5 h-5 mr-3 group-hover/btn:rotate-12 transition-transform duration-300" />
                   Add to Cart

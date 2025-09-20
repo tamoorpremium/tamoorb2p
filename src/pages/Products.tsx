@@ -3,7 +3,7 @@ import { Search, Filter, Grid, List, Star, Heart, Eye, ShoppingCart, X } from 'l
 //import { useCart } from '../context/CartContext';
 import { supabase } from '../utils/supabaseClient';
 import { Listbox } from "@headlessui/react"
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 
 
 
@@ -585,130 +585,154 @@ return (
     </section>
 
     {/* Products Grid */}
-<section ref={sectionRef} className="py-16">
-  <div className="container mx-auto px-4">
-    <div className="mb-8 flex items-center justify-between">
-      <p className="text-neutral-600 font-medium">
-        Showing {filteredProducts.length} of {products.length} products
-      </p>
-    </div>
-
-    {loading ? (
-      <div className="text-center text-neutral-500 py-12 font-medium">Loading products...</div>
-    ) : (
-      <div
-        className={`grid gap-4 ${
-          viewMode === "grid"
-            ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3"
-            : "grid-cols-1"
-        }`}
-      >
-        {filteredProducts.map((product) => (
-          <div
-            key={product.id}
-            className={`product-card luxury-card neomorphism rounded-3xl overflow-hidden group opacity-0 ${
-              viewMode === "list" ? "flex flex-col md:flex-row" : ""
-            }`}
-          >
-            {/* Product Image */}
-            <div className={`relative overflow-hidden ${viewMode === "list" ? "md:w-1/3" : ""}`}>
-              <img
-                src={product.image}
-                alt={product.name}
-                className={`w-full ${viewMode === "list" ? "h-40 md:h-full object-cover" : "h-40 sm:h-56 md:h-72 object-cover"} group-hover:scale-110 transition-transform duration-700`}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className={`absolute top-4 left-4 ${product.badge_color} text-white px-3 py-1 rounded-full text-xs sm:text-sm font-semibold shadow-lg`}>
-                {product.badge}
-              </div>
-              <div className="absolute top-3 right-3 sm:top-6 sm:right-6 flex flex-col space-y-2 sm:space-y-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                <button
-                  onClick={() => toggleWishlist(product.id)}
-                  className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
-                >
-                  <Heart
-                    className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                      wishlistIds.includes(product.id)
-                        ? "text-red-500 fill-red-500"
-                        : "text-white hover:text-red-400"
-                    }`}
-                  />
-                </button>
-                <button className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300">
-                  <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                </button>
-              </div>
-            </div>
-
-            {/* Product Details */}
-        <div
-          className={`${
-            viewMode === "list"
-              ? "md:w-2/3 md:pl-6 flex flex-col justify-between"
-              : "p-4 sm:p-6"
-          }`}
-        >
-          <div className="space-y-2 sm:space-y-3">
-            <h3 className="font-display font-semibold text-sm sm:text-xl text-neutral-800 group-hover:text-luxury-gold transition-colors duration-300">
-              {product.name}
-            </h3>
-
-            {/* Hide description on mobile */}
-            <p className="hidden sm:block text-neutral-600 text-sm font-medium">
-              {product.description}
-            </p>
-
-            {/* Stars + rating */}
-            <div className="flex items-center text-[10px] sm:text-sm">
-              <div className="flex items-center space-x-0.5 sm:space-x-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-2.5 h-2.5 sm:w-4 sm:h-4 ${
-                      i < Math.floor(product.rating) ? "text-luxury-gold fill-current" : "text-neutral-300"
-                    }`}
-                  />
-                ))}
-              </div>
-              <span className="ml-1 sm:ml-3 text-neutral-600 font-medium text-[10px] sm:text-sm">
-                {product.rating} ({product.reviews})
-              </span>
-            </div>
-
-
-            {/* Price + original + discount */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-lg sm:text-2xl font-display font-bold tamoor-gradient">
-                ₹{product.price} / {product.measurement_unit === "kilograms" ? "kg" : "pcs"}
-              </span>
-              <span className="text-sm sm:text-lg text-neutral-400 line-through font-medium">
-                ₹{product.original_price}
-              </span>
-              <span className="text-xs sm:text-sm text-luxury-sage font-semibold bg-luxury-sage/10 px-2 py-1 rounded-full">
-                Save ₹{product.original_price - product.price}
-              </span>
-            </div>
-          </div>
-
-          {/* Add to Cart button */}
-          <button
-            onClick={() => {
-              if (product.measurement_unit === "kilograms") {
-                setSelectedProduct(product);
-                setShowQuantityModal(true);
-              } else {
-                handleAddCartDirect(product, 1);
-              }
-            }}
-            className="w-full btn-premium text-white py-1 px-0.5 sm:py-4 sm:px-4 rounded-full font-extrabold text-[8px] sm:text-lg flex items-center justify-center gap-1 sm:gap-3 mt-2 sm:mt-4"
-          >
-            <ShoppingCart className="w-3 h-3 sm:w-5 sm:h-5" />
-            Add to Cart
-          </button>  
+    <section ref={sectionRef} className="py-16">
+      <div className="container mx-auto px-4">
+        <div className="mb-8 flex items-center justify-between">
+          <p className="text-neutral-600 font-medium">
+            Showing {filteredProducts.length} of {products.length} products
+          </p>
         </div>
 
-          </div>
+        {loading ? (
+          <div className="text-center text-neutral-500 py-12 font-medium">Loading products...</div>
+        ) : (
+          <div
+            className={`grid gap-4 ${
+              viewMode === "grid"
+                ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3"
+                : "grid-cols-1"
+            }`}
+          >
+        {filteredProducts.map((product) => (
+          <Link
+            key={product.id}
+            to={`/product/${product.id}`}
+            className="block"
+          >
+            <div
+              className={`product-card luxury-card neomorphism rounded-3xl overflow-hidden group opacity-0 ${
+                viewMode === "list" ? "flex flex-col md:flex-row" : ""
+              }`}
+            >
+              {/* Product Image */}
+              <div
+                className={`relative overflow-hidden ${
+                  viewMode === "list" ? "md:w-1/3" : ""
+                }`}
+              >
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className={`w-full ${
+                    viewMode === "list"
+                      ? "h-40 md:h-full object-cover"
+                      : "h-40 sm:h-56 md:h-72 object-cover"
+                  } group-hover:scale-110 transition-transform duration-700`}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div
+                  className={`absolute top-4 left-4 ${product.badge_color} text-white px-3 py-1 rounded-full text-xs sm:text-sm font-semibold shadow-lg`}
+                >
+                  {product.badge}
+                </div>
+                <div className="absolute top-3 right-3 sm:top-6 sm:right-6 flex flex-col space-y-2 sm:space-y-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault(); // prevent navigation when clicking wishlist
+                      toggleWishlist(product.id);
+                    }}
+                    className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
+                  >
+                    <Heart
+                      className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                        wishlistIds.includes(product.id)
+                          ? "text-red-500 fill-red-500"
+                          : "text-white hover:text-red-400"
+                      }`}
+                    />
+                  </button>
+                  <button
+                    onClick={(e) => e.preventDefault()} // prevent navigation on quick view
+                    className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
+                  >
+                    <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Product Details */}
+              <div
+                className={`${
+                  viewMode === "list"
+                    ? "md:w-2/3 md:pl-6 flex flex-col justify-between"
+                    : "p-4 sm:p-6"
+                }`}
+              >
+                <div className="space-y-2 sm:space-y-3">
+                  <h3 className="font-display font-semibold text-sm sm:text-xl text-neutral-800 group-hover:text-luxury-gold transition-colors duration-300">
+                    {product.name}
+                  </h3>
+
+                  {/* Hide description on mobile */}
+                  <p className="hidden sm:block text-neutral-600 text-sm font-medium">
+                    {product.description}
+                  </p>
+
+                  {/* Stars + rating */}
+                  <div className="flex items-center text-[10px] sm:text-sm">
+                    <div className="flex items-center space-x-0.5 sm:space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-2.5 h-2.5 sm:w-4 sm:h-4 ${
+                            i < Math.floor(product.rating)
+                              ? "text-luxury-gold fill-current"
+                              : "text-neutral-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="ml-1 sm:ml-3 text-neutral-600 font-medium text-[10px] sm:text-sm">
+                      {product.rating} ({product.reviews})
+                    </span>
+                  </div>
+
+                  {/* Price + original + discount */}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-lg sm:text-2xl font-display font-bold tamoor-gradient">
+                      ₹{product.price} /{" "}
+                      {product.measurement_unit === "kilograms" ? "kg" : "pcs"}
+                    </span>
+                    <span className="text-sm sm:text-lg text-neutral-400 line-through font-medium">
+                      ₹{product.original_price}
+                    </span>
+                    <span className="text-xs sm:text-sm text-luxury-sage font-semibold bg-luxury-sage/10 px-2 py-1 rounded-full">
+                      Save ₹{product.original_price - product.price}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Add to Cart button */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault(); // stop navigation when adding to cart
+                    if (product.measurement_unit === "kilograms") {
+                      setSelectedProduct(product);
+                      setShowQuantityModal(true);
+                    } else {
+                      handleAddCartDirect(product, 1);
+                    }
+                  }}
+                  className="w-full btn-premium text-white py-1 px-0.5 sm:py-4 sm:px-4 rounded-full font-extrabold text-[8px] sm:text-lg flex items-center justify-center gap-1 sm:gap-3 mt-2 sm:mt-4"
+                >
+                  <ShoppingCart className="w-3 h-3 sm:w-5 sm:h-5" />
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </Link>
         ))}
+
 
       </div>
     )}

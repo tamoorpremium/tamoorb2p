@@ -37,6 +37,7 @@ import AdminUsers from './pages/admin/adminsettings/AdminUsers';
 import SettingsPage from './pages/admin/AdminSettings';
 import { User } from '@supabase/supabase-js';
 import OrderTracking from './pages/OrderTracking';
+import ProductDetails from './pages/ProductDetails';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -115,6 +116,7 @@ function App() {
             {/* Public routes */}
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<Products />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/categories" element={<Categories />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />

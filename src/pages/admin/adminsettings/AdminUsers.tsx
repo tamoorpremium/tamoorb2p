@@ -569,16 +569,19 @@ const deleteUser = async (user: User): Promise<void> => {
       <ToastContainer position="top-right" autoClose={3000} />
       <div className="luxury-card glass p-8 rounded-3xl shadow-xl max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-4xl font-display font-bold text-tamoor-charcoal">Users</h1>
-          <button className="btn-premium" onClick={() => setShowCreateModal(true)}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+          <h1 className="text-2xl sm:text-3xl font-display font-bold text-tamoor-charcoal">
+            Users
+          </h1>
+          <button className="btn-premium w-full sm:w-auto">
             + Create New Admin
           </button>
         </div>
 
+
         {/* Search + Role Filter */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 mb-6">
-          <div className="relative w-full max-w-sm mb-4 sm:mb-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 mb-6 gap-4">
+          <div className="relative w-full">
             <input
               type="text"
               className="neomorphism w-full rounded-full py-3 pl-10 pr-4 text-tamoor-charcoal placeholder-tamoor-charcoal"
@@ -590,7 +593,7 @@ const deleteUser = async (user: User): Promise<void> => {
           </div>
 
           <select
-            className="rounded-full border border-gray-300 p-3 text-tamoor-charcoal max-w-xs"
+            className="w-full sm:w-auto rounded-full border border-gray-300 p-3 text-tamoor-charcoal"
             aria-label="Filter by Role"
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
@@ -604,9 +607,10 @@ const deleteUser = async (user: User): Promise<void> => {
           </select>
         </div>
 
+
         {/* Users Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse border border-slate-300 rounded-lg overflow-hidden">
+        <div className="overflow-x-auto -mx-2 sm:mx-0">
+          <table className="min-w-full text-sm sm:text-base text-left border-collapse border border-slate-300 rounded-lg overflow-hidden">
             <thead>
               <tr className="bg-tamoor-gold-light text-white">
                 <th className="p-3">
@@ -684,7 +688,7 @@ const deleteUser = async (user: User): Promise<void> => {
         </div>
 
         {/* Pagination */}
-        <div className="mt-4 flex justify-between items-center">
+        <div className="mt-4 flex flex-col sm:flex-row justify-between items-center gap-3">
           <button
             className="btn-premium px-4 py-2"
             disabled={page === 1}
@@ -692,7 +696,7 @@ const deleteUser = async (user: User): Promise<void> => {
           >
             Previous
           </button>
-          <span>
+          <span className="text-sm sm:text-base">
             Page {page} of {Math.ceil(totalUsers / PAGE_SIZE) || 1}
           </span>
           <button
@@ -705,9 +709,9 @@ const deleteUser = async (user: User): Promise<void> => {
         </div>
 
         {/* Bulk Role Update */}
-        <div className="mt-6 flex items-center space-x-3 max-w-xs">
+        <div className="mt-6 w-full sm:max-w-xs flex items-center space-x-3 max-w-xs">
           <select
-            className="w-full rounded border border-gray-300 p-2"
+            className="w-full rounded border border-gray-300 p-3 text-sm sm:text-base"
             onChange={(e) => bulkUpdateRole(e.target.value)}
             defaultValue=""
           >
@@ -724,6 +728,7 @@ const deleteUser = async (user: User): Promise<void> => {
       </div>
 
       {/* Modals */}
+      <div className="bg-gray-900 rounded-2xl p-6 w-[95%] max-w-lg sm:max-w-md ...">
       <UserDetailModal
         user={selectedUser}
         onClose={() => setSelectedUser(null)}
@@ -742,6 +747,7 @@ const deleteUser = async (user: User): Promise<void> => {
         creating={creatingAdmin}
         allowedRoles={allowedRoles}
       />
+      </div>
     </>
   );
 };

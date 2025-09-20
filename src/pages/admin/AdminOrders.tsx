@@ -145,8 +145,7 @@ const AdminOrders: React.FC = () => {
 
   useEffect(() => {
     fetchOrders();
-    // Poll every 15 minutes
-    const interval = setInterval(fetchOrders, 900000); // 900,000 ms = 15 min
+    const interval = setInterval(fetchOrders, 900000); // 15 min
     return () => clearInterval(interval);
   }, [page, sortBy, selectedOrders]);
 
@@ -200,25 +199,25 @@ const AdminOrders: React.FC = () => {
   };
 
   return (
-    <div className="luxury-card glass p-8 rounded-3xl shadow-xl max-w-7xl mx-auto">
+    <div className="luxury-card glass p-4 sm:p-8 rounded-3xl shadow-xl max-w-full sm:max-w-7xl mx-auto">
       <ToastContainer position="top-right" autoClose={3000} />
-      <h1 className="text-4xl font-display font-bold mb-6 text-tamoor-charcoal">Orders</h1>
+      <h1 className="text-3xl sm:text-4xl font-display font-bold mb-6 text-tamoor-charcoal">Orders</h1>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-6 items-center">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-6 items-center">
+        <div className="relative flex-1 min-w-[150px]">
           <input
             type="text"
-            className="neomorphism w-full rounded-full py-3 pl-10 pr-4 text-tamoor-charcoal placeholder-tamoor-charcoal"
+            className="neomorphism w-full rounded-full py-3 pl-10 pr-4 text-tamoor-charcoal placeholder-tamoor-charcoal text-sm sm:text-base"
             placeholder="Search by ID, Name, Phone, Email"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
           />
-          <Search className="absolute left-4 top-3.5 text-tamoor-charcoal" />
+          <Search className="absolute left-4 top-3 sm:top-3.5 text-tamoor-charcoal" />
         </div>
 
         <select
-          className="rounded-full py-3 px-4 border border-gray-300"
+          className="flex-1 min-w-[120px] rounded-full py-3 px-4 border border-gray-300 text-sm sm:text-base"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
@@ -234,19 +233,17 @@ const AdminOrders: React.FC = () => {
           type="date"
           value={dateFrom}
           onChange={(e) => setDateFrom(e.target.value)}
-          className="rounded-full py-3 px-4 border border-gray-300"
-          placeholder="From"
+          className="flex-1 min-w-[120px] rounded-full py-3 px-4 border border-gray-300 text-sm sm:text-base"
         />
         <input
           type="date"
           value={dateTo}
           onChange={(e) => setDateTo(e.target.value)}
-          className="rounded-full py-3 px-4 border border-gray-300"
-          placeholder="To"
+          className="flex-1 min-w-[120px] rounded-full py-3 px-4 border border-gray-300 text-sm sm:text-base"
         />
 
         <select
-          className="rounded-full py-3 px-4 border border-gray-300"
+          className="flex-1 min-w-[120px] rounded-full py-3 px-4 border border-gray-300 text-sm sm:text-base"
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
         >
@@ -257,16 +254,16 @@ const AdminOrders: React.FC = () => {
           ))}
         </select>
 
-        <button onClick={applyFilters} className="btn-premium py-3 px-6">
+        <button onClick={applyFilters} className="btn-premium py-3 px-6 text-sm sm:text-base">
           Apply Filters
         </button>
       </div>
 
       {/* Bulk Actions */}
       {selectedOrders.length > 0 && (
-        <div className="flex gap-2 mb-4">
+        <div className="flex flex-wrap gap-2 mb-4">
           <select
-            className="rounded-full py-2 px-4 border border-gray-300"
+            className="rounded-full py-2 px-4 border border-gray-300 text-sm sm:text-base"
             onChange={(e) => updateSelectedOrdersStatus(e.target.value)}
             defaultValue=""
           >
@@ -281,7 +278,7 @@ const AdminOrders: React.FC = () => {
           </select>
           <button
             onClick={exportCSV}
-            className="btn-premium flex items-center gap-2"
+            className="btn-premium flex items-center gap-2 text-sm sm:text-base"
           >
             Export CSV
           </button>
@@ -289,119 +286,168 @@ const AdminOrders: React.FC = () => {
       )}
 
       {/* Orders Table */}
-      {/* {loading ? (
-        <p className="text-center text-tamoor-charcoal font-semibold">Loading...</p>
-      ) : (
-        {/* Orders Table */}
-        {/* Orders Table */}
-<div className="overflow-x-auto">
-  <table className="min-w-full table-auto border-collapse border border-slate-300 rounded-lg overflow-hidden">
-    <thead className="bg-tamoor-gold-light text-white">
-      <tr>
-        <th className="p-3">
-          <input
-            type="checkbox"
-            checked={selectedOrders.length === orders.length && orders.length > 0}
-            onChange={(e) =>
-              setSelectedOrders(e.target.checked ? orders.map(o => o.id) : [])
-            }
-          />
-        </th>
-        <th className="p-3">Order ID</th>
-        <th className="p-3">User Name</th>
-        <th className="p-3">Phone</th>
-        <th className="p-3">Order Date</th>
-        <th className="p-3">Status</th>
-        <th className="p-3">Total (₹)</th>
-        <th className="p-3">Shipment</th>
-        <th className="p-3">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {loading
-        ? Array.from({ length: 5 }).map((_, i) => (
-            <tr key={i} className="animate-pulse">
-              {Array.from({ length: 9 }).map((_, j) => (
-                <td key={j} className="border border-slate-300 p-3">
-                  <div className="h-4 bg-gray-200 rounded w-full"></div>
-                </td>
-              ))}
-            </tr>
-          ))
-        : orders.length === 0
-        ? (
-          <tr>
-            <td colSpan={9} className="text-center py-6 text-tamoor-charcoal">
-              No orders found.
-            </td>
-          </tr>
-        )
-        : orders.map((order) => (
-            <tr key={order.id} className="hover:bg-white/20 transition-colors">
-              <td className="border border-slate-300 p-3">
+      <div className="overflow-x-auto sm:block">
+        <table className="min-w-full table-auto border-collapse border border-slate-300 rounded-lg overflow-hidden hidden sm:table">
+          <thead className="bg-tamoor-gold-light text-white">
+            <tr>
+              <th className="p-3">
                 <input
                   type="checkbox"
-                  checked={order.selected || false}
-                  onChange={() => toggleSelectOrder(order.id)}
+                  checked={selectedOrders.length === orders.length && orders.length > 0}
+                  onChange={(e) =>
+                    setSelectedOrders(e.target.checked ? orders.map(o => o.id) : [])
+                  }
                 />
-              </td>
-              <td
-                className="border border-slate-300 p-3 cursor-pointer"
-                onClick={() => navigate(`/admin/orders/${order.id}`)}
-              >
-                {order.id}
-              </td>
-              <td className="border border-slate-300 p-3">{order.user_name}</td>
-              <td className="border border-slate-300 p-3">{order.user_phone}</td>
-              <td className="border border-slate-300 p-3">
-                {new Date(order.placed_at).toLocaleDateString()}
-              </td>
-              <td className="border border-slate-300 p-3">
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    STATUS_COLORS[order.status] || 'bg-gray-400 text-gray-900'
-                  }`}
-                >
-                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                </span>
-              </td>
-              <td className="border border-slate-300 p-3">{order.total.toFixed(2)}</td>
-              <td className="border border-slate-300 p-3">
-                <span
-                  className={`px-2 py-1 rounded-full text-sm font-semibold ${
-                    SHIPMENT_STATUS_COLORS[order.shipment_status!] || 'bg-gray-200 text-gray-800'
-                  }`}
-                >
-                  {order.shipment_status}
-                </span>
-              </td>
-              <td className="border border-slate-300 p-3 flex flex-wrap gap-2">
-                <button
-                  onClick={() => navigate(`/admin/orders/${order.id}`)}
-                  className="btn-premium text-sm"
-                >
-                  View
-                </button>
-                {order.status !== 'cancelled' && (
-                  <button
-                    onClick={async () => {
-                      await supabase.from('orders').update({ status: 'cancelled' }).eq('id', order.id);
-                      toast.success('Order cancelled');
-                      fetchOrders();
-                    }}
-                    className="btn-danger text-sm flex items-center gap-1"
-                  >
-                    <Trash2 size={16} /> Cancel
-                  </button>
-                )}
-              </td>
+              </th>
+              <th className="p-3">Order ID</th>
+              <th className="p-3">User Name</th>
+              <th className="p-3">Phone</th>
+              <th className="p-3">Order Date</th>
+              <th className="p-3">Status</th>
+              <th className="p-3">Total (₹)</th>
+              <th className="p-3">Shipment</th>
+              <th className="p-3">Actions</th>
             </tr>
-          ))}
-    </tbody>
-  </table>
-</div>
+          </thead>
+          <tbody>
+            {loading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    {Array.from({ length: 9 }).map((_, j) => (
+                      <td key={j} className="border border-slate-300 p-3">
+                        <div className="h-4 bg-gray-200 rounded w-full"></div>
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              : orders.length === 0
+              ? (
+                <tr>
+                  <td colSpan={9} className="text-center py-6 text-tamoor-charcoal">
+                    No orders found.
+                  </td>
+                </tr>
+              )
+              : orders.map((order) => (
+                  <tr key={order.id} className="hover:bg-white/20 transition-colors">
+                    <td className="border border-slate-300 p-3">
+                      <input
+                        type="checkbox"
+                        checked={order.selected || false}
+                        onChange={() => toggleSelectOrder(order.id)}
+                      />
+                    </td>
+                    <td
+                      className="border border-slate-300 p-3 cursor-pointer"
+                      onClick={() => navigate(`/admin/orders/${order.id}`)}
+                    >
+                      {order.id}
+                    </td>
+                    <td className="border border-slate-300 p-3">{order.user_name}</td>
+                    <td className="border border-slate-300 p-3">{order.user_phone}</td>
+                    <td className="border border-slate-300 p-3">
+                      {new Date(order.placed_at).toLocaleDateString()}
+                    </td>
+                    <td className="border border-slate-300 p-3">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                          STATUS_COLORS[order.status] || 'bg-gray-400 text-gray-900'
+                        }`}
+                      >
+                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      </span>
+                    </td>
+                    <td className="border border-slate-300 p-3">{order.total.toFixed(2)}</td>
+                    <td className="border border-slate-300 p-3">
+                      <span
+                        className={`px-2 py-1 rounded-full text-sm font-semibold ${
+                          SHIPMENT_STATUS_COLORS[order.shipment_status!] || 'bg-gray-200 text-gray-800'
+                        }`}
+                      >
+                        {order.shipment_status}
+                      </span>
+                    </td>
+                    <td className="border border-slate-300 p-3 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => navigate(`/admin/orders/${order.id}`)}
+                        className="btn-premium text-sm"
+                      >
+                        View
+                      </button>
+                      {order.status !== 'cancelled' && (
+                        <button
+                          onClick={async () => {
+                            await supabase.from('orders').update({ status: 'cancelled' }).eq('id', order.id);
+                            toast.success('Order cancelled');
+                            fetchOrders();
+                          }}
+                          className="btn-danger text-sm flex items-center gap-1"
+                        >
+                          <Trash2 size={16} /> Cancel
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+          </tbody>
+        </table>
 
-
+        {/* Mobile Stacked Cards */}
+        <div className="sm:hidden flex flex-col gap-4">
+          {loading
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="p-4 border rounded-lg animate-pulse bg-white/10"></div>
+              ))
+            : orders.map((order) => (
+                <div key={order.id} className="p-4 border rounded-lg bg-white/10 flex flex-col gap-1">
+                  <div className="flex justify-between">
+                    <span><strong>ID:</strong> {order.id}</span>
+                    <input
+                      type="checkbox"
+                      checked={order.selected || false}
+                      onChange={() => toggleSelectOrder(order.id)}
+                    />
+                  </div>
+                  <p><strong>Name:</strong> {order.user_name}</p>
+                  <p><strong>Phone:</strong> {order.user_phone}</p>
+                  <p><strong>Date:</strong> {new Date(order.placed_at).toLocaleDateString()}</p>
+                  <p>
+                    <strong>Status:</strong>{' '}
+                    <span className={`px-2 py-1 rounded-full text-sm font-semibold ${
+                      STATUS_COLORS[order.status] || 'bg-gray-400 text-gray-900'
+                    }`}>{order.status}</span>
+                  </p>
+                  <p><strong>Total:</strong> ₹{order.total.toFixed(2)}</p>
+                  <p>
+                    <strong>Shipment:</strong>{' '}
+                    <span className={`px-2 py-1 rounded-full text-sm font-semibold ${
+                      SHIPMENT_STATUS_COLORS[order.shipment_status!] || 'bg-gray-200 text-gray-800'
+                    }`}>{order.shipment_status}</span>
+                  </p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <button
+                      onClick={() => navigate(`/admin/orders/${order.id}`)}
+                      className="btn-premium text-sm"
+                    >
+                      View
+                    </button>
+                    {order.status !== 'cancelled' && (
+                      <button
+                        onClick={async () => {
+                          await supabase.from('orders').update({ status: 'cancelled' }).eq('id', order.id);
+                          toast.success('Order cancelled');
+                          fetchOrders();
+                        }}
+                        className="btn-danger text-sm flex items-center gap-1"
+                      >
+                        <Trash2 size={16} /> Cancel
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+        </div>
+      </div>
 
       {/* Pagination */}
       {totalPages > 1 && (

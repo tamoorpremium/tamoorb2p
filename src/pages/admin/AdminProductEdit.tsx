@@ -62,17 +62,25 @@ const AdminProductEdit: React.FC = () => {
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="min-h-screen bg-dashboard-gradient p-12">
-        <h1 className="text-4xl font-display font-bold text-tamoor-charcoal mb-8">
+      <div className="min-h-screen bg-dashboard-gradient 
+                      p-4 sm:p-6 lg:p-12 
+                      flex flex-col">
+        
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl 
+                       font-display font-bold 
+                       text-tamoor-charcoal 
+                       mb-6 sm:mb-8">
           {id ? 'Edit Product' : 'Add New Product'}
         </h1>
 
-        <ProductForm
-          initialData={initialData}
-          onSubmit={handleSubmit}
-          loading={loading}
-          productImageUrl={initialData?.image}
-        />
+        <div className="w-full max-w-full sm:max-w-3xl lg:max-w-5xl">
+          <ProductForm
+            initialData={initialData}
+            onSubmit={handleSubmit}
+            loading={loading}
+            productImageUrl={initialData?.image}
+          />
+        </div>
       </div>
     </>
   );

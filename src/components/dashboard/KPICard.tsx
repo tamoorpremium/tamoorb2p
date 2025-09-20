@@ -4,10 +4,24 @@ interface KPICardProps {
   title: string;
   value: number;
   icon: React.ReactNode;
-  colorClass: string; // e.g., 'bg-tamoor-gold-light', 'bg-blue-600'
+  colorClass?: string; // fallback color
+  status?: 'confirmed' | 'paid' | 'cancelled' | 'pending';
 }
 
-const KPICard: React.FC<KPICardProps> = ({ title, value, icon, colorClass }) => {
+const KPICard: React.FC<KPICardProps> = ({ title, value, icon, colorClass, status }) => {
+  // Determine color based on status
+  const statusColorClass = status
+    ? status === 'confirmed'
+      ? 'bg-blue-600'
+      : status === 'paid'
+      ? 'bg-green-600'
+      : status === 'cancelled'
+      ? 'bg-red-600'
+      : status === 'pending'
+      ? 'bg-yellow-400'
+      : colorClass
+    : colorClass;
+
   return (
     <div
       className={`relative luxury-card glass animate-gradient-border p-8 flex items-center space-x-6 shadow-xl transition-transform duration-500 hover:scale-[1.03] hover:shadow-2xl cursor-pointer`}
@@ -16,7 +30,7 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, icon, colorClass }) => 
     >
       {/* Icon with colored background */}
       <div
-        className={`${colorClass} w-16 h-16 rounded-full flex items-center justify-center text-white text-3xl shadow-lg z-10`}
+        className={`${statusColorClass} w-16 h-16 rounded-full flex items-center justify-center text-white text-3xl shadow-lg z-10`}
         aria-hidden="true"
       >
         {icon}

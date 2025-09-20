@@ -91,9 +91,9 @@ const AdminLogin: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-800">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-800 px-4">
       <div className="w-full max-w-md p-8 rounded-2xl bg-white/10 backdrop-blur-xl shadow-xl border border-white/20">
-        <h1 className="text-3xl font-bold text-center text-white mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center text-white mb-6">
           Admin Login
         </h1>
         <form onSubmit={handleLogin} className="space-y-5">
@@ -103,7 +103,7 @@ const AdminLogin: React.FC = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full px-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-400 sm:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
               placeholder="Enter your email"
               required
             />
@@ -122,7 +122,7 @@ const AdminLogin: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-xl shadow-lg transition disabled:opacity-50"
+            className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 active:scale-95 text-black font-semibold rounded-xl shadow-lg transition disabled:opacity-50"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
@@ -158,7 +158,7 @@ const AdminLogin: React.FC = () => {
           )}
         </div>
       </div>
-      <ToastContainer />
+      <ToastContainer position="top-center" limit={1} />
     </div>
   );
 };

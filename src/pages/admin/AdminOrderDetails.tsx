@@ -295,8 +295,8 @@ const AdminOrderDetails: React.FC = () => {
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="luxury-card glass p-8 rounded-3xl shadow-xl max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4 text-tamoor-charcoal">Order Details</h1>
+      <div className="luxury-card glass p-4 sm:p-8 rounded-3xl shadow-xl max-w-4xl mx-auto">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 text-tamoor-charcoal">Order Details</h1>
 
         {/* Basic Info */}
         <p><strong>Order ID:</strong> {order.id}</p>
@@ -317,19 +317,19 @@ const AdminOrderDetails: React.FC = () => {
               </option>
             ))}
           </select>
-          <button onClick={updateStatus} disabled={saving} className="btn-premium mt-2 w-full">
+          <button onClick={updateStatus} disabled={saving} className="btn-premium mt-2 w-full sm:w-auto">
             {saving ? 'Saving...' : 'Update Status'}
           </button>
         </div>
 
         {/* Customer Info */}
-        <div className="my-4 bg-tamoor-white/40 rounded-xl shadow p-4 border border-slate-200">
-          <h2 className="text-lg font-semibold text-tamoor-charcoal mb-2">Customer Details</h2>
+        <div className="my-4 bg-tamoor-white/40 rounded-xl shadow p-4 sm:p-6 border border-slate-200">
+          <h2 className="text-lg sm:text-xl font-semibold text-tamoor-charcoal mb-2">Customer Details</h2>
           <p><strong>Name:</strong> {order.address?.full_name || 'N/A'}</p>
           <p><strong>Phone:</strong> {order.address?.phone || 'N/A'}</p>
           <p><strong>Address:</strong></p>
           {order.address ? (
-            <address className="whitespace-pre-line ml-4 text-tamoor-charcoal">
+            <address className="whitespace-pre-line ml-0 sm:ml-4 text-tamoor-charcoal">
               {[order.address.address, order.address.city, order.address.state, order.address.pincode].filter(Boolean).join('\n')}
             </address>
           ) : (
@@ -339,7 +339,8 @@ const AdminOrderDetails: React.FC = () => {
 
         {/* Order Items */}
         <h2 className="mt-6 text-2xl font-semibold text-tamoor-charcoal">Items</h2>
-        <table className="w-full mt-2 table-auto border-collapse border border-slate-300">
+        <div className="overflow-x-auto">
+        <table className="w-full table-auto border-collapse border border-slate-300">
           <thead>
             <tr className="bg-tamoor-gold-light text-white">
               <th className="p-3 text-left">Product ID</th>
@@ -359,10 +360,10 @@ const AdminOrderDetails: React.FC = () => {
             ))}
           </tbody>
         </table>
-
+        </div>
         {/* Payment Info */}
         {order.payment && (
-          <div className="mt-6 bg-tamoor-white/40 rounded-xl shadow p-4 border border-slate-200">
+          <div className="mt-6 bg-tamoor-white/40 rounded-xl shadow p-4 sm:p-6 border border-slate-200">
             <h2 className="text-xl font-semibold text-tamoor-charcoal mb-2">Payment Details</h2>
             <p><strong>Payment Method:</strong> {order.payment.payment_method}</p>
             <p><strong>Payment Status:</strong> {order.payment.payment_status}</p>
@@ -374,7 +375,7 @@ const AdminOrderDetails: React.FC = () => {
 
         {/* Shipment Info */}
         {order.shipment && (
-          <div className="mt-6 bg-tamoor-white/40 rounded-xl shadow p-4 border border-slate-200">
+          <div className="mt-6 bg-tamoor-white/40 rounded-xl shadow p-4 sm:p-6 border border-slate-200">
             <h2 className="text-xl font-semibold text-tamoor-charcoal mb-2">Shipment Details</h2>
             <p><strong>Shipment ID:</strong> {order.shipment.shipment_id || 'N/A'}</p>
             <p><strong>Tracking ID:</strong> {order.shipment.tracking_id || 'N/A'}</p>
@@ -390,7 +391,7 @@ const AdminOrderDetails: React.FC = () => {
                 const currentIndex = SHIPMENT_STEPS.indexOf(order.shipment!.tracking_status || 'Packed');
                 const stepCompleted = stepIndex <= currentIndex;
                 return (
-                  <div key={step} className="flex items-center mb-2">
+                  <div key={step} className="mt-4 flex flex-col sm:flex-col gap-2 items-center mb-2">
                     <div className={`w-4 h-4 rounded-full mr-3 ${stepCompleted ? SHIPMENT_COLORS[step] : 'bg-gray-300'}`} />
                     <span className={`${stepCompleted ? 'font-bold text-gray-900' : 'text-gray-500'}`}>{step}</span>
                   </div>
@@ -415,9 +416,9 @@ const AdminOrderDetails: React.FC = () => {
         )}
 
 {/* Invoice Actions */}
-<div className="mt-6 bg-tamoor-white/40 rounded-xl shadow p-4 border border-slate-200">
+<div className="mt-6 bg-tamoor-white/40 rounded-xl shadow p-4 sm:p-6 border border-slate-200">
   <h2 className="text-xl font-semibold text-tamoor-charcoal mb-2">Invoice</h2>
-  <div className="flex gap-4">
+  <div className="flex flex-col sm:flex-row gap-4">
 
     {/* Generate Invoice */}
     <button

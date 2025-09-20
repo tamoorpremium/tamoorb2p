@@ -220,7 +220,7 @@ const AdminEmailTemplates: React.FC = () => {
         {templates.map((t) => (
           <div
             key={t.id}
-            className="w-full max-w-2xl bg-white/10 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/10 flex flex-col justify-between"
+            className="w-full md:max-w-2xl bg-white/10 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/10 flex flex-col justify-between"
           >
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-lg font-semibold text-white">{t.name}</h3>
@@ -235,7 +235,7 @@ const AdminEmailTemplates: React.FC = () => {
             </div>
             <p className="text-sm text-white/70 mb-1">Type: {t.type}</p>
             <p className="text-sm text-white/70 mb-1">Subject: {t.subject}</p>
-            <p className="text-sm text-white/70 mb-2 truncate">Body: {t.body}</p>
+            <p className="text-sm text-white/70 mb-2 line-clamp-2">Body: {t.body}</p>
             {t.banner_url && <img src={getPublicUrl(t.banner_url) || ""} alt="Banner" className="rounded-lg mt-2" />}
             <div className="flex gap-2 mt-2">
               <span className={`px-2 py-1 rounded-lg text-sm ${t.is_active ? "bg-green-600" : "bg-gray-500"}`}>Active</span>
@@ -253,7 +253,7 @@ const AdminEmailTemplates: React.FC = () => {
                 onChange={(e) => setTestOrderId(e.target.value)}
               />
               <label className="flex items-center gap-2 mb-2">
-                <input type="checkbox" checked={useAdminEmail} onChange={(e) => setUseAdminEmail(e.target.checked)} />
+                <input type="checkbox" className="w-5 h-5 accent-indigo-600" checked={useAdminEmail} onChange={(e) => setUseAdminEmail(e.target.checked)} />
                 Send to admin email (tamoorpremium@gmail.com)
               </label>
               <div className="flex flex-col gap-2">
@@ -329,7 +329,7 @@ const AdminEmailTemplates: React.FC = () => {
 
             <div className="flex items-center gap-3 mt-2">
               <label className="text-white/80 text-sm">Set as Active:</label>
-              <input type="checkbox" checked={editing.is_active ?? false} onChange={(e) => setEditing({ ...editing, is_active: e.target.checked })} />
+              <input type="checkbox" className="w-5 h-5 accent-indigo-600" checked={editing.is_active ?? false} onChange={(e) => setEditing({ ...editing, is_active: e.target.checked })} />
             </div>
 
             <div className="bg-black/30 rounded-xl p-3 text-white/80 text-sm mt-2">
@@ -341,7 +341,7 @@ const AdminEmailTemplates: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-4 mt-2">
+            <div className="bg-white rounded-xl p-4 mt-2 max-h-[50vh] overflow-y-auto">
               <h3 className="text-sm font-semibold mb-2 flex items-center gap-2"><Eye className="w-4 h-4" /> Preview</h3>
               {editing.banner_url && <img src={getPublicUrl(editing.banner_url) || ""} alt="Banner" className="rounded mb-2" />}
               <h4 className="font-bold mb-1">{editing.subject}</h4>

@@ -162,19 +162,20 @@ const PromoCodesAdmin: React.FC = () => {
       </button>
 
       {/* Promo Codes Table */}
-      <table className="w-full border-collapse border border-gray-300 rounded-lg overflow-hidden">
+      <div className="overflow-x-auto">
+      <table className="min-w-full border-collapse border border-gray-300 rounded-lg overflow-hidden text-sm">
         <thead className="bg-gray-100">
           <tr>
-            <th className="p-3 border">Code</th>
-            <th className="p-3 border">Type</th>
-            <th className="p-3 border">Value</th>
-            <th className="p-3 border">Min Order</th>
-            <th className="p-3 border">Valid From</th>
-            <th className="p-3 border">Valid To</th>
-            <th className="p-3 border">First Order</th>
-            <th className="p-3 border">Enabled</th>
-            <th className="p-3 border">Usage</th>
-            <th className="p-3 border">Actions</th>
+            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Code</th>
+            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Type</th>
+            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Value</th>
+            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Min Order</th>
+            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Valid From</th>
+            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Valid To</th>
+            <th className="p-3 sm:p-2 text-xs sm:text-sm border">First Order</th>
+            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Enabled</th>
+            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Usage</th>
+            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -189,16 +190,16 @@ const PromoCodesAdmin: React.FC = () => {
           ) : (
             promoCodes.map((promo) => (
               <tr key={promo.id} className="hover:bg-gray-50">
-                <td className="p-2 border">{promo.code}</td>
-                <td className="p-2 border capitalize">{promo.type}</td>
-                <td className="p-2 border">{promo.value}</td>
-                <td className="p-2 border">{promo.min_order_amount}</td>
-                <td className="p-2 border">{new Date(promo.valid_from).toLocaleDateString()}</td>
-                <td className="p-2 border">{new Date(promo.valid_to).toLocaleDateString()}</td>
-                <td className="p-2 border">
+                <td className="p-2 sm:p-1 text-xs sm:text-sm border">{promo.code}</td>
+                <td className="p-2 sm:p-1 text-xs sm:text-sm border capitalize">{promo.type}</td>
+                <td className="p-2 sm:p-1 text-xs sm:text-sm border">{promo.value}</td>
+                <td className="p-2 sm:p-1 text-xs sm:text-sm border">{promo.min_order_amount}</td>
+                <td className="p-2 sm:p-1 text-xs sm:text-sm border">{new Date(promo.valid_from).toLocaleDateString()}</td>
+                <td className="p-2 sm:p-1 text-xs sm:text-sm border">{new Date(promo.valid_to).toLocaleDateString()}</td>
+                <td className="p-2 sm:p-1 text-xs sm:text-sm border">
                   {promo.first_order_only ? <span className="text-yellow-700 font-semibold">Yes</span> : 'No'}
                 </td>
-                <td className="p-2 border">
+                <td className="p-2 sm:p-1 text-xs sm:text-sm border">
                   <button
                     className={`px-3 py-1 rounded-full text-white ${promo.enabled ? 'bg-green-500' : 'bg-gray-400'}`}
                     onClick={() => toggleEnable(promo.id, promo.enabled)}
@@ -209,7 +210,7 @@ const PromoCodesAdmin: React.FC = () => {
                 <td className="p-2 border text-center">
                   {promo.usage_limit ? `${promo.used_count} / ${promo.usage_limit}` : `${promo.used_count}`}
                 </td>
-                <td className="p-2 border flex justify-center gap-2">
+                <td className="p-2 border flex flex-col sm:flex-row justify-center gap-2">
                   <button onClick={() => openModal(promo)} className="text-blue-500 hover:text-blue-700">
                     <Edit />
                   </button>
@@ -222,11 +223,12 @@ const PromoCodesAdmin: React.FC = () => {
           )}
         </tbody>
       </table>
+      </div>
 
       {/* Create / Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl w-full max-w-lg shadow-xl relative animate-slide-in">
+          <div className="bg-white/90 backdrop-blur-md p-4 sm:p-6 rounded-2xl w-full max-w-lg shadow-xl relative animate-slide-in">
             <h2 className="text-2xl font-bold mb-4 text-tamoor-charcoal">{editingPromo ? 'Edit' : 'Add'} Promo Code</h2>
             <button
               className="absolute top-4 right-4 text-gray-700 hover:text-red-500 transition"
@@ -289,7 +291,7 @@ const PromoCodesAdmin: React.FC = () => {
                 <DatePicker
                   selected={form.valid_from}
                   onChange={(date) => handleDateChange(date!, 'valid_from')}
-                  className="border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none transition"
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none transition"
                 />
               </div>
 
@@ -298,7 +300,7 @@ const PromoCodesAdmin: React.FC = () => {
                 <DatePicker
                   selected={form.valid_to}
                   onChange={(date) => handleDateChange(date!, 'valid_to')}
-                  className="border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none transition"
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none transition"
                 />
               </div>
 

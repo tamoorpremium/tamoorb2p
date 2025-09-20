@@ -106,17 +106,19 @@ const EmailAutomation: React.FC = () => {
         Toggle automation on/off and select active templates for each function.
       </p>
 
+      {/* Test with Order ID */}
       <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 md:p-6 shadow-lg border border-white/10 mb-6">
-        <label className="block text-sm text-white/80 mb-1">Test with Order ID</label>
-        <div className="flex gap-3 items-center">
+        <label className="block text-sm text-white/80 mb-2">Test with Order ID</label>
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
           <input
-            className="flex-1 rounded-xl px-4 py-3 bg-white/80 focus:bg-white outline-none"
+            className="flex-1 rounded-xl px-4 py-2 sm:py-3 bg-white/80 focus:bg-white outline-none text-sm sm:text-base"
             placeholder="e.g. 117"
             value={testOrderId}
             onChange={(e) => setTestOrderId(e.target.value)}
           />
         </div>
       </div>
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {FUNCTIONS.map(({ key, label, icon: Icon }) => {
@@ -138,11 +140,12 @@ const EmailAutomation: React.FC = () => {
               </div>
 
               {/* Template Selector */}
+              {/* Template Selector */}
               <div className="mb-4">
-                <label className="block text-sm text-white/80 mb-1">Select Template</label>
-                <div className="flex gap-2">
+                <label className="block text-sm text-white/80 mb-2">Select Template</label>
+                <div className="flex flex-col sm:flex-row gap-2">
                   <select
-                    className="flex-1 rounded-xl px-4 py-3 bg-white/80 focus:bg-white outline-none"
+                    className="flex-1 rounded-xl px-3 py-2 sm:px-4 sm:py-3 bg-white/80 focus:bg-white outline-none text-sm sm:text-base"
                     value={activeTemplate?.id ?? ""}
                     onChange={(e) => setActiveTemplate(key, Number(e.target.value))}
                   >
@@ -157,12 +160,13 @@ const EmailAutomation: React.FC = () => {
                   </select>
                   <button
                     onClick={() => sendTestEmail(key)}
-                    className="inline-flex items-center gap-2 rounded-xl px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white transition"
+                    className="inline-flex justify-center items-center gap-2 rounded-xl px-3 py-2 sm:px-4 sm:py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm sm:text-base transition"
                   >
-                    <Send className="w-4 h-4" /> Send Test
+                    <Send className="w-4 h-4" /> <span className="hidden sm:inline">Send Test</span>
                   </button>
                 </div>
               </div>
+
 
               {/* Automation Toggle */}
               {activeTemplate && (

@@ -700,7 +700,7 @@ return (
                 handleAddCartDirect(product, 1);
               }
             }}
-            className="w-full btn-premium text-white py-1 px-1 font-semibold text-[10px] sm:text-lg flex items-center justify-center gap-1 sm:gap-3 mt-2 sm:mt-4 !rounded-lg md:!rounded-full"
+            className="w-full btn-premium text-white py-1 px-0.5 font-bold text-[10px] sm:text-lg flex items-center justify-center gap-1 sm:gap-3 mt-2 sm:mt-4 !rounded-lg md:!rounded-full"
 
 
           >

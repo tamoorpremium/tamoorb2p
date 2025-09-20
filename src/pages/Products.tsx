@@ -670,7 +670,7 @@ return (
                   />
                 ))}
               </div>
-              <span className="ml-1 sm:ml-3 text-neutral-600 font-medium text-[10px] sm:text-sm">
+              <span className="ml-1 sm:ml-3 text-neutral-600 font-medium text-[12px] sm:text-sm">
                 {product.rating} ({product.reviews})
               </span>
             </div>
@@ -700,7 +700,7 @@ return (
                 handleAddCartDirect(product, 1);
               }
             }}
-            className="w-full btn-premium text-white py-1 px-0.5 sm:py-4 sm:px-4 rounded-full font-bold text-[8px] sm:text-lg flex items-center justify-center gap-1 sm:gap-3 mt-2 sm:mt-4"
+            className="w-full btn-premium text-white py-1 px-0.5 sm:py-4 sm:px-4 rounded-full font-extrabold text-[8px] sm:text-lg flex items-center justify-center gap-1 sm:gap-3 mt-2 sm:mt-4"
           >
             <ShoppingCart className="w-3 h-3 sm:w-5 sm:h-5" />
             Add to Cart

@@ -76,19 +76,29 @@ const ProductDetails: React.FC = () => {
     fetchProduct();
   }, [id]);
 
-  // Fetch images
-  useEffect(() => {
-    if (!id) return;
-    const fetchImages = async () => {
-      const { data, error } = await supabase.from("product_images").select("*").eq("product_id", id);
-      if (error) console.error(error);
-      else {
-        setImages(data);
-        if (data.length > 0) setSelectedImage(data[0].image_url);
+// Fetch images
+useEffect(() => {
+  if (!id) return;
+  const fetchImages = async () => {
+    const { data, error } = await supabase
+      .from("product_images")
+      .select("*")
+      .eq("product_id", id);
+
+    if (error) {
+      console.error(error);
+    } else {
+      setImages(data);
+      if (data.length > 0) {
+        // Prefer the primary image
+        const primaryImage = data.find(img => img.is_primary) || data[0];
+        setSelectedImage(primaryImage.image_url);
       }
-    };
-    fetchImages();
-  }, [id]);
+    }
+  };
+  fetchImages();
+}, [id]);
+
 
   // Fetch reviews
   useEffect(() => {
@@ -309,7 +319,7 @@ const ProductDetails: React.FC = () => {
             </p>
             <p className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
               - Make in INDIA initiative
-              <span className="inline-block w-6 h-4 flex-shrink-0">
+              <span className="inline-block w-10 h-4 flex-shrink-0">
                 <img
                   src="https://upload.wikimedia.org/wikipedia/en/4/46/Make_In_India.png"
                   alt="India Flag"

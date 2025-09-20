@@ -380,7 +380,9 @@ useEffect(() => {
 return (
   <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white">
     {/* Hero Section */}
-    <section className="py-20 bg-gradient-to-br from-luxury-cream via-white to-luxury-cream-dark">
+      <section
+        className={`pt-14 ${showFilters ? "pb-4" : "pb-4"} sm:pt-24 sm:pb-12 bg-gradient-to-br from-luxury-cream via-white to-luxury-cream-dark`}
+      >
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-neutral-800 mb-6">
@@ -393,319 +395,324 @@ return (
       </div>
     </section>
 
-   {/* Filters & Search */}
-<section
-  className={`sticky top-20 z-40 glass backdrop-blur-xl border-b border-white/20 py-6
-    transition-transform duration-300 lg:translate-y-0 ${
-      showFilters || showBar ? "translate-y-0" : "-translate-y-full"
-    }`}
->
-  <div className="container mx-auto px-4">
-    <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
-      {/* Search Bar */}
-      <div className="flex-1 max-w-md">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
-          <input
-            type="text"
-            placeholder="Search premium dry fruits..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 glass rounded-full text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-luxury-gold/50"
-          />
-        </div>
-      </div>
+    {/* Filters & Search */}
+    <section
+      className={`sticky z-40 glass backdrop-blur-xl border-b border-white/20 py-6
+        transition-transform duration-300 will-change-transform
+        top-0 lg:top-20
+        ${showFilters || showBar ? "translate-y-0" : "lg:-translate-y-full"}`}
+    >
 
-      {/* Filter Controls */}
-      <div className="flex items-center space-x-4">
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center space-x-2 glass px-6 py-3 rounded-full hover:bg-white/20 transition-all duration-300 relative"
-        >
-          <Filter className="w-5 h-5" />
-          <span className="font-medium">Filters</span>
-
-          {/* Show active filter badge */}
-          {(selectedCategory || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 3000) && (
-            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-luxury-gold text-white">
-              Active
-            </span>
-          )}
-        </button>
-
-       {/* Clear Filters button when active */}
-        {(selectedCategory !== "all" || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 3000) && (
-          <button
-            onClick={() => {
-              setSelectedCategory("all");   // Reset to "All Products"
-              setSortBy("featured");
-              setPriceRange([0, 3000]);
-            }}
-            className="text-sm text-red-500 hover:underline"
-          >
-            Clear All
-          </button>
-        )}
-
-
-        {/* Grid/List toggle */}
-        <div className="flex items-center space-x-2 flex-wrap glass rounded-full p-1">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-full transition-all duration-300 ${
-              viewMode === 'grid'
-                ? 'bg-luxury-gold text-white'
-                : 'text-neutral-600'
-            }`}
-          >
-            <Grid className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`p-2 rounded-full transition-all duration-300 ${
-              viewMode === 'list'
-                ? 'bg-luxury-gold text-white'
-                : 'text-neutral-600'
-            }`}
-          >
-            <List className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-    </div>
-
-    {/* Filter Panel */}
-    {showFilters && (
-      <div className="mt-6 glass rounded-2xl p-6 animate-slide-up flex flex-col max-h-[70vh]">
-        {/* Scrollable filter body */}
-        <div className="flex-1 overflow-y-auto pr-2">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Categories */}
-            <div>
-              <h3 className="font-display font-semibold text-lg mb-4">Categories</h3>
-              <div className="space-y-2">
-                {categories.map((category) => (
-                  <div key={category.id}>
-                    {/* Parent Category Button */}
-                    <div className="flex items-center justify-between">
-                      <button
-                        onClick={() => setSelectedCategory(category.id)}
-                        className={`w-full text-left px-4 py-2 rounded-lg transition-all duration-300 ${
-                          selectedCategory === category.id ? "bg-luxury-gold text-white" : "hover:bg-white/20"
-                        }`}
-                      >
-                        <span className="font-medium">{category.name}</span>
-                      </button>
-
-                      {/* Dropdown toggle if parent has children */}
-                      {category.children?.length > 0 && (
-                        <button
-                          onClick={() =>
-                            setOpenParentCategory(openParentCategory === category.id ? null : category.id)
-                          }
-                          className="ml-2 text-sm text-neutral-400 hover:text-neutral-600"
-                        >
-                          {openParentCategory === category.id ? "▲" : "▼"}
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Subcategories dropdown */}
-                    {category.children?.length > 0 && openParentCategory === category.id && (
-                      <div className="ml-4 mt-1 space-y-1">
-                        {category.children.map((child: any) => (
-                          <button
-                            key={child.id}
-                            onClick={() => setSelectedCategory(child.id)}
-                            className={`w-full text-left px-3 py-1 rounded-lg text-sm transition-all duration-300 ${
-                              selectedCategory === child.id ? "bg-luxury-gold text-white" : "hover:bg-white/10"
-                            }`}
-                          >
-                            {child.name}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-
-            </div>
-
-            {/* Price Range */}
-            <div>
-              <h3 className="font-display font-semibold text-lg mb-4">Price Range</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">₹{priceRange[0]}</span>
-                  <span className="text-sm">₹{priceRange[1]}</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="3000"
-                  value={priceRange[1]}
-                  onChange={(e) =>
-                    setPriceRange([priceRange[0], parseInt(e.target.value)])
-                  }
-                  className="w-full"
-                />
-              </div>
-            </div>
-
-            {/* Sort By */}
+      <div className="container mx-auto px-4">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-center justify-between">
+          {/* Search Bar */}
+          <div className="flex-1 max-w-md">
             <div className="relative">
-              <h3 className="font-display font-semibold text-lg mb-4">Sort By</h3>
-              <Listbox value={sortBy} onChange={setSortBy}>
-                <Listbox.Button className="w-full py-4 px-3 glass rounded-lg text-left cursor-pointer">
-                  {sortBy === "featured" && "Featured"}
-                  {sortBy === "price-low" && "Price: Low to High"}
-                  {sortBy === "price-high" && "Price: High to Low"}
-                  {sortBy === "rating" && "Highest Rated"}
-                  {sortBy === "newest" && "Newest First"}
-                </Listbox.Button>
-
-
-                <Listbox.Options className="absolute mt-2 w-full glass rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
-                  <Listbox.Option value="featured">Featured</Listbox.Option>
-                  <Listbox.Option value="price-low">Price: Low to High</Listbox.Option>
-                  <Listbox.Option value="price-high">Price: High to Low</Listbox.Option>
-                  <Listbox.Option value="rating">Highest Rated</Listbox.Option>
-                  <Listbox.Option value="newest">Newest First</Listbox.Option>
-                </Listbox.Options>
-              </Listbox>
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+              <input
+                type="text"
+                placeholder="Search premium dry fruits..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 glass rounded-full text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
+              />
             </div>
+          </div>
+
+          {/* Filter & Grid/List */}
+          <div className="flex items-center space-x-2 sm:space-x-4 flex-wrap">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center space-x-2 glass px-4 sm:px-6 py-2 sm:py-3 rounded-full hover:bg-white/20 transition-all duration-300 relative text-sm sm:text-base"
+            >
+              <Filter className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="font-medium">Filters</span>
+
+              {(selectedCategory || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 3000) && (
+                <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-luxury-gold text-white">
+                  Active
+                </span>
+              )}
+            </button>
+
+            {(selectedCategory !== "all" || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 3000) && (
+              <button
+                onClick={() => {
+                  setSelectedCategory("all");
+                  setSortBy("featured");
+                  setPriceRange([0, 3000]);
+                }}
+                className="text-sm text-red-500 hover:underline"
+              >
+                Clear All
+              </button>
+            )}
+
+            <div className="flex items-center space-x-2 flex-wrap glass rounded-full p-1">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-2 rounded-full transition-all duration-300 flex items-center justify-center hover:bg-white/20 ${
+                  viewMode === "grid" ? "bg-luxury-gold text-white" : "text-neutral-600"
+                }`}
+              >
+                <Grid className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-2 rounded-full transition-all duration-300 flex items-center justify-center hover:bg-white/20 ${
+                  viewMode === "list" ? "bg-luxury-gold text-white" : "text-neutral-600"
+                }`}
+              >
+                <List className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            </div>
+
           </div>
         </div>
 
-        {/* Sticky footer Apply button */}
-        <div className="pt-4 border-t border-white/20">
-          <button
-            onClick={() => setShowFilters(false)}
-            className="w-full py-3 rounded-xl bg-luxury-gold text-white font-semibold shadow-md hover:bg-luxury-gold-dark transition"
-          >
-            Apply Filters
-          </button>
-        </div>
-      </div>
-    )}
-  </div>
-</section>
-
-
-    {/* Products Grid */}
-    {/* Remaining parts coming up */}
-        <section ref={sectionRef} className="py-16">
-      <div className="container mx-auto px-4">
-        <div className="mb-8 flex items-center justify-between">
-          <p className="text-neutral-600 font-medium">
-            Showing {filteredProducts.length} of {products.length} products
-          </p>
-        </div>
-        {loading ? (
-          <div className="text-center text-neutral-500 py-12 font-medium">Loading products...</div>
-        ) : (
+        {/* Filter Panel */}
+        {showFilters && (
           <div
-            className={`grid gap-8 ${
-              viewMode === 'grid'
-                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-                : 'grid-cols-1'
+            className={`mt-6 glass rounded-2xl p-6 flex flex-col overflow-hidden transition-all duration-500 max-h-0 ${
+              showFilters ? "max-h-[70vh] animate-slide-up" : ""
             }`}
           >
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="product-card luxury-card neomorphism rounded-3xl overflow-hidden group opacity-0"
-              >
-                <div className="relative overflow-hidden">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-56 sm:h-64 md:h-72 object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  {/* Badge */}
-                  <div className={`absolute top-6 left-6 ${product.badge_color} text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg`}>
-                    {product.badge}
-                  </div>
-                  {/* Action buttons */}
-                  <div className="absolute top-3 right-3 sm:top-6 sm:right-6 flex flex-col space-y-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-                    <button
-                      onClick={() => toggleWishlist(product.id)}
-                      className="p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
-                    >
-                      <Heart
-                        className={`w-5 h-5 ${
-                          wishlistIds.includes(product.id)
-                            ? "text-red-500 fill-red-500"
-                            : "text-white hover:text-red-400"
-                        }`}
-                      />
-                    </button>
-
-                    <button className="p-3 glass rounded-full hover:bg-white/20 transition-all duration-300">
-                      <Eye className="w-5 h-5 text-white" />
-                    </button>
-                  </div>
-                </div>
-                <div className="p-8">
-                  <h3 className="font-display font-semibold text-xl text-neutral-800 mb-3 group-hover:text-luxury-gold transition-colors duration-300">
-                    {product.name}
-                  </h3>
-                  <p className="text-neutral-600 text-sm mb-4 font-medium">
-                    {product.description}
-                  </p>
-                  <div className="flex items-center mb-4">
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < Math.floor(product.rating) ? 'text-luxury-gold fill-current' : 'text-neutral-300'
+            {/* Categories */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <h3 className="font-display font-semibold text-lg mb-4">Categories</h3>
+                <div className="space-y-2">
+                  {categories.map((category) => (
+                    <div key={category.id}>
+                      <div className="flex items-center justify-between">
+                        <button
+                          onClick={() => setSelectedCategory(category.id)}
+                          className={`w-full text-left px-4 py-2 rounded-lg transition-all duration-300 ${
+                            selectedCategory === category.id ? "bg-luxury-gold text-white" : "hover:bg-white/20"
                           }`}
-                        />
-                      ))}
+                        >
+                          <span className="font-medium">{category.name}</span>
+                        </button>
+                        {category.children?.length > 0 && (
+                          <button
+                            onClick={() =>
+                              setOpenParentCategory(
+                                openParentCategory === category.id ? null : category.id
+                              )
+                            }
+                            className="ml-2 text-sm text-neutral-400 hover:text-neutral-600"
+                          >
+                            {openParentCategory === category.id ? "▲" : "▼"}
+                          </button>
+                        )}
+                      </div>
+
+                      {category.children?.length > 0 && openParentCategory === category.id && (
+                        <div className="ml-4 mt-1 space-y-1">
+                          {category.children.map((child: any) => (
+                            <button
+                              key={child.id}
+                              onClick={() => setSelectedCategory(child.id)}
+                              className={`w-full text-left px-3 py-1 rounded-lg text-sm transition-all duration-300 ${
+                                selectedCategory === child.id ? "bg-luxury-gold text-white" : "hover:bg-white/10"
+                              }`}
+                            >
+                              {child.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <span className="ml-3 text-sm text-neutral-600 font-medium">
-                      {product.rating} ({product.reviews} reviews)
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                      <span className="text-2xl font-display font-bold tamoor-gradient">
-                        ₹{product.price} / {product.measurement_unit === 'kilograms' ? 'kg' : 'pieces'}
-                      </span>
-                      <span className="text-lg text-neutral-400 line-through font-medium">
-                        ₹{product.original_price}
-                      </span>
-                    </div>
-                    <div className="text-sm text-luxury-sage font-semibold bg-luxury-sage/10 px-3 py-1 rounded-full">
-                      Save ₹{product.original_price - product.price}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (product.measurement_unit === 'kilograms') {
-                        setSelectedProduct(product);
-                        setShowQuantityModal(true);
-                      } else {
-                        handleAddCartDirect(product, 1);
-                      }
-                    }}
-                    className="w-full btn-premium text-white py-4 rounded-full font-semibold text-lg flex items-center justify-center group/btn"
-                  >
-                    <ShoppingCart className="w-5 h-5 mr-3 group-hover/btn:rotate-12 transition-transform duration-300" />
-                    Add to Cart
-                  </button>
+                  ))}
                 </div>
               </div>
-            ))}
+
+              {/* Price Range */}
+              <div>
+                <h3 className="font-display font-semibold text-lg mb-4">Price Range</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span>₹{priceRange[0]}</span>
+                    <span>₹{priceRange[1]}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="3000"
+                    value={priceRange[1]}
+                    onChange={(e) =>
+                      setPriceRange([priceRange[0], parseInt(e.target.value)])
+                    }
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
+              {/* Sort By */}
+              <div className="relative">
+                <h3 className="font-display font-semibold text-lg mb-4">Sort By</h3>
+                <Listbox value={sortBy} onChange={setSortBy}>
+                  <Listbox.Button className="w-full py-3 px-3 glass rounded-lg text-left cursor-pointer text-sm">
+                    {sortBy === "featured" && "Featured"}
+                    {sortBy === "price-low" && "Price: Low to High"}
+                    {sortBy === "price-high" && "Price: High to Low"}
+                    {sortBy === "rating" && "Highest Rated"}
+                    {sortBy === "newest" && "Newest First"}
+                  </Listbox.Button>
+                  <Listbox.Options className="absolute mt-2 w-full glass rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto text-sm">
+                    <Listbox.Option value="featured">Featured</Listbox.Option>
+                    <Listbox.Option value="price-low">Price: Low to High</Listbox.Option>
+                    <Listbox.Option value="price-high">Price: High to Low</Listbox.Option>
+                    <Listbox.Option value="rating">Highest Rated</Listbox.Option>
+                    <Listbox.Option value="newest">Newest First</Listbox.Option>
+                  </Listbox.Options>
+                </Listbox>
+              </div>
+            </div>
+
+            {/* Apply button */}
+            <div className="pt-4 border-t border-white/20">
+              <button
+                onClick={() => setShowFilters(false)}
+                className="w-full py-3 rounded-xl bg-luxury-gold text-white font-semibold shadow-md hover:bg-luxury-gold-dark transition"
+              >
+                Apply Filters
+              </button>
+            </div>
           </div>
         )}
       </div>
     </section>
 
+    {/* Products Grid */}
+<section ref={sectionRef} className="py-16">
+  <div className="container mx-auto px-4">
+    <div className="mb-8 flex items-center justify-between">
+      <p className="text-neutral-600 font-medium">
+        Showing {filteredProducts.length} of {products.length} products
+      </p>
+    </div>
+
+    {loading ? (
+      <div className="text-center text-neutral-500 py-12 font-medium">Loading products...</div>
+    ) : (
+      <div
+        className={`grid gap-4 ${
+          viewMode === "grid"
+            ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3"
+            : "grid-cols-1"
+        }`}
+      >
+        {filteredProducts.map((product) => (
+          <div
+            key={product.id}
+            className={`product-card luxury-card neomorphism rounded-3xl overflow-hidden group opacity-0 ${
+              viewMode === "list" ? "flex flex-col md:flex-row" : ""
+            }`}
+          >
+            {/* Product Image */}
+            <div className={`relative overflow-hidden ${viewMode === "list" ? "md:w-1/3" : ""}`}>
+              <img
+                src={product.image}
+                alt={product.name}
+                className={`w-full ${viewMode === "list" ? "h-40 md:h-full object-cover" : "h-40 sm:h-56 md:h-72 object-cover"} group-hover:scale-110 transition-transform duration-700`}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className={`absolute top-4 left-4 ${product.badge_color} text-white px-3 py-1 rounded-full text-xs sm:text-sm font-semibold shadow-lg`}>
+                {product.badge}
+              </div>
+              <div className="absolute top-3 right-3 sm:top-6 sm:right-6 flex flex-col space-y-2 sm:space-y-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                <button
+                  onClick={() => toggleWishlist(product.id)}
+                  className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
+                >
+                  <Heart
+                    className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                      wishlistIds.includes(product.id)
+                        ? "text-red-500 fill-red-500"
+                        : "text-white hover:text-red-400"
+                    }`}
+                  />
+                </button>
+                <button className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300">
+                  <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                </button>
+              </div>
+            </div>
+
+            {/* Product Details */}
+        <div
+          className={`${
+            viewMode === "list"
+              ? "md:w-2/3 md:pl-6 flex flex-col justify-between"
+              : "p-4 sm:p-6"
+          }`}
+        >
+          <div className="space-y-2 sm:space-y-3">
+            <h3 className="font-display font-semibold text-sm sm:text-xl text-neutral-800 group-hover:text-luxury-gold transition-colors duration-300">
+              {product.name}
+            </h3>
+
+            {/* Hide description on mobile */}
+            <p className="hidden sm:block text-neutral-600 text-sm font-medium">
+              {product.description}
+            </p>
+
+            {/* Stars + rating */}
+            <div className="flex items-center text-xs sm:text-sm">
+              <div className="flex items-center space-x-0.5 sm:space-x-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-3 h-3 sm:w-4 sm:h-4 ${
+                      i < Math.floor(product.rating) ? "text-luxury-gold fill-current" : "text-neutral-300"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="ml-2 sm:ml-3 text-neutral-600 font-medium">
+                {product.rating} ({product.reviews})
+              </span>
+            </div>
+
+            {/* Price + original + discount */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-lg sm:text-2xl font-display font-bold tamoor-gradient">
+                ₹{product.price} / {product.measurement_unit === "kilograms" ? "kg" : "pcs"}
+              </span>
+              <span className="text-sm sm:text-lg text-neutral-400 line-through font-medium">
+                ₹{product.original_price}
+              </span>
+              <span className="text-xs sm:text-sm text-luxury-sage font-semibold bg-luxury-sage/10 px-2 py-1 rounded-full">
+                Save ₹{product.original_price - product.price}
+              </span>
+            </div>
+          </div>
+
+          {/* Add to Cart button */}
+          <button
+            onClick={() => {
+              if (product.measurement_unit === "kilograms") {
+                setSelectedProduct(product);
+                setShowQuantityModal(true);
+              } else {
+                handleAddCartDirect(product, 1);
+              }
+            }}
+            className="w-full btn-premium text-white py-2 px-3 sm:py-4 sm:px-4 rounded-full font-semibold text-xs sm:text-lg flex items-center justify-center gap-1 sm:gap-3 mt-3 sm:mt-4"
+          >
+            <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+            Add to Cart
+          </button>
+        </div>
+
+          </div>
+        ))}
+
+      </div>
+    )}
+  </div>
+</section>
     {/* Quantity Selection Modal will be continued in the next part */}
         {/* Quantity Selection Modal */}
     {showQuantityModal && selectedProduct && (() => {

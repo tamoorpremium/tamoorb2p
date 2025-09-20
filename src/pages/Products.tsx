@@ -700,12 +700,11 @@ return (
                 handleAddCartDirect(product, 1);
               }
             }}
-            className="w-full btn-premium text-white py-1 px-0.5 sm:py-4 sm:px-4 rounded-full font-extrabold text-[8px] sm:text-lg flex items-center justify-center gap-1 sm:gap-3 mt-2 sm:mt-4"
+            className="w-full btn-premium text-white py-1 px-0.5 sm:py-4 sm:px-4 rounded-full font-extrabold text-[10px] sm:text-lg flex items-center justify-items-stretch gap-1 sm:gap-3 mt-2 sm:mt-4"
           >
             <ShoppingCart className="w-3 h-3 sm:w-5 sm:h-5" />
             Add to Cart
-          </button>
-
+          </button>  
         </div>
 
           </div>

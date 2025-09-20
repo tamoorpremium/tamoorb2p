@@ -659,21 +659,22 @@ return (
             </p>
 
             {/* Stars + rating */}
-            <div className="flex items-center text-xs sm:text-sm">
+            <div className="flex items-center text-[10px] sm:text-sm">
               <div className="flex items-center space-x-0.5 sm:space-x-1">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-3 h-3 sm:w-4 sm:h-4 ${
+                    className={`w-2.5 h-2.5 sm:w-4 sm:h-4 ${
                       i < Math.floor(product.rating) ? "text-luxury-gold fill-current" : "text-neutral-300"
                     }`}
                   />
                 ))}
               </div>
-              <span className="ml-2 sm:ml-3 text-neutral-600 font-medium">
+              <span className="ml-1 sm:ml-3 text-neutral-600 font-medium text-[10px] sm:text-sm">
                 {product.rating} ({product.reviews})
               </span>
             </div>
+
 
             {/* Price + original + discount */}
             <div className="flex items-center gap-3 flex-wrap">
@@ -699,11 +700,12 @@ return (
                 handleAddCartDirect(product, 1);
               }
             }}
-            className="w-full btn-premium text-white py-2 px-3 sm:py-4 sm:px-4 rounded-full font-semibold text-xs sm:text-lg flex items-center justify-center gap-1 sm:gap-3 mt-3 sm:mt-4"
+            className="w-full btn-premium text-white py-1.5 px-2.5 sm:py-4 sm:px-4 rounded-full font-semibold text-[10px] sm:text-lg flex items-center justify-center gap-1 sm:gap-3 mt-2 sm:mt-4"
           >
-            <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+            <ShoppingCart className="w-3 h-3 sm:w-5 sm:h-5" />
             Add to Cart
           </button>
+
         </div>
 
           </div>

@@ -670,7 +670,7 @@ return (
                   />
                 ))}
               </div>
-              <span className="ml-1 sm:ml-3 text-neutral-600 font-medium text-[12px] sm:text-sm">
+              <span className="ml-1 sm:ml-3 text-neutral-600 font-medium text-[10px] sm:text-sm">
                 {product.rating} ({product.reviews})
               </span>
             </div>

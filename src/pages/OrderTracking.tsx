@@ -3,7 +3,15 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../utils/supabaseClient";
 import { toast, ToastContainer } from "react-toastify";
-import { Package, Truck, CreditCard, MapPin, FileText } from "lucide-react";
+import {
+  Package,
+  Truck,
+  CreditCard,
+  MapPin,
+  FileText,
+  X,
+  Clock,
+} from "lucide-react";
 
 // ---------- Interfaces ----------
 interface OrderItem {
@@ -16,7 +24,6 @@ interface OrderItem {
     name: string;
   };
 }
-
 interface PaymentInfo {
   payment_method: string;
   payment_status: string;
@@ -34,6 +41,7 @@ interface ShipmentInfo {
 }
 interface OrderDetails {
   id: number;
+  user_id: string;
   placed_at: string;
   status: string;
   total: number;
@@ -41,6 +49,7 @@ interface OrderDetails {
   payment?: PaymentInfo | null;
   shipment?: ShipmentInfo | null;
   address?: any;
+  cancel_request_status?: string | null;
 }
 
 // ---------- Constants ----------
@@ -69,61 +78,78 @@ const OrderTracking: React.FC = () => {
   const navigate = useNavigate();
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(false);
+  const [canceling, setCanceling] = useState(false);
+
+  // -------- fetch order ----------
+  const fetchOrder = async () => {
+  if (!id) return;
+  setLoading(true);
+  const orderId = Number(id); // convert to integer
+
+  try {
+    // Fetch main order
+    const { data: orderData, error } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("id", orderId)
+      .single();
+    if (error || !orderData) throw error;
+
+    // Fetch order items
+    const { data: itemsData, error: itemsError } = await supabase
+      .from("order_items")
+      .select(`id, product_id, quantity, price, weight, products ( name )`)
+      .eq("order_id", orderId);
+    if (itemsError) throw itemsError;
+
+    // Fetch payment info
+    const { data: paymentData } = await supabase
+      .from("payments")
+      .select("*")
+      .eq("order_id", orderId)
+      .single();
+
+    // Fetch shipment info
+    const { data: shipmentData } = await supabase
+      .from("shipments")
+      .select("*")
+      .eq("order_id", orderId)
+      .single();
+
+    // Fetch latest cancellation request
+    const { data: cancelReqData, error: cancelReqError } = await supabase
+      .from("order_cancellation_requests")
+      .select("status")
+      .eq("order_id", orderId)
+      .order("id", { ascending: false }) // use 'id' instead of 'created_at'
+      .limit(1);
+
+
+    if (cancelReqError) console.error("Error fetching cancellation request:", cancelReqError);
+
+    const latestCancelRequest = cancelReqData?.[0] || null;
+
+    // Set state
+    setOrder({
+      ...orderData,
+      items: itemsData || [],
+      payment: paymentData || null,
+      shipment: shipmentData || null,
+      cancel_request_status: latestCancelRequest?.status || null,
+    });
+  } catch (err) {
+    console.error(err);
+    toast.error("❌ Failed to fetch order");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
-    if (!id) return;
-    const fetchOrder = async () => {
-      setLoading(true);
-      try {
-        const { data: orderData, error } = await supabase
-          .from("orders")
-          .select("*")
-          .eq("id", id)
-          .single();
-        if (error || !orderData) throw error;
-
-        const { data: itemsData, error: itemsError } = await supabase
-          .from("order_items")
-          .select(
-            `
-            id,
-            product_id,
-            quantity,
-            price,
-            weight,
-            products ( name )
-          `
-          )
-          .eq("order_id", id);
-
-        if (itemsError) throw itemsError;
-
-        const { data: paymentData } = await supabase
-          .from("payments")
-          .select("*")
-          .eq("order_id", id)
-          .single();
-
-        const { data: shipmentData } = await supabase
-          .from("shipments")
-          .select("*")
-          .eq("order_id", id)
-          .single();
-
-        setOrder({
-          ...orderData,
-          items: itemsData || [],
-          payment: paymentData || null,
-          shipment: shipmentData || null,
-        });
-      } catch (err) {
-        toast.error("❌ Failed to fetch order");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchOrder();
   }, [id]);
+
 
   const downloadInvoice = async () => {
     if (!order) return;
@@ -145,6 +171,57 @@ const OrderTracking: React.FC = () => {
     }
   };
 
+  const handleCancelOrder = async () => {
+  if (!order) return;
+
+  // Prevent duplicate requests
+  if (order.cancel_request_status === "pending" || order.cancel_request_status === "approved") {
+    toast.info("Cancellation request already submitted.");
+    return;
+  }
+
+  const userId = order.user_id;
+  if (!userId) {
+    toast.error("❌ User ID missing");
+    return;
+  }
+
+  setCanceling(true);
+
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/cancel-order`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          orderId: order.id,
+          userId: userId,
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || `Edge function failed with ${res.status}`);
+    }
+
+    toast.success("✅ Cancellation request submitted");
+    setOrder({ ...order, cancel_request_status: "pending" });
+  } catch (err: any) {
+    console.error(err);
+    toast.error(`❌ ${err.message || "Failed to submit cancellation"}`);
+  } finally {
+    setCanceling(false);
+  }
+};
+
+
+
+
   if (loading) return <p className="text-center">Loading...</p>;
   if (!order) return <p className="text-center">Order not found</p>;
 
@@ -156,7 +233,8 @@ const OrderTracking: React.FC = () => {
           <h1 className="text-3xl sm:text-5xl font-display font-bold mb-8 text-neutral-800">
             Order <span className="tamoor-gradient">#{order.id}</span>
           </h1>
-          <p className="text-lg text-neutral-600 mb-8">
+          <p className="text-lg text-neutral-600 mb-8 flex items-center gap-2">
+            <Clock className="w-5 h-5 text-luxury-gold" />
             Placed on {new Date(order.placed_at).toLocaleString()}
           </p>
 
@@ -171,18 +249,27 @@ const OrderTracking: React.FC = () => {
               <div className="space-y-6">
                 {SHIPMENT_STEPS.map((step) => {
                   const isActive = order.shipment?.tracking_status === step;
+                  const isCompleted =
+                    SHIPMENT_STEPS.indexOf(step) <=
+                    SHIPMENT_STEPS.indexOf(order.shipment?.tracking_status || "");
                   return (
                     <div key={step} className="relative flex items-center">
                       <div
-                        className={`w-4 h-4 rounded-full border-2 ${
+                        className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
                           isActive
                             ? "bg-luxury-gold border-luxury-gold shadow-lg"
+                            : isCompleted
+                            ? `${SHIPMENT_COLORS[step]} border-transparent`
                             : "bg-white border-neutral-400"
                         }`}
                       ></div>
                       <span
                         className={`ml-4 font-medium ${
-                          isActive ? "text-luxury-gold" : "text-neutral-500"
+                          isActive
+                            ? "text-luxury-gold"
+                            : isCompleted
+                            ? "text-neutral-800"
+                            : "text-neutral-400"
                         }`}
                       >
                         {step}
@@ -198,6 +285,34 @@ const OrderTracking: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* CANCEL BUTTON / CANCELLATION STATUS */}
+          {order.status !== "delivered" && (
+            <div className="mb-6">
+              {order.status === "cancelled" ? (
+                <span className="text-red-600 font-semibold">
+                  Order Cancelled
+                </span>
+              ) : order.cancel_request_status === "pending" ? (
+                <span className="text-orange-600 font-semibold">
+                  Cancellation Request Pending
+                </span>
+              ) : order.cancel_request_status === "approved" ? (
+                <span className="text-green-600 font-semibold">
+                  Cancellation Approved
+                </span>
+              ) : (
+                <button
+                  onClick={handleCancelOrder}
+                  disabled={canceling}
+                  className="btn-premium flex items-center gap-2"
+                >
+                  <X className="w-5 h-5" />
+                  {canceling ? "Cancelling..." : "Cancel Order"}
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Shipment Details */}
           {order.shipment && (
@@ -258,8 +373,7 @@ const OrderTracking: React.FC = () => {
           </div>
 
           {/* Items */}
-          {/* Items */}
-          <div className="luxury-card glass rounded-2xl p-6 mb-8">
+          <div className="luxury-card glass rounded-2xl p-6 mb-8 overflow-x-auto">
             <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
               <Package className="w-6 h-6 mr-2 text-luxury-gold" /> Items
             </h2>
@@ -275,7 +389,10 @@ const OrderTracking: React.FC = () => {
                 </thead>
                 <tbody>
                   {order.items.map((item) => (
-                    <tr key={item.id} className="border-t border-neutral-200">
+                    <tr
+                      key={item.id}
+                      className="border-t border-neutral-200 text-sm sm:text-base"
+                    >
                       <td className="p-4">
                         {item.products?.name || "Unknown Product"}
                       </td>

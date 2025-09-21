@@ -11,6 +11,7 @@ import {
   LogOut,
   Menu,
   X,
+  ClipboardList, // 🆕 for Requests tab
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -25,6 +26,10 @@ const tabs = [
   },
   { id: "orders", name: "Orders", icon: ShoppingCart, path: "/admin/orders" },
   { id: "users", name: "Users", icon: Users, path: "/admin/users" },
+
+  // 🆕 Requests Tab
+  { id: "requests", name: "Requests", icon: ClipboardList, path: "/admin/requests" },
+
   { id: "settings", name: "Settings", icon: Settings, path: "/admin/settings" },
 ];
 
@@ -33,7 +38,7 @@ const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = async () => {
-  await logout(navigate); // SPA redirect using navigate
+    await logout(navigate); // SPA redirect using navigate
   };
 
   const SidebarContent = () => (

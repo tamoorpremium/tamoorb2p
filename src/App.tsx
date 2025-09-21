@@ -39,6 +39,7 @@ import { User } from '@supabase/supabase-js';
 import OrderTracking from './pages/OrderTracking';
 import ProductDetails from './pages/ProductDetails';
 import FancyPageTransition from "./components/FancyPageTransition";
+import AdminRequests from './pages/admin/AdminRequests';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -163,6 +164,7 @@ function App() {
               <Route path="categories/:id" element={<AdminCategoryEdit />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="settings" element={<SettingsPage />} />
+              <Route path="requests" element={<AdminRequests />} />
             </Route>
 
             {/* Catch-all fallback */}

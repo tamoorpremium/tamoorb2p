@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../utils/supabaseClient";
-import { ShoppingCart, X, Star } from "lucide-react";
+import { ShoppingCart, X, Star, Heart } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
 
 interface Product {
   id: number;
@@ -104,6 +105,62 @@ useEffect(() => {
 }, [id]);
 
 
+ // ✅ Wishlist states
+  const [wishlistIds, setWishlistIds] = useState<number[]>([]);
+  const [wishlistMessage, setWishlistMessage] = useState<{ text: string; type: "success" | "remove" } | null>(null);
+
+  useEffect(() => {
+    const fetchProductAndWishlist = async () => {
+      if (!id) return;
+
+      // fetch product
+      const { data: productData, error } = await supabase.from("products").select("*").eq("id", id).single();
+      if (!error) setProduct(productData);
+
+      // fetch wishlist if logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: wishlist } = await supabase
+          .from("wishlists")
+          .select("product_id")
+          .eq("user_id", user.id);
+
+        if (wishlist) {
+          setWishlistIds(wishlist.map((w) => w.product_id));
+        }
+      }
+    };
+
+    fetchProductAndWishlist();
+  }, [id]);
+
+  // ✅ Toggle wishlist
+  const toggleWishlist = async (productId: number) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      window.location.href = "/auth?message=loginRequired&redirect=/product/" + productId;
+      return;
+    }
+
+    const isInWishlist = wishlistIds.includes(productId);
+
+    if (isInWishlist) {
+      await supabase.from("wishlists").delete().eq("user_id", user.id).eq("product_id", productId);
+      setWishlistIds((prev) => prev.filter((id) => id !== productId));
+      setWishlistMessage({ text: "Item removed from wishlist ❌", type: "remove" });
+    } else {
+      const { error } = await supabase.from("wishlists").insert({
+        user_id: user.id,
+        product_id: productId,
+      });
+      if (!error) {
+        setWishlistIds((prev) => [...prev, productId]);
+        setWishlistMessage({ text: "Item added to wishlist ✅", type: "success" });
+      }
+    }
+
+    setTimeout(() => setWishlistMessage(null), 3000);
+  };
 
   // Fetch reviews
   useEffect(() => {
@@ -247,16 +304,46 @@ useEffect(() => {
       <div className="flex flex-col md:flex-row gap-4 md:gap-6">
         {/* Images */}
         <div className="md:w-1/2 flex flex-col gap-2">
-          <div className="rounded-2xl overflow-hidden">
-            <img src={selectedImage || product.image} alt={product.name} className="w-full h-64 sm:h-96 object-cover rounded-2xl" />
+          {/* Main Image with Wishlist */}
+          <div className="relative rounded-2xl overflow-hidden">
+            <img
+              src={selectedImage || product.image}
+              alt={product.name}
+              className="w-full h-64 sm:h-96 object-cover rounded-2xl"
+            />
+
+            {/* Wishlist Button */}
+            <button
+              onClick={() => {
+                toggleWishlist(product.id);
+                if (wishlistIds.includes(product.id)) {
+                  toast.info("Removed from Wishlist ❤️");
+                } else {
+                  toast.success("Added to Wishlist ❤️");
+                }
+              }}
+              className="absolute top-4 right-4 p-3 bg-white/80 rounded-full shadow-md hover:bg-white transition"
+            >
+              <Heart
+                className={`w-6 h-6 ${
+                  wishlistIds.includes(product.id)
+                    ? "text-red-500 fill-red-500"
+                    : "text-neutral-600"
+                }`}
+              />
+            </button>
           </div>
+
+          {/* Thumbnails */}
           <div className="flex gap-2 overflow-x-auto">
             {images.map((img) => (
               <img
                 key={img.id}
                 src={img.image_url}
                 alt={product.name}
-                className={`w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg cursor-pointer border-2 ${selectedImage === img.image_url ? "border-amber-500" : "border-transparent"}`}
+                className={`w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg cursor-pointer border-2 ${
+                  selectedImage === img.image_url ? "border-amber-500" : "border-transparent"
+                }`}
                 onClick={() => setSelectedImage(img.image_url)}
               />
             ))}

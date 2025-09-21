@@ -69,9 +69,9 @@ const AdminLayout = () => {
   );
 
   return (
-    <div className="bg-dashboard-gradient1 min-h-screen flex flex-col md:flex-row">
+    <div className="bg-dashboard-gradient1 min-h-screen flex flex-col md:flex-row overflow-x-hidden">
       {/* 🔹 Mobile Top Bar */}
-      <header className="md:hidden flex items-center justify-between p-4 bg-luxury-gold-dark backdrop-blur-md text-black shadow-lg">
+      <header className="md:hidden flex items-center justify-between p-4 w-full box-border bg-luxury-gold-dark backdrop-blur-md text-black shadow-lg">
         <h1 className="text-lg font-bold tracking-wide text-tamoor-gold">
           Admin Panel
         </h1>
@@ -97,7 +97,7 @@ const AdminLayout = () => {
             onClick={() => setSidebarOpen(false)}
           />
           {/* Drawer */}
-          <aside className="relative text-luxury-gold-dark bg-gradient-to-b from-black via-gray-900 to-gray-800 w-72 p-6 flex flex-col z-50 shadow-2xl rounded-r-3xl border-r-2 border-tamoor-gold transform animate-slideIn">
+          <aside className="relative text-luxury-gold-dark bg-gradient-to-b from-black via-gray-900 to-gray-800 w-full max-w-xs p-6 flex flex-col z-50 shadow-2xl rounded-r-3xl border-r-2 border-tamoor-gold transform animate-slideIn">
             <button
               className="absolute top-4 right-4 text-white hover:text-tamoor-gold"
               onClick={() => setSidebarOpen(false)}
@@ -110,7 +110,7 @@ const AdminLayout = () => {
       )}
 
       {/* 🔹 Main Content */}
-      <main className="flex-1 p-4 md:p-10 overflow-auto">
+      <main className="flex-1 p-4 md:p-10 overflow-auto min-w-0">
         <Outlet />
       </main>
     </div>

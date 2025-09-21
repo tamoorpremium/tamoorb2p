@@ -224,7 +224,7 @@ const AdminProductEdit: React.FC = () => {
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="min-h-screen bg-dashboard-gradient p-4 sm:p-6 lg:p-12 flex flex-col">
+      <div className="min-h-screen bg-dashboard-gradient p-4 sm:p-6 lg:p-12 flex flex-col w-full max-w-[1440px] mx-auto overflow-x-hidden">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-tamoor-charcoal mb-6 sm:mb-8">
           {id ? "Edit Product" : "Add New Product"}
         </h1>

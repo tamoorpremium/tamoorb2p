@@ -627,18 +627,15 @@ return (
                     viewMode === "list"
                       ? "h-40 md:h-full object-cover"
                       : "h-40 sm:h-56 md:h-72 object-cover"
-                  } group-hover:scale-110 transition-transform duration-700`}
+                  } sm:group-hover:scale-110 transition-transform duration-700`} // ✅ hover only on sm+
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div
-                  className={`absolute top-4 left-4 ${product.badge_color} text-white px-3 py-1 rounded-full text-xs sm:text-sm font-semibold shadow-lg`}
-                >
-                  {product.badge}
-                </div>
-                <div className="absolute top-3 right-3 sm:top-6 sm:right-6 flex flex-col space-y-2 sm:space-y-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                <div className="absolute top-3 right-3 sm:top-6 sm:right-6 flex flex-col space-y-2 sm:space-y-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 transform sm:translate-x-2 sm:group-hover:translate-x-0">
                   <button
                     onClick={(e) => {
-                      e.preventDefault(); // prevent navigation when clicking wishlist
+                      e.preventDefault();
                       toggleWishlist(product.id);
                     }}
                     className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
@@ -652,7 +649,7 @@ return (
                     />
                   </button>
                   <button
-                    onClick={(e) => e.preventDefault()} // prevent navigation on quick view
+                    onClick={(e) => e.preventDefault()}
                     className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
                   >
                     <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-white" />

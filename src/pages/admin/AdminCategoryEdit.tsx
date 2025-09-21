@@ -18,7 +18,9 @@ const AdminCategoryEdit: React.FC = () => {
   const [initialData, setInitialData] = useState<Category | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
+  // Fetch category and parent categories
   useEffect(() => {
     if (!id) return;
 
@@ -39,7 +41,7 @@ const AdminCategoryEdit: React.FC = () => {
         setInitialData(category);
       }
 
-      // Fetch only parent categories for dropdown
+      // Fetch parent categories for dropdown
       const { data: parentCategories, error: categoriesError } = await supabase
         .from('categories')
         .select('id, name, slug, parent_id')
@@ -59,25 +61,52 @@ const AdminCategoryEdit: React.FC = () => {
     fetchData();
   }, [id]);
 
+  // Handle category update
   const handleSubmit = async (formData: Omit<Category, 'id'>) => {
     if (!id) return;
     setLoading(true);
 
-    const { error } = await supabase.from('categories').update(formData).eq('id', parseInt(id));
+    const slug = formData.slug
+      ? formData.slug
+      : formData.name
+          .toLowerCase()
+          .trim()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/\s+/g, '-');
+
+    if (!formData.name.trim()) {
+      toast.error('Category name cannot be empty.');
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase
+      .from('categories')
+      .update({
+        name: formData.name,
+        slug,
+        parent_id: formData.parent_id || null,
+      })
+      .eq('id', parseInt(id));
 
     setLoading(false);
 
     if (error) {
-      toast.error('Failed to update category.');
+      if (error.code === '23505') {
+        toast.error('A category with this slug already exists.');
+      } else {
+        console.error('Update error:', error);
+        toast.error(`Failed to update category: ${error.message}`);
+      }
     } else {
       toast.success('Category updated successfully.');
       navigate('/admin/categories');
     }
   };
 
+  // Handle category delete
   const handleDelete = async () => {
-    if (!id || !window.confirm('Are you sure you want to delete this category? This action cannot be undone.'))
-      return;
+    if (!id) return;
 
     setLoading(true);
     const { error } = await supabase.from('categories').delete().eq('id', parseInt(id));
@@ -110,13 +139,36 @@ const AdminCategoryEdit: React.FC = () => {
               loading={loading}
             />
 
-            <button
-              onClick={handleDelete}
-              disabled={loading}
-              className="btn-premium bg-red-600 hover:bg-red-700 w-full py-3 sm:py-4 mt-4 sm:mt-6 font-semibold"
-            >
-              Delete Category
-            </button>
+            {/* Inline Delete Confirmation */}
+            {!showConfirmDelete ? (
+              <button
+                onClick={() => setShowConfirmDelete(true)}
+                disabled={loading}
+                className="btn-premium bg-red-600 hover:bg-red-700 w-full py-3 sm:py-4 mt-4 sm:mt-6 font-semibold"
+              >
+                Delete Category
+              </button>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-6">
+                <span className="text-sm sm:text-base text-gray-700 mb-2 sm:mb-0">
+                  Are you sure you want to delete this category?
+                </span>
+                <button
+                  onClick={handleDelete}
+                  disabled={loading}
+                  className="btn-premium bg-red-600 hover:bg-red-700 w-full sm:w-auto py-2 px-4 font-semibold"
+                >
+                  Yes, Delete
+                </button>
+                <button
+                  onClick={() => setShowConfirmDelete(false)}
+                  disabled={loading}
+                  className="btn-premium bg-gray-400 hover:bg-gray-500 w-full sm:w-auto py-2 px-4 font-semibold"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </>
         ) : (
           <p className="text-center py-4">Loading category data...</p>

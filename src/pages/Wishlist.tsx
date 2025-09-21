@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Heart, ShoppingCart, Star, Trash2 } from 'lucide-react';
 import { supabase } from '../utils/supabaseClient';
 import { useCart } from '../context/CartContext';
-import { useNavigate } from "react-router-dom";
+import { useNavigate , Link } from "react-router-dom";
 
 const Wishlist = () => {
   const { setCartItems, cartItems } = useCart();
@@ -326,6 +326,11 @@ const Wishlist = () => {
         {/* Wishlist items */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {wishlistItems.map((product, index) => (
+            <Link
+            key={product.id}
+            to={`/product/${product.id}`}
+            className="block"
+          >
             <div
               key={product.id}
               className="luxury-card neomorphism rounded-3xl overflow-hidden group"
@@ -378,6 +383,7 @@ const Wishlist = () => {
                 </div>
               </div>
             </div>
+            </Link>
           ))}
         </div>
       </div>

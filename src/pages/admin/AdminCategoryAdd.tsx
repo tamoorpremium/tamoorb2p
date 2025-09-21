@@ -16,7 +16,7 @@ const AdminCategoryAdd: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
 
-  // Fetch only top-level categories for parent dropdown
+  // Fetch top-level categories for parent dropdown
   useEffect(() => {
     const fetchParentCategories = async () => {
       setLoading(true);
@@ -40,11 +40,41 @@ const AdminCategoryAdd: React.FC = () => {
 
   const handleSubmit = async (formData: Omit<Category, 'id'>) => {
     setLoading(true);
-    const { error } = await supabase.from('categories').insert(formData);
+
+    // Auto-generate slug if not present
+    const slug = formData.slug
+      ? formData.slug
+      : formData.name
+          .toLowerCase()
+          .trim()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/\s+/g, '-');
+
+    // Check for empty name
+    if (!formData.name.trim()) {
+      toast.error('Category name cannot be empty.');
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.from('categories').insert([
+      {
+        name: formData.name,
+        slug,
+        parent_id: formData.parent_id || null,
+      },
+    ]);
+
     setLoading(false);
 
     if (error) {
-      toast.error('Failed to add category.');
+      // Handle duplicate slug specifically
+      if (error.code === '23505') {
+        toast.error('A category with this slug already exists.');
+      } else {
+        console.error('Insert error:', error);
+        toast.error(`Failed to add category: ${error.message}`);
+      }
     } else {
       toast.success('Category added successfully!');
       navigate('/admin/categories');
@@ -60,7 +90,7 @@ const AdminCategoryAdd: React.FC = () => {
         </h1>
 
         <AdminCategoryForm
-          categories={categories} // pass parent categories
+          categories={categories} // parent categories
           onSubmit={handleSubmit}
           loading={loading}
         />

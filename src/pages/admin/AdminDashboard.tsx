@@ -180,7 +180,7 @@ const Dashboard: React.FC = () => {
   const BAR_COLORS = ['#FBBF24', '#EC4899', '#10B981', '#1D4ED8', '#EF4444'];
 
   return (
-    <div className="min-h-screen bg-dashboard-gradient1 text-tamoor-charcoal flex flex-col">
+    <div className="min-h-screen bg-dashboard-gradient1 text-tamoor-charcoal flex flex-col overflow-x-hidden">
       
       <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-6 sm:mb-8 md:mb-12 px-4 md:px-12">
         Admin <span className="tamoor-gradient">Dashboard</span>

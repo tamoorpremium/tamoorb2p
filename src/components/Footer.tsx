@@ -1,10 +1,17 @@
 import React from 'react';
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin, ArrowUp } from 'lucide-react';
+import AllPayments from "../assets/payments/payments2.svg"; // or .svg
 
 const Footer = () => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+const certifications = [
+    "https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/fssai-removebg-preview.png",
+    "https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/iso-removebg-preview.png",
+    "https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/msme-removebg-preview.png"
+  ];
 
   return (
     <footer className="bg-neutral-900 text-white relative overflow-x-hidden">
@@ -104,14 +111,14 @@ const Footer = () => {
               </div>
             </div>
 
-            <div className="flex items-center flex-wrap gap-4">
+            <div className="flex items-center gap-4">
               <span className="text-neutral-400 font-medium">Secure payments:</span>
-              <div className="flex flex-wrap gap-3">
-                {['💳', '🏦', '📱', '💰'].map((emoji, index) => (
-                  <div key={index} className="w-8 h-8 md:w-12 md:h-12 glass rounded-lg flex items-center justify-center text-base md:text-lg hover:scale-110 transition-transform duration-300">
-                    {emoji}
-                  </div>
-                ))}
+              <div className="w-56 md:w-72 lg:w-96 xl:w-[28rem]">
+                <img
+                  src={AllPayments}
+                  alt="All payment methods"
+                  className="w-full h-auto object-contain"
+                />
               </div>
             </div>
           </div>
@@ -120,17 +127,18 @@ const Footer = () => {
         {/* Awards & Certifications */}
         <div className="border-t border-neutral-800 mt-12 pt-12">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 flex-wrap">
-            <div className="flex items-center flex-wrap gap-4">
-              <span className="text-neutral-400 font-medium">Certified by:</span>
-              <div className="flex flex-wrap gap-3">
-                {['🏆 ISO 9001', '🌱 Organic', '⭐ Premium', '🛡️ Safe'].map((cert, index) => (
-                  <div key={index} className="text-sm text-neutral-400 font-medium bg-neutral-800 px-3 py-2 rounded-full">
-                    {cert}
-                  </div>
+            <section className="py-12">
+              <div className="container mx-auto px-4 flex items-center justify-center gap-8 flex-wrap">
+                {certifications.map((logo, i) => (
+                  <img
+                    key={i}
+                    src={logo}
+                    alt={`Certification ${i + 1}`}
+                    className="h-16 md:h-20 lg:h-24 object-contain transition-transform duration-300 hover:scale-105"
+                  />
                 ))}
               </div>
-            </div>
-            
+            </section>         
             <button 
               onClick={scrollToTop}
               className="btn-premium text-white p-3 rounded-full hover:scale-110 transition-all duration-300"

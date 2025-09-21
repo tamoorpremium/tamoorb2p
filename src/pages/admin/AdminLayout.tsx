@@ -1,6 +1,7 @@
 // src/layouts/AdminLayout.tsx
 import React, { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { logout } from "../../utils/logout";
 import {
   Home,
   Package,
@@ -31,11 +32,8 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("userRole");
-    toast.success("Logged out successfully");
-    navigate("/login");
+  const handleLogout = async () => {
+  await logout(navigate); // SPA redirect using navigate
   };
 
   const SidebarContent = () => (

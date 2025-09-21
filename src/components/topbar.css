@@ -17,12 +17,13 @@
 
 /* Futuristic neon text */
 .futuristic-text {
-  color: #b37f00; /* darker gold for light header */
-  text-shadow: 
-    0 0 3px #b3800062, 
-    0 0 6px #ffae00, 
-    0 0 12px #ff9f00, 
-    0 0 18px #ff800096;
+ color: #4a90e2; /* rich sapphire */
+text-shadow:
+  0 0 2px #4a90e266,
+  0 0 5px #5aa0f0,
+  0 0 10px #3d80ccad,
+  0 0 16px #2f63aa88;
+
   font-weight: 700;
   backface-visibility: hidden;
   transform: translateZ(0);

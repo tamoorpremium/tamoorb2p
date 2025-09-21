@@ -3,11 +3,11 @@ import { Award, Users, Globe, Heart, Leaf, Shield, Linkedin, Twitter } from 'luc
 import { Link } from 'react-router-dom';
 
 // CountUp hook for smooth number animation
-const useCountUp = (end: number, duration = 2000) => {
+const useCountUp = (end: number, duration = 3000) => {
   const [count, setCount] = useState(0);
   useEffect(() => {
     let start = 0;
-    const step = end / (duration / 14);
+    const step = end / (duration / 12);
     const interval = setInterval(() => {
       start += step;
       if (start >= end) {

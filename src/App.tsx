@@ -38,6 +38,7 @@ import SettingsPage from './pages/admin/AdminSettings';
 import { User } from '@supabase/supabase-js';
 import OrderTracking from './pages/OrderTracking';
 import ProductDetails from './pages/ProductDetails';
+import FancyPageTransition from "./components/FancyPageTransition";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -100,11 +101,12 @@ function App() {
   return (
     <CartProvider>
       <Router>
+        <FancyPageTransition>
         <div className="min-h-screen">
           <Header />
           <ToastContainer
             position="top-center"
-            autoClose={2000}
+            autoClose={3000}
             hideProgressBar={false}
             newestOnTop
             closeOnClick
@@ -168,6 +170,7 @@ function App() {
           </Routes>
           <Footer />
         </div>
+        </FancyPageTransition>
       </Router>
     </CartProvider>
   );

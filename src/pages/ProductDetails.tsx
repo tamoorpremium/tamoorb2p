@@ -77,6 +77,7 @@ const ProductDetails: React.FC = () => {
   }, [id]);
 
 // Fetch images
+// Fetch images
 useEffect(() => {
   if (!id) return;
   const fetchImages = async () => {
@@ -87,17 +88,21 @@ useEffect(() => {
 
     if (error) {
       console.error(error);
-    } else {
-      setImages(data);
-      if (data.length > 0) {
-        // Prefer the primary image
-        const primaryImage = data.find(img => img.is_primary) || data[0];
-        setSelectedImage(primaryImage.image_url);
-      }
+    } else if (data.length > 0) {
+      // Sort by sort_order ascending
+      const sortedImages = data.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
+      // Prefer the primary image as default
+      const primaryImage = sortedImages.find(img => img.is_primary) || sortedImages[0];
+      setSelectedImage(primaryImage.image_url);
+
+      // Set images state
+      setImages(sortedImages);
     }
   };
   fetchImages();
 }, [id]);
+
 
 
   // Fetch reviews
@@ -318,11 +323,11 @@ useEffect(() => {
               </span>
             </p>
             <p className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
-              - Make in INDIA initiative
-              <span className="inline-block w-10 h-4 flex-shrink-0">
+              Make in INDIA initiative
+              <span className="inline-block w-14 h-6 flex-shrink-0">
                 <img
                   src="https://upload.wikimedia.org/wikipedia/en/4/46/Make_In_India.png"
-                  alt="India Flag"
+                  alt="tiger"
                   className="w-full h-full object-cover rounded-sm"
                 />
               </span>

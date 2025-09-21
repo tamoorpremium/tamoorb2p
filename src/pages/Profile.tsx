@@ -4,6 +4,8 @@ import { supabase } from '../utils/supabaseClient';
 import { LogOut } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from 'react-toastify';
+import { logout } from "../utils/logout";
+
 
 type OrderItem = {
   name: string;
@@ -249,26 +251,9 @@ const handleSave = async () => {
 
 
 
-  const handleLogout = async () => {
-  await supabase.auth.signOut();
-  window.location.href = '/'; // redirect to auth page after logout
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl font-bold">Loading profile...</div>
-      </div>
-    );
-  }
-
-  if (errorMsg) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl text-red-500 font-bold">{errorMsg}</div>
-      </div>
-    );
-  }
+const handleLogout = async () => {
+  await logout(navigate); // SPA redirect using navigate
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-32">

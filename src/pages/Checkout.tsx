@@ -42,6 +42,7 @@ const Checkout = () => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
+    countryCode: '+91',
     phone: '',
     address: '',
     city: '',
@@ -62,7 +63,14 @@ const Checkout = () => {
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [addingNewAddress, setAddingNewAddress] = useState(false);
   const [newAddress, setNewAddress] = useState({
-    full_name: '', email: '', phone: '', address: '', city: '', state: '', pincode: ''
+    full_name: '', 
+    email: '', 
+    country_code: '+91',
+    phone: '', 
+    address: '', 
+    city: '', 
+    state: '', 
+    pincode: ''
   });
 
   const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
@@ -158,6 +166,7 @@ const [defaultAddressId, setDefaultAddressId] = useState<number | null>(null);
   const [editAddressData, setEditAddressData] = useState({
     full_name: '',
     email: '',
+    country_code: '+91',
     phone: '',
     address: '',
     city: '',
@@ -170,6 +179,7 @@ const [defaultAddressId, setDefaultAddressId] = useState<number | null>(null);
     setEditAddressData({
       full_name: addr.full_name,
       email: addr.email,
+      country_code: addr.country_code || '+91', // added
       phone: addr.phone,
       address: addr.address,
       city: addr.city,
@@ -186,19 +196,32 @@ const [defaultAddressId, setDefaultAddressId] = useState<number | null>(null);
   const handleUpdateAddress = async () => {
     if (!editingAddressId) return;
 
-    const { error } = await supabase.from('addresses').update(editAddressData).eq('id', editingAddressId);
+    // Make sure country_code is included
+    const updateData = {
+      full_name: editAddressData.full_name,
+      email: editAddressData.email,
+      country_code: editAddressData.country_code || '+91',
+      phone: editAddressData.phone,
+      address: editAddressData.address,
+      city: editAddressData.city,
+      state: editAddressData.state,
+      pincode: editAddressData.pincode
+    };
+
+    const { error } = await supabase.from('addresses').update(updateData).eq('id', editingAddressId);
 
     if (error) {
       setErrorMsg('Failed to update address: ' + error.message);
     } else {
       // Update savedAddresses state with edited data
       setSavedAddresses(prev =>
-        prev.map(item => (item.id === editingAddressId ? { ...item, ...editAddressData } : item))
+        prev.map(item => (item.id === editingAddressId ? { ...item, ...updateData } : item))
       );
       setEditingAddressId(null);
       setErrorMsg('');
     }
   };
+
 
   const handleDeleteAddress = async () => {
     if (!editingAddressId) return;
@@ -362,6 +385,10 @@ const validateForm = (): boolean => {
   else if (!/^\S+@\S+\.\S+$/.test(formData.email)) newErrors.email = "Email is invalid";
   if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
   else if (!/^\d{10}$/.test(formData.phone)) newErrors.phone = "Phone number must be 10 digits";
+
+  if (!formData.countryCode.trim()) newErrors.countryCode = "Country code is required";
+  else if (!/^\+\d{1,4}$/.test(formData.countryCode)) newErrors.countryCode = "Country code is invalid";
+
 
   setErrors(newErrors);
   return Object.keys(newErrors).length === 0;
@@ -593,8 +620,20 @@ const handleSaveNewAddress = async () => {
     setErrorMsg('User not logged in.');
     return;
   }
+
+  // Save new address with country_code and phone as separate columns
   const { data, error } = await supabase.from('addresses').insert([
-    { user_id: user.id, ...newAddress }
+    { 
+      user_id: user.id,
+      full_name: newAddress.full_name,
+      email: newAddress.email,
+      country_code: newAddress.country_code || '+91', // default if empty
+      phone: newAddress.phone,
+      address: newAddress.address,
+      city: newAddress.city,
+      state: newAddress.state,
+      pincode: newAddress.pincode
+    }
   ]).select().single();
 
   if (error) {
@@ -603,22 +642,35 @@ const handleSaveNewAddress = async () => {
     setSavedAddresses(prev => [...prev, data]);
     setSelectedAddressId(data.id);
     setAddingNewAddress(false);
+
+    // Update formData with both country_code and phone
     setFormData(prev => ({
       ...prev,
       fullName: data.full_name,
       email: data.email,
+      countryCode: data.country_code,
       phone: data.phone,
       address: data.address,
       city: data.city,
       state: data.state,
       pincode: data.pincode
     }));
+
     setNewAddress({
-      full_name: '', email: '', phone: '', address: '', city: '', state: '', pincode: ''
+      full_name: '',
+      email: '',
+      country_code: '+91', // reset to default
+      phone: '',
+      address: '',
+      city: '',
+      state: '',
+      pincode: ''
     });
+
     setErrorMsg('');
   }
 };
+
 
 
   const handleNextStep = () => {
@@ -703,13 +755,22 @@ const handleSaveNewAddress = async () => {
                             className="mb-4 p-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 w-full"
                             placeholder="Email"
                           />
-                          <input
-                            name="phone"
-                            value={editAddressData.phone}
-                            onChange={handleEditAddressChange}
-                            className="mb-4 p-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 w-full"
-                            placeholder="Phone"
-                          />
+                          <div className="flex space-x-2 mb-4">
+                            <input
+                              name="country_code"
+                              value={editAddressData.country_code}
+                              onChange={handleEditAddressChange}
+                              placeholder="+91"
+                              className="p-4 neomorphism-inset rounded-xl w-24 focus:outline-none focus:ring-2 focus:ring-luxury-gold/50"
+                            />
+                            <input
+                              name="phone"
+                              value={editAddressData.phone}
+                              onChange={handleEditAddressChange}
+                              placeholder="Phone"
+                              className="p-4 neomorphism-inset rounded-xl flex-grow focus:outline-none focus:ring-2 focus:ring-luxury-gold/50"
+                            />
+                          </div>
                           <input
                             name="address"
                             value={editAddressData.address}
@@ -852,13 +913,23 @@ const handleSaveNewAddress = async () => {
                         onChange={handleNewAddressChange}
                         className="mb-4 p-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 w-full"
                       />
-                      <input
-                        name="phone"
-                        placeholder="Phone"
-                        value={newAddress.phone}
-                        onChange={handleNewAddressChange}
-                        className="mb-4 p-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 w-full"
-                      />
+                      <div className="flex space-x-2 mb-4">
+                        <input
+                          name="country_code"
+                          value={newAddress.country_code}
+                          onChange={handleNewAddressChange}
+                          placeholder="+91"
+                          className="p-4 neomorphism-inset rounded-xl w-24 focus:outline-none focus:ring-2 focus:ring-luxury-gold/50"
+                        />
+                        <input
+                          name="phone"
+                          value={newAddress.phone}
+                          onChange={handleNewAddressChange}
+                          placeholder="Phone"
+                          className="p-4 neomorphism-inset rounded-xl flex-grow focus:outline-none focus:ring-2 focus:ring-luxury-gold/50"
+                        />
+                      </div>
+
                       <input
                         name="address"
                         placeholder="Address"
@@ -1059,7 +1130,7 @@ const handleSaveNewAddress = async () => {
                         <p className="font-medium">{formData.fullName}</p>
                         <p>{formData.address}</p>
                         <p>{formData.city}, {formData.state} - {formData.pincode}</p>
-                        <p>{formData.phone}</p>
+                        <p>{formData.countryCode} {formData.phone}</p>
                       </div>
                     </div>
                   </div>

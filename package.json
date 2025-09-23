@@ -43,6 +43,7 @@
     "@fontsource/shizuru": "^5.2.7",
     "@fontsource/trade-winds": "^5.2.7",
     "@headlessui/react": "^2.2.7",
+    "@react-pdf/renderer": "^4.3.0",
     "@supabase/supabase-js": "^2.57.4",
     "@types/react-router-dom": "^5.3.3",
     "bcrypt": "^6.0.0",

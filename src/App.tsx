@@ -40,6 +40,13 @@ import OrderTracking from './pages/OrderTracking';
 import ProductDetails from './pages/ProductDetails';
 import FancyPageTransition from "./components/FancyPageTransition";
 import AdminRequests from './pages/admin/AdminRequests';
+import ProfileCompletion from './pages/ProfileCompletion';
+import Terms from './pages/Terms';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import ReturnsRefundPolicy from './pages/ReturnsRefundPolicy';
+import Shipping from './pages/Shipping';
+import SizeQualityGuide from './pages/SizeQualityGuide';
+import FaqSupport from './pages/FaqSupport';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -130,6 +137,13 @@ function App() {
             <Route path="/order-tracking/:id" element={<OrderTracking />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
+            <Route path="/profile-completion" element={<ProfileCompletion />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/returns-policy" element={<ReturnsRefundPolicy />} />
+            <Route path="/shipping-policy" element={<Shipping />} />
+            <Route path="/size-quality" element={<SizeQualityGuide />} />
+            <Route path="/faq" element={<FaqSupport />} />
 
             {/* Protected user routes */}
             <Route

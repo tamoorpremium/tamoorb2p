@@ -5,6 +5,8 @@ import { LogOut } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from 'react-toastify';
 import { logout } from "../utils/logout";
+import countryPhoneData from '../utils/countryCodes.json';
+
 
 
 type OrderItem = {
@@ -26,14 +28,17 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [userInfo, setUserInfo] = useState<any>({
-  full_name: '',
-  address_email: '',
-  phone: '',
-  address_line: '',
-  city: '',
-  state: '',
-  pincode: ''
-});
+    full_name: '',
+    address_email: '',
+    country_code: '+91',
+    phone_number: '',
+    address_line: '',
+    city: '',
+    state: '',
+    pincode: ''
+  });
+
+  
 
 const navigate = useNavigate();
 
@@ -45,6 +50,7 @@ const navigate = useNavigate();
   const [wishlistLoading, setWishlistLoading] = useState(true);
   const [notificationToggles, setNotificationToggles] = useState<boolean[]>([
   false, false, false, false,]);
+  const combinedPhone = `${userInfo.country_code}${userInfo.phone_number}`.trim();
 
 
   // Fetch user profile and orders on mount
@@ -63,52 +69,57 @@ const navigate = useNavigate();
 
     // Default base info from supabase auth
     let baseInfo = {
-      full_name: user.user_metadata?.full_name || '',
-      address_email: user.email || '',
-      phone: '',
-      address_line: '',
-      city: '',
-      state: '',
-      pincode: ''
-    };
+  full_name: user.user_metadata?.full_name || '',
+  address_email: user.email || '',
+  country_code: '+91',
+  phone_number: '',
+  address_line: '',
+  city: '',
+  state: '',
+  pincode: ''
+};
 
-    // Fetch default address
-    const { data: defaultAddress, error: addrError } = await supabase
-      .from('addresses')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('is_default', true)
-      .maybeSingle(); // safer instead of .single()
+// Fetch default address
+const { data: defaultAddress, error: addrError } = await supabase
+  .from('addresses')
+  .select('*')
+  .eq('user_id', user.id)
+  .eq('is_default', true)
+  .maybeSingle();
 
-    if (defaultAddress) {
-      baseInfo = {
-        ...baseInfo,
-        full_name: defaultAddress.full_name || baseInfo.full_name,
-        address_email: defaultAddress.email || baseInfo.address_email,
-        phone: defaultAddress.phone || '',
-        address_line: defaultAddress.address || '',
-        city: defaultAddress.city || '',
-        state: defaultAddress.state || '',
-        pincode: defaultAddress.pincode || ''
-      };
-    }
+if (defaultAddress) {
+  baseInfo = {
+    ...baseInfo,
+    full_name: defaultAddress.full_name || baseInfo.full_name,
+    address_email: defaultAddress.email || baseInfo.address_email,
+    country_code: defaultAddress.country_code || '+91',
+    phone_number: defaultAddress.phone || '',
+    address_line: defaultAddress.address || '',
+    city: defaultAddress.city || '',
+    state: defaultAddress.state || '',
+    pincode: defaultAddress.pincode || ''
+  };
+}
 
-    // Optionally fetch profile row for phone/name
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('full_name, phone')
-      .eq('id', user.id)
-      .maybeSingle();
+// Fetch profile row for name and phone
+const { data: profileData, error: profileError } = await supabase
+  .from('profiles')
+  .select('full_name, country_code, phone')
+  .eq('id', user.id)
+  .maybeSingle();
 
-    if (profileData) {
-      baseInfo = {
-        ...baseInfo,
-        full_name: profileData.full_name || baseInfo.full_name,
-        phone: profileData.phone || baseInfo.phone,
-      };
-    }
+if (profileData) {
+  baseInfo = {
+    ...baseInfo,
+    full_name: profileData.full_name || baseInfo.full_name,
+    country_code: profileData.country_code || '+91',
+    phone_number: profileData.phone|| '',
+  };
+}
 
-    setUserInfo(baseInfo);
+setUserInfo(baseInfo);
+
+
 
     // Fetch orders
     const { data: ordersData, error: ordersError } = await supabase
@@ -212,32 +223,92 @@ const handleSave = async () => {
     return;
   }
 
-  // Update default address
-  const { error: updateError } = await supabase
-    .from('addresses')
-    .update({
-      full_name: userInfo.full_name,
-      email: userInfo.address_email,
-      phone: userInfo.phone,
-      address: userInfo.address_line,
-      city: userInfo.city,
-      state: userInfo.state,
-      pincode: userInfo.pincode,
-    })
-    .eq('user_id', user.id)
-    .eq('is_default', true);
+  // Trim inputs
+  let country_code = (userInfo.country_code || '+91').trim();
+  let phone_number = (userInfo.phone_number || '').trim();
 
-  if (updateError) {
-    setErrorMsg('Failed to update address: ' + updateError.message);
+  // ✅ Country code validation
+  const country = countryPhoneData.find(c => c.code === country_code);
+  if (!country) {
+    setErrorMsg('Invalid country code');
     return;
   }
 
-  // Optionally update profiles table for name/phone if desired
+  // ✅ Phone number must be numeric
+  if (!/^\d+$/.test(phone_number)) {
+    setErrorMsg('Phone number must contain only digits');
+    return;
+  }
+
+  // ✅ Phone number length check
+  if (phone_number.length < country.minLength || phone_number.length > country.maxLength) {
+    setErrorMsg(
+      `Phone number must be between ${country.minLength} and ${country.maxLength} digits for ${country.name}`
+    );
+    return;
+  }
+
+  // Check if default address exists
+  const { data: existingAddress, error: fetchError } = await supabase
+    .from('addresses')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('is_default', true)
+    .maybeSingle();
+
+  if (fetchError) {
+    setErrorMsg('Failed to check addresses: ' + fetchError.message);
+    return;
+  }
+
+  let addrError;
+  if (existingAddress) {
+    // Update existing default address
+    const { error } = await supabase
+      .from('addresses')
+      .update({
+        full_name: userInfo.full_name,
+        email: userInfo.address_email,
+        country_code,
+        phone: phone_number, // combine in schema column
+        address: userInfo.address_line,
+        city: userInfo.city,
+        state: userInfo.state,
+        pincode: userInfo.pincode,
+      })
+      .eq('id', existingAddress.id);
+    addrError = error;
+  } else {
+    // Insert new default address
+    const { error } = await supabase
+      .from('addresses')
+      .insert([{
+        user_id: user.id,
+        full_name: userInfo.full_name,
+        email: userInfo.address_email,
+        country_code,
+        phone: phone_number, // combine in schema column
+        address: userInfo.address_line,
+        city: userInfo.city,
+        state: userInfo.state,
+        pincode: userInfo.pincode,
+        is_default: true,
+      }]);
+    addrError = error;
+  }
+
+  if (addrError) {
+    setErrorMsg('Failed to save address: ' + addrError.message);
+    return;
+  }
+
+  // Update profiles table for consistency
   const { error: profileUpdateError } = await supabase
     .from('profiles')
     .update({
       full_name: userInfo.full_name,
-      phone: userInfo.phone,
+      country_code,
+      phone: phone_number,
     })
     .eq('id', user.id);
 
@@ -246,8 +317,12 @@ const handleSave = async () => {
     return;
   }
 
-  setSuccessMsg('Profile and address updated successfully!');
+  setSuccessMsg('Profile and address saved successfully!');
 };
+
+
+
+
 
 
 
@@ -342,13 +417,25 @@ const handleLogout = async () => {
 
                   <div>
                     <label className="block text-sm font-medium text-neutral-700 mb-2">Phone Number</label>
-                    <input
-                      type="tel"
-                      value={userInfo.phone || ''}
-                      onChange={e => setUserInfo({ ...userInfo, phone: e.target.value })}
-                      disabled={!isEditing}
-                      className="w-full p-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 disabled:opacity-60"
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={userInfo.country_code || ''}
+                        onChange={e => setUserInfo({ ...userInfo, country_code: e.target.value })}
+                        disabled={!isEditing}
+                        placeholder="+91"
+                        className="w-1/3 p-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 disabled:opacity-60"
+                      />
+                      <input
+                        type="tel"
+                        value={userInfo.phone_number || ''}
+                        onChange={e => setUserInfo({ ...userInfo, phone_number: e.target.value })}
+                        disabled={!isEditing}
+                        placeholder="9900990099"
+                        className="w-2/3 p-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 disabled:opacity-60"
+                      />
+                    </div>
+
                   </div>
 
                   <div className="md:col-span-2">

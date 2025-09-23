@@ -16,7 +16,7 @@ export const logout = async (navigate?: (path: string) => void) => {
 
     // Redirect
     if (navigate) {
-      navigate("/login"); // for SPA navigation
+      navigate("/auth"); // for SPA navigation
     } else {
       window.location.href = "/"; // fallback for non-SPA
     }

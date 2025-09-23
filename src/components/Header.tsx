@@ -26,17 +26,33 @@ const Header = () => {
           : "bg-white/95 backdrop-blur-sm"
       }`}
     >
-      <div className="max-w-full w-full mx-auto px-4 overflow-x-hidden">
-        {/* Futuristic Top Bar */}
-       <div className="relative overflow-hidden py-2 border-b border-neutral-200/50">
-  <div className="relative overflow-hidden">
-    <div className="animate-scroll">
-      {/* Duplicate enough times for seamless loop */}
-      {Array(10).fill(
-        <span className="futuristic-text mx-8 text-sm font-bold">
-          ✨ Free shipping on orders above ₹999
+      
+  <div className="metallic-bar">
+  {/* Sparkles */}
+  {Array.from({ length: 50 }).map((_, i) => (
+    <div key={i} className="sparkle"></div>
+  ))}
+
+  {/* Smooth scrolling text */}
+  <div className="scroll-wrapper">
+    <div className="scroll-content">
+      {Array.from({ length: 20 }).map((_, i) => (
+        <span key={i} className="futuristic-text">
+          {i % 2 === 0
+            ? "✨ Free shipping on orders above ₹999!"
+            : "⚡ Use Code: WELCOME10 & Unlock 10% Savings On Your First Order! 🎉"}
         </span>
-      )}
+      ))}
+    </div>
+    {/* Duplicate content for seamless scroll */}
+    <div className="scroll-content">
+      {Array.from({ length: 20 }).map((_, i) => (
+        <span key={i + 100} className="futuristic-text">
+          {i % 2 === 0
+            ? "✨ Free shipping on orders above ₹999!"
+            : "⚡ Use Code: WELCOME10 & Unlock 10% Savings On Your First Order! 🎉"}
+        </span>
+      ))}
     </div>
   </div>
 </div>
@@ -45,7 +61,12 @@ const Header = () => {
 
 
 
+
+
+
+
        {/* Main header */}
+       <div className="max-w-full w-full mx-auto px-4 overflow-x-hidden">
         <div className="flex items-center justify-between py-4">
           {/* Mobile Logo (visible only on small screens) */}
           <div className="flex items-center sm:hidden group">

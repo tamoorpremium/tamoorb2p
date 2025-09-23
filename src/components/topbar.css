@@ -1,78 +1,95 @@
-/* ===========================
-   Metallic Premium Top Bar + Sparkles
-   =========================== */
+/* =========================== Metallic Premium Top Bar + Sparkles =========================== */ /* Metallic gradient animation */ 
+@keyframes metallicShine 
+{ 
+   0% { background-position: 0% 50%; } 
+   50% { background-position: 100% 50%; } 
+   100% { background-position: 0% 50%; } 
+} 
 
-/* Metallic gradient animation */
-@keyframes metallicShine {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+.metallic-bar { 
+   background: linear-gradient( 
+      120deg, 
+      #0a1a40, 
+      #123b70, 
+      #1a4d9c, 
+      #249eff, 
+      #1a4d9c, 
+      #123b70, 
+      #0a1a40 
+      ); 
+      
+   background-size: 400% 400%; 
+   animation: metallicShine 20s 
+   ease infinite; 
+   
+   border-bottom: 1px 
+   solid rgba(255, 255, 255, 0.15); 
+   position: relative; 
+   overflow: hidden; 
+   width: 100vw; 
+   left: 0; 
+   right: 0; 
+   
+   /* Depth glow */ 
+   box-shadow: inset 
+   0 0 20px rgba(34, 114, 215, 0.4), 
+   0 0 12px rgba(34, 114, 215, 0.6); 
+} 
 
-.metallic-bar {
-  background: linear-gradient(
-    120deg,
-    #0a1a40,
-    #123b70,
-    #1a4d9c,
-    #249eff,
-    #1a4d9c,
-    #123b70,
-    #0a1a40
-  );
-  background-size: 400% 400%;
-  animation: metallicShine 20s ease infinite;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  position: relative;
-  overflow: hidden;
-  width: 100vw;
-  box-shadow: inset 0 0 25px rgba(34, 114, 215, 0.5),
-              0 0 15px rgba(34, 114, 215, 0.7);
-  padding: 0.5rem 0;
-}
+/* Glossy reflection sweep */ 
+.metallic-bar::after 
+{ 
+   content: ""; 
+   position: absolute; 
+   top: 0; 
+   left: -100%; 
+   width: 50%; 
+   height: 100%; 
+   background: linear-gradient
+   ( 
+      120deg, 
+      transparent, 
+      rgba(255, 255, 255, 0.2), 
+      transparent 
+      ); 
+      
+   animation: shineMove 6s infinite; 
+} 
 
-/* Glossy reflection sweep */
-.metallic-bar::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    120deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  animation: shineMove 6s infinite;
-}
+@keyframes shineMove 
+{ 
+   0% { left: -100%; } 
+   50% { left: 120%; } 
+   100% { left: 120%; } 
+} 
 
-@keyframes shineMove {
-  0% { left: -100%; }
-  50% { left: 120%; }
-  100% { left: 120%; }
-}
-
-/* Sparkling Particles */
-@keyframes sparkleFloat {
-  0% { transform: translate(0,0) scale(1); opacity: 1; }
-  50% { transform: translate(10px,-30px) scale(0.5); opacity: 0.6; }
-  100% { transform: translate(-5px,-60px) scale(0.3); opacity: 0; }
-}
-
-@keyframes sparkleTwinkle {
-  0%,100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-
-.metallic-bar .sparkle {
-  position: absolute;
-  background: radial-gradient(circle, #fff 50%, rgba(255,255,255,0) 70%);
-  border-radius: 50%;
-  animation: sparkleFloat 6s linear infinite, sparkleTwinkle 1.5s infinite;
-  pointer-events: none;
-  filter: drop-shadow(0 0 8px #99ccff) drop-shadow(0 0 14px #3399ff);
+/* =========================== Sparkling Particles ✨ =========================== */ /* =========================== Sparkling Particles ✨ =========================== */ 
+@keyframes sparkleFloat 
+{ 
+   from { 
+      transform: translateY(0) scale(1); 
+      opacity: 1; 
+   } to { 
+      transform: translateY(-60px) scale(0.3); 
+      opacity: 0; } 
+   } 
+   
+.metallic-bar .sparkle 
+{ 
+   position: absolute; 
+   background: radial-gradient(
+      circle, 
+      #fff 40%, 
+      rgba(255,255,255,0) 70%
+      ); 
+      
+   border-radius: 50%; 
+   opacity: 0.8; 
+   animation: sparkleFloat 6s linear infinite; 
+   pointer-events: none; 
+   filter: drop-shadow
+   (0 0 6px #66aaff) 
+   drop-shadow(0 0 10px #3399ff); 
 }
 
 /* ===========================
@@ -133,47 +150,89 @@
 .sparkle:nth-child(49) { width: 3px; height: 3px; top: 22%; left: 90%; animation-delay: 9.0s, 0.8s; }
 .sparkle:nth-child(50) { width: 2px; height: 2px; top: 52%; left: 98%; animation-delay: 10.0s, 1.0s; }
 
-/* ===========================
-   Smooth Scrolling Text
-   =========================== */
-:root { --scroll-duration: 180s; }
+/* =========================== Scrolling Text =========================== */ 
 
-.scroll-wrapper {
-  display: flex;
-  width: max-content;
-  animation: scroll var(--scroll-duration) linear infinite;
-}
+@keyframes scroll { 
+   0% { 
+      transform: translateX(0%); 
+   } 100% 
+   { transform: translateX(-50%); 
+   } 
+} 
 
-.scroll-content {
-  display: flex;
-}
+.animate-scroll 
+{ 
+   display: flex; 
+   width: max-content; 
+   animation: scroll var(--scroll-duration) linear infinite; 
+   z-index: 10; 
+   position: relative; 
+} 
 
-@keyframes scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-100%); }
-}
+/* =========================== Futuristic Text Glow =========================== */ 
 
-.futuristic-text {
-  color: #eaf3ff;
-  text-shadow:
-    0 0 4px #4a90e2,
-    0 0 10px #2272d7,
-    0 0 20px #1a4d9c,
-    0 0 30px rgba(34,114,215,0.6);
-  font-weight: 700;
-  white-space: nowrap;
-  flex-shrink: 0;
-  margin-right: 4rem;
-  animation: shimmer 2s infinite alternate;
-}
+.futuristic-text 
+{ 
+   color: #eaf3ff; 
+   text-shadow: 
+   0 0 4px #4a90e2, 
+   0 0 10px #2272d7, 
+   0 0 20px #1a4d9c, 
+   0 0 30px rgba
+   (34,114,215,0.6);
 
-@keyframes shimmer {
-  0% { opacity: 0.8; text-shadow: 0 0 3px #66aaff,0 0 6px #3399ff,0 0 12px #2272d7; }
-  50% { opacity: 1; text-shadow: 0 0 6px #99ccff,0 0 12px #66aaff,0 0 18px #3399ff; }
-  100% { opacity: 0.9; text-shadow: 0 0 3px #66aaff,0 0 6px #3399ff,0 0 12px #2272d7; }
-}
+   font-weight: 700; 
+   animation: shimmer 2s infinite alternate; 
+   white-space: nowrap; 
+   flex-shrink: 0; 
+} 
 
-/* Responsive scroll speed */
-@media (max-width: 1024px) { :root { --scroll-duration: 180s; } }
-@media (max-width: 768px)  { :root { --scroll-duration: 180s; } }
-@media (max-width: 640px)  { :root { --scroll-duration: 180s; } }
+@keyframes shimmer 
+{ 0% 
+   { opacity: 0.8; 
+      text-shadow: 
+      0 0 3px #66aaff, 
+      0 0 6px #3399ff, 
+      0 0 12px #2272d7; 
+   } 50% { 
+      opacity: 1; 
+      text-shadow: 
+      0 0 6px #99ccff, 
+      0 0 12px #66aaff, 
+      0 0 18px #3399ff; 
+   } 100% { 
+      opacity: 0.9; 
+      text-shadow: 
+      0 0 3px #66aaff, 
+      0 0 6px #3399ff, 
+      0 0 12px #2272d7; 
+   } 
+} 
+
+/* =========================== Responsive Scroll Speed =========================== */ 
+
+:root 
+{ 
+   --scroll-duration: 60s; 
+} 
+
+@media (max-width: 1024px) 
+
+{ 
+   
+   :root { --scroll-duration: 60s; } 
+
+} 
+
+@media (max-width: 768px) 
+{ 
+   :root { --scroll-duration: 60s; } 
+
+} 
+
+@media (max-width: 640px) 
+{ 
+   :root { --scroll-duration: 60s; } 
+} 
+
+.animate-scroll > span { margin-right: 4rem; }

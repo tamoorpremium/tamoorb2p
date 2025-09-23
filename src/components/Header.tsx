@@ -9,14 +9,46 @@ import './topbar.css';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showTopBar, setShowTopBar] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+
+  const SCROLL_THRESHOLD = 50; // minimum scroll difference to toggle
 
   useEffect(() => {
+    let ticking = false; // to throttle scroll events
+
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      const currentScrollY = window.scrollY;
+
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const delta = currentScrollY - lastScrollY;
+
+          if (delta > SCROLL_THRESHOLD && showTopBar && currentScrollY > 50) {
+            // scrolling down
+            setShowTopBar(false);
+            setLastScrollY(currentScrollY);
+          } else if (delta < -SCROLL_THRESHOLD && !showTopBar) {
+            // scrolling up
+            setShowTopBar(true);
+            setLastScrollY(currentScrollY);
+          }
+
+          // header background effect
+          setIsScrolled(currentScrollY > 20);
+
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY, showTopBar]);
+
+
 
   return (
     <header
@@ -26,42 +58,48 @@ const Header = () => {
           : "bg-white/95 backdrop-blur-sm"
       }`}
     >
-      
-  <div className="metallic-bar">
-  {/* Sparkles */}
-  {Array.from({ length: 50 }).map((_, i) => (
-    <div key={i} className="sparkle"></div>
-  ))}
+      {/* Futuristic Top Bar */}
+      <div
+        className={`metallic-bar w-screen relative overflow-hidden py-2 transition-all duration-500 ${
+          showTopBar ? "mt-0" : "-mt-10"  // negative margin pulls up the header
+        }`}
+      >
+        <div className="relative overflow-hidden">
+          {Array.from({ length: 100 }).map((_, i) => {
+            const size = Math.floor(Math.random() * 4) + 2;
+            const top = Math.floor(Math.random() * 100);
+            const left = Math.floor(Math.random() * 100);
+            const delay1 = (Math.random() * 10).toFixed(1) + "s";
+            const delay2 = (Math.random() * 2).toFixed(1) + "s";
+            return (
+              <div
+                key={i}
+                className="sparkle absolute rounded-full bg-white opacity-80 animate-twinkle"
+                style={{
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  top: `${top}%`,
+                  left: `${left}%`,
+                  animationDelay: `${delay1}, ${delay2}`,
+                }}
+              ></div>
+            );
+          })}
 
-  {/* Smooth scrolling text */}
-  <div className="scroll-wrapper">
-    <div className="scroll-content">
-      {Array.from({ length: 20 }).map((_, i) => (
-        <span key={i} className="futuristic-text">
-          {i % 2 === 0
-            ? "✨ Free shipping on orders above ₹999!"
-            : "⚡ Use Code: WELCOME10 & Unlock 10% Savings On Your First Order! 🎉"}
-        </span>
-      ))}
-    </div>
-    {/* Duplicate content for seamless scroll */}
-    <div className="scroll-content">
-      {Array.from({ length: 20 }).map((_, i) => (
-        <span key={i + 100} className="futuristic-text">
-          {i % 2 === 0
-            ? "✨ Free shipping on orders above ₹999!"
-            : "⚡ Use Code: WELCOME10 & Unlock 10% Savings On Your First Order! 🎉"}
-        </span>
-      ))}
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
+          <div className="animate-scroll whitespace-nowrap flex">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <span
+                key={i}
+                className="futuristic-text mx-8 text-sm font-bold"
+              >
+                {i % 2 === 0
+                  ? "✨ Free shipping on orders above ₹999!"
+                  : "⚡ Use Code: WELCOME10 & Unlock 10% Savings On Your First Order! 🎉"}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
 
 
 

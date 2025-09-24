@@ -47,6 +47,7 @@ import ReturnsRefundPolicy from './pages/ReturnsRefundPolicy';
 import Shipping from './pages/Shipping';
 import SizeQualityGuide from './pages/SizeQualityGuide';
 import FaqSupport from './pages/FaqSupport';
+import BlogRecipesExpanded from './pages/BlogRecipes';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -144,6 +145,7 @@ function App() {
             <Route path="/shipping-policy" element={<Shipping />} />
             <Route path="/size-quality" element={<SizeQualityGuide />} />
             <Route path="/faq" element={<FaqSupport />} />
+            <Route path="/blog" element={<BlogRecipesExpanded />} />
 
             {/* Protected user routes */}
             <Route

@@ -49,13 +49,54 @@ const Footer = () => {
           <div>
             <h4 className="text-xl font-display font-semibold mb-8 text-white">Quick Links</h4>
             <ul className="space-y-4">
-              {['About Us', 'Our Story', 'Premium Collection', 'Blog & Recipes', 'Contact Us', 'FAQ & Support'].map((link) => (
-                <li key={link}>
-                  <a href="#" className="text-neutral-400 hover:text-luxury-gold transition-colors duration-300 font-medium hover:translate-x-1 transform inline-block">
-                    {link}
-                  </a>
-                </li>
-              ))}
+              <li>
+                <Link
+                  to="/about"
+                  className="text-neutral-400 hover:text-luxury-gold transition-colors duration-300 font-medium hover:translate-x-1 transform inline-block"
+                >
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/about"
+                  className="text-neutral-400 hover:text-luxury-gold transition-colors duration-300 font-medium hover:translate-x-1 transform inline-block"
+                >
+                  Our Story
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/products"
+                  className="text-neutral-400 hover:text-luxury-gold transition-colors duration-300 font-medium hover:translate-x-1 transform inline-block"
+                >
+                  Premium Collection
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/blog"
+                  className="text-neutral-400 hover:text-luxury-gold transition-colors duration-300 font-medium hover:translate-x-1 transform inline-block"
+                >
+                  Blog & Recipes
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/contact"
+                  className="text-neutral-400 hover:text-luxury-gold transition-colors duration-300 font-medium hover:translate-x-1 transform inline-block"
+                >
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/faq"
+                  className="text-neutral-400 hover:text-luxury-gold transition-colors duration-300 font-medium hover:translate-x-1 transform inline-block"
+                >
+                  FAQ & Support
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -94,11 +135,19 @@ const Footer = () => {
             <div className="flex items-center flex-wrap gap-4">
               <span className="text-neutral-400 font-medium">Connect with us:</span>
               <div className="flex gap-3 flex-wrap">
-                {[{ icon: Facebook, color: 'hover:text-blue-500', bg: 'hover:bg-blue-500/10' },
-                  { icon: Twitter, color: 'hover:text-blue-400', bg: 'hover:bg-blue-400/10' },
-                  { icon: Instagram, color: 'hover:text-pink-500', bg: 'hover:bg-pink-500/10' },
-                  { icon: Youtube, color: 'hover:text-red-500', bg: 'hover:bg-red-500/10' }].map(({ icon: Icon, color, bg }, index) => (
-                  <a key={index} href="#" className={`text-neutral-400 ${color} ${bg} transition-all duration-300 p-3 rounded-full hover:scale-110 transform`}>
+                {[
+                  { icon: Facebook, color: 'hover:text-blue-500', bg: 'hover:bg-blue-500/10', link: 'https://www.facebook.com/people/Tamoor-Kolar/61572179471006/' },
+                  { icon: Twitter, color: 'hover:text-blue-400', bg: 'hover:bg-blue-400/10', link: '#' },
+                  { icon: Instagram, color: 'hover:text-pink-500', bg: 'hover:bg-pink-500/10', link: 'https://www.instagram.com/tamoor_kolar/#' },
+                  { icon: Youtube, color: 'hover:text-red-500', bg: 'hover:bg-red-500/10', link: '#' },
+                ].map(({ icon: Icon, color, bg, link }, index) => (
+                  <a
+                    key={index}
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`text-neutral-400 ${color} ${bg} transition-all duration-300 p-3 rounded-full hover:scale-110 transform`}
+                  >
                     <Icon className="w-6 h-6" />
                   </a>
                 ))}
@@ -112,6 +161,7 @@ const Footer = () => {
             </div>
           </div>
         </div>
+
 
         {/* Certifications / Awards */}
         <div className="border-t border-neutral-800 mt-12 pt-12">
@@ -142,3 +192,4 @@ const Footer = () => {
 };
 
 export default Footer;
+ 

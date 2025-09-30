@@ -94,6 +94,8 @@ const AdminProductEdit: React.FC = () => {
     }
   };
 
+  const [uploading, setUploading] = useState(false);
+
   // ✅ Upload images
   const handleUploadImages = async () => {
     if (!id || !initialData?.name || selectedFiles.length === 0) {
@@ -101,10 +103,15 @@ const AdminProductEdit: React.FC = () => {
       return;
     }
 
+    setUploading(true); // disable button
     const productId = parseInt(id);
     const productName = initialData.name.replace(/\s+/g, "-").toLowerCase();
 
-    for (const file of selectedFiles) {
+    // Check if product already has images
+    const alreadyHasImages = productImages.length > 0;
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const file = selectedFiles[i];
       const fileExt = file.name.split(".").pop();
       const uniqueName = `${Date.now()}-${Math.random()
         .toString(36)
@@ -136,22 +143,40 @@ const AdminProductEdit: React.FC = () => {
 
       const newSortOrder = (maxSort?.sort_order ?? 0) + 1;
 
+      const isPrimary = !alreadyHasImages && i === 0;
+
       const { error: dbError } = await supabase.from("product_images").insert({
         product_id: productId,
         image_url: publicUrlData.publicUrl,
-        is_primary: productImages.length === 0, // first uploaded image auto primary
+        is_primary: isPrimary,
         sort_order: newSortOrder,
       });
 
       if (dbError) {
         console.error("DB error:", dbError);
         toast.error(`Failed to save ${file.name} in database`);
+        continue;
+      }
+
+      // ✅ If this is the very first image, update products.image too
+      if (isPrimary) {
+        const { error: productError } = await supabase
+          .from("products")
+          .update({ image: publicUrlData.publicUrl })
+          .eq("id", productId);
+
+        if (productError) {
+          console.error("Failed to update product main image:", productError);
+          toast.error("Failed to set product main image.");
+        }
       }
     }
 
     await fetchProductImages(productId);
     setSelectedFiles([]);
+    setUploading(false); // re-enable button
   };
+
 
   // ✅ Delete image (DB only)
   const handleDeleteImage = async (imageId: number) => {
@@ -253,10 +278,14 @@ const AdminProductEdit: React.FC = () => {
             />
             <button
               onClick={handleUploadImages}
-              className="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg"
+              disabled={uploading}
+              className={`mt-2 px-4 py-2 rounded-lg text-white ${
+                uploading ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+              }`}
             >
-              + Upload Images
+              {uploading ? "Uploading..." : "+ Upload Images"}
             </button>
+
 
             <DragDropContext onDragEnd={handleDragEnd}>
   <Droppable droppableId="images" direction="horizontal">

@@ -24,7 +24,7 @@ const sections = [
 ];
 
 const contentMap: Record<string, string> = {
-  intro: `This document (“Agreement”, “Terms of Service”) is an electronic record under the Information Technology Act, 2000 and the rules framed thereunder, including the Information Technology (Intermediaries Guidelines) Rules, 2011, and is published in accordance with the legal requirements to ensure transparency and compliance. By accessing, browsing, or using www.tamoor.com ( “Site”, “Tamoor”, “Company”, “we”, “our”, or “us”), you acknowledge that you have read, understood, and agree to be legally bound by these Terms of Service, as well as all applicable laws, rules, and regulations. If you do not agree, you are advised not to use this Site or avail of any services.
+  intro: `This document (“Agreement”, “Terms of Service”) is an electronic record under the Information Technology Act, 2000 and the rules framed thereunder, including the Information Technology (Intermediaries Guidelines) Rules, 2011, and is published in accordance with the legal requirements to ensure transparency and compliance. By accessing, browsing, or using www.tamoor.in ( “Site”, “Tamoor”, “Company”, “we”, “our”, or “us”), you acknowledge that you have read, understood, and agree to be legally bound by these Terms of Service, as well as all applicable laws, rules, and regulations. If you do not agree, you are advised not to use this Site or avail of any services.
 
 These Terms apply to all users of the Site, including customers, browsers, suppliers, merchants, resellers, and contributors of content. Your continued use of the Site constitutes your acceptance of these Terms in full.`,
   

@@ -104,13 +104,12 @@ const Footer = () => {
           <div>
             <h4 className="text-xl font-display font-semibold mb-8 text-white">Premium Categories</h4>
             <ul className="space-y-4">
-              {['Luxury Nuts', 'Exotic Dried Fruits', 'Superfood Seeds', 'Artisan Trail Mixes', 'Gift Collections', 'Organic Selection'].map((category) => (
-                <li key={category}>
-                  <a href="#" className="text-neutral-400 hover:text-luxury-gold transition-colors duration-300 font-medium hover:translate-x-1 transform inline-block">
-                    {category}
-                  </a>
-                </li>
-              ))}
+              <li><Link to="/products?categoryId=1" className="text-neutral-400 hover:text-luxury-gold transition-colors duration-300 font-medium hover:translate-x-1 transform inline-block">Premium Nuts</Link></li>
+              <li><Link to="/products?categoryId=10" className="text-neutral-400 hover:text-luxury-gold transition-colors duration-300 font-medium hover:translate-x-1 transform inline-block">Dried Fruits</Link></li>
+              <li><Link to="/products?categoryId=19" className="text-neutral-400 hover:text-luxury-gold transition-colors duration-300 font-medium hover:translate-x-1 transform inline-block">Seeds & Others</Link></li>
+              <li><Link to="/products?categoryId=30" className="text-neutral-400 hover:text-luxury-gold transition-colors duration-300 font-medium hover:translate-x-1 transform inline-block">Chocolates</Link></li>
+              <li><Link to="/products?categoryId=43" className="text-neutral-400 hover:text-luxury-gold transition-colors duration-300 font-medium hover:translate-x-1 transform inline-block">Premium Gift Hampers</Link></li>
+              <li><Link to="/products?categoryId=63" className="text-neutral-400 hover:text-luxury-gold transition-colors duration-300 font-medium hover:translate-x-1 transform inline-block">Scented Candles</Link></li>
             </ul>
           </div>
 
@@ -182,7 +181,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="border-t border-neutral-800 mt-12 pt-8 text-center">
           <p className="text-neutral-400 font-medium">
-            © 2025 TAMOOR Premium. All rights reserved. Crafted with ❤️ for luxury healthy living.
+            © 2025 TAMOOR. All rights reserved. Crafted with ❤️ for luxury healthy living.
           </p>
         </div>
 

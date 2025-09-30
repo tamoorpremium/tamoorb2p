@@ -48,6 +48,7 @@ import Shipping from './pages/Shipping';
 import SizeQualityGuide from './pages/SizeQualityGuide';
 import FaqSupport from './pages/FaqSupport';
 import BlogRecipesExpanded from './pages/BlogRecipes';
+import ExcelProductImport from "./pages/admin/ExcelProductImport";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -181,6 +182,7 @@ function App() {
               <Route path="users" element={<AdminUsers />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="requests" element={<AdminRequests />} />
+              <Route path="excel-import" element={<ExcelProductImport />} />
             </Route>
 
             {/* Catch-all fallback */}

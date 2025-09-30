@@ -106,13 +106,24 @@ const AdminProducts: React.FC = () => {
           <h1 className="text-5xl font-extrabold tracking-wide drop-shadow-lg text-yellow-400">
             Products
           </h1>
-          <button
-            onClick={() => navigate('/admin/products/new')}
-            className="px-6 py-3 bg-yellow-400 text-gray-900 rounded-full shadow-lg hover:shadow-yellow-500/75 transition-transform hover:scale-105"
-          >
-            Add New Product
-          </button>
+
+          <div className="flex gap-4">
+            <button
+              onClick={() => navigate('/admin/products/new')}
+              className="px-6 py-3 bg-yellow-400 text-gray-900 rounded-full shadow-lg hover:shadow-yellow-500/75 transition-transform hover:scale-105"
+            >
+              Add New Product
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/excel-import')}
+              className="px-6 py-3 bg-green-400 text-gray-900 rounded-full shadow-lg hover:shadow-green-500/75 transition-transform hover:scale-105"
+            >
+              Bulk Import
+            </button>
+          </div>
         </div>
+
 
         {/* Category filter dropdown */}
         <div className="max-w-xs mb-6">

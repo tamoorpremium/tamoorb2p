@@ -1,15 +1,15 @@
 import React, { useEffect, useRef } from "react";
 import { Star, ShoppingCart, Heart, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import almondsVideo from "../assets/videos/almonds.mov";
+import almondsVideo from "../assets/videos/Almonds.mp4";
 import cashewsVideo from "../assets/videos/cashews.mp4";
-import pistaVideo from "../assets/videos/pista.mov";
+import pistaVideo from "../assets/videos/Pista.mp4";
 import wallnutsVideo from "../assets/videos/wallnut.mp4";
-import mixnutsVideo from "../assets/videos/mixnuts.mov";
+import mixnutsVideo from "../assets/videos/mixnuts.mp4";
 import mixbowlVideo from "../assets/videos/mixbowlrotate.mp4";
-import medjoolVideo from "../assets/videos/medjool.mov";
+import medjoolVideo from "../assets/videos/medjool.mp4";
 import candlesVideo from "../assets/videos/candles.mp4";
-import giftsVideo from "../assets/videos/gift.mov";
+import giftsVideo from "../assets/videos/gift.mp4";
 
 const FeaturedProducts = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -43,7 +43,7 @@ const FeaturedProducts = () => {
 
   const products = [
   {
-    id: 1,
+    id: 2,
     name: "California Premium Almonds",
     price: 999,
     originalPrice: 1299,
@@ -56,7 +56,7 @@ const FeaturedProducts = () => {
     description: "Rich in vitamin E and healthy fats",
   },
   {
-    id: 2,
+    id: 3,
     name: "Roasted Cashews Premium",
     price: 1599,
     originalPrice: 1899,
@@ -69,7 +69,7 @@ const FeaturedProducts = () => {
     description: "Buttery smooth and perfectly roasted",
   },
   {
-    id: 3,
+    id: 4,
     name: "California Pistachios Jumbo",
     price: 1899,
     originalPrice: 2299,
@@ -82,7 +82,7 @@ const FeaturedProducts = () => {
     description: "Heart-healthy and deliciously crunchy",
   },
   {
-    id: 4,
+    id: 14,
     name: "Medjool Dates Premium",
     price: 899,
     originalPrice: 1199,
@@ -95,7 +95,7 @@ const FeaturedProducts = () => {
     description: "Nature's sweetest superfood",
   },
   {
-    id: 5,
+    id: 10,
     name: "Mixed Dry Fruits Luxury",
     price: 1499,
     originalPrice: 1799,
@@ -108,7 +108,7 @@ const FeaturedProducts = () => {
     description: "Perfect blend of premium nuts",
   },
   {
-    id: 6,
+    id: 5,
     name: "Walnuts Halves Premium",
     price: 1399,
     originalPrice: 1699,
@@ -121,7 +121,7 @@ const FeaturedProducts = () => {
     description: "Brain food with omega-3 goodness",
   },
   {
-    id: 7,
+    id: 19,
     name: "Seeds Mix",
     price: 899,
     originalPrice: 1199,
@@ -134,7 +134,7 @@ const FeaturedProducts = () => {
     description: "Nature's sweetest superfood",
   },
   {
-    id: 8,
+    id: 63,
     name: "Scented Candles",
     price: 299,
     originalPrice: 499,
@@ -147,7 +147,7 @@ const FeaturedProducts = () => {
     description: "Scented Candles with luxury vibes",
   },
   {
-    id: 9,
+    id: 43,
     name: "Gift Hampers",
     price: 999,
     originalPrice: 1299,
@@ -187,103 +187,92 @@ const FeaturedProducts = () => {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {products.map((product) => (
+          {products.map((sub) => (
             <div
-              key={product.id}
-              className="product-card luxury-card neomorphism rounded-3xl overflow-hidden group opacity-0 md:opacity-100 cursor-pointer"
-              onClick={() => navigate("/products")}
+              key={sub.id}
+              className="product-card luxury-card neomorphism rounded-3xl overflow-hidden group opacity-100 cursor-pointer"
+              onClick={() => navigate(`/products?categoryId=${sub.id}`)}
             >
-              {/* Media Section (Video with Fallback to Image) */}
-<div className="relative overflow-hidden">
-  {product.video ? (
-    <video
-      src={product.video}
-      autoPlay
-      loop
-      muted
-      playsInline
-      className="w-full h-64 sm:h-72 object-cover group-hover:scale-110 transition-transform duration-700"
-      poster={product.image} // fallback thumbnail before video plays
-      onError={(e) => {
-        // fallback to image if video fails
-        const target = e.target as HTMLVideoElement;
-        if (product.image) {
-          target.outerHTML = `<img src="${product.image}" alt="${product.name}" class="w-full h-64 sm:h-72 object-cover group-hover:scale-110 transition-transform duration-700" />`;
-        }
-      }}
-    />
-  ) : (
-    <img
-      src={product.image}
-      alt={product.name}
-      className="w-full h-64 sm:h-72 object-cover group-hover:scale-110 transition-transform duration-700"
-    />
-  )}
+              {/* Media Section */}
+              <div className="relative overflow-hidden">
+                {sub.video ? (
+                  <video
+                    src={sub.video}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-64 sm:h-72 object-cover group-hover:scale-110 transition-transform duration-700"
+                    poster={sub.image}
+                  />
+                ) : (
+                  <img
+                    src={sub.image}
+                    alt={sub.name}
+                    className="w-full h-64 sm:h-72 object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                )}
 
-  {/* Overlay */}
-  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-  {/* Badge */}
-  <div
-    className={`absolute top-6 left-6 ${product.badgeColor} text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg`}
-  >
-    {product.badge}
-  </div>
+                {/* Badge */}
+                {sub.badge && (
+                  <div
+                    className={`absolute top-6 left-6 ${sub.badgeColor} text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg`}
+                  >
+                    {sub.badge}
+                  </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="absolute top-6 right-6 flex flex-col space-y-2 sm:space-y-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-3 group-hover:translate-x-0">
-                  <button className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300">
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
+                  >
                     <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-white hover:text-red-400" />
                   </button>
-                  <button className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300">
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
+                  >
                     <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </button>
                 </div>
               </div>
 
               {/* Content Section */}
-              <div className="p-8">
-                <h3 className="font-display font-semibold text-xl text-neutral-800 mb-3 text-center sm:text-left group-hover:text-luxury-gold transition-colors duration-300">
-                  {product.name}
+              <div className="p-8 text-center sm:text-left">
+                <h3 className="font-display font-semibold text-xl text-neutral-800 mb-3 group-hover:text-luxury-gold transition-colors duration-300">
+                  {sub.name}
                 </h3>
 
-                <p className="text-neutral-600 text-sm mb-4 font-medium text-center sm:text-left">
-                  {product.description}
+                <p className="text-neutral-600 text-sm mb-4 font-medium">
+                  {sub.description}
                 </p>
-
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                  <div className="flex items-center justify-center sm:justify-start">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < Math.floor(product.rating)
-                            ? "text-luxury-gold fill-current"
-                            : "text-neutral-300"
-                        }`}
-                      />
-                    ))}
-                    <span className="ml-3 text-sm text-neutral-600 font-medium">
-                      {product.rating} ({product.reviews} reviews)
-                    </span>
-                  </div>
-                </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-2 sm:space-y-0">
                   <div className="flex items-center justify-center sm:justify-start space-x-3">
                     <span className="text-2xl font-display font-bold luxury-gradient">
-                      ₹{product.price}
+                      ₹{sub.price}
                     </span>
                     <span className="text-lg text-neutral-400 line-through font-medium">
-                      ₹{product.originalPrice}
+                      ₹{sub.originalPrice}
                     </span>
                   </div>
                   <div className="text-sm text-luxury-sage font-semibold bg-luxury-sage/10 px-3 py-1 rounded-full text-center sm:text-left">
-                    Save ₹{product.originalPrice - product.price}
+                    Save ₹{sub.originalPrice - sub.price}
                   </div>
                 </div>
 
-                <button className="w-full btn-premium text-white py-4 rounded-full font-semibold text-lg flex items-center justify-center group/btn">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/products?categoryId=${sub.id}`);
+                  }}
+                  className="w-full btn-premium text-white py-4 rounded-full font-semibold text-lg flex items-center justify-center group/btn"
+                >
                   <ShoppingCart className="w-5 h-5 mr-3 group-hover/btn:rotate-12 transition-transform duration-300" />
                   Add to Cart
                 </button>
@@ -304,6 +293,8 @@ const FeaturedProducts = () => {
       </div>
     </section>
   );
+
+
 };
 
 export default FeaturedProducts;

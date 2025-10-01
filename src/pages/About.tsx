@@ -128,7 +128,7 @@ const About = () => {
         {/* Content */}
           <div className="relative z-10 max-w-3xl px-6">
             <h1 className="text-4xl md:text-6xl font-display font-bold text-white mb-6">
-              The <span className="tamoor-gradient">TAMOOR</span> Legacy
+              The <span className="tamoor-gradient font-serif font-extrabold">TAMOOR</span> Legacy
             </h1>
             <p className="text-lg md:text-xl text-neutral-200 leading-relaxed font-medium">
               From humble beginnings to becoming a trusted name in premium dry fruits,
@@ -315,7 +315,7 @@ const About = () => {
       <section className="py-20 bg-gradient-to-br from-neutral-900 via-neutral-800 to-luxury-charcoal text-white relative overflow-hidden">
         <div className="container mx-auto px-4 text-center relative z-10">
           <h2 className="text-3xl md:text-5xl font-display font-bold mb-6">
-            Join the <span className="tamoor-gradient">TAMOOR</span> Family
+            Join the <span className="tamoor-gradient font-serif font-extrabold">TAMOOR</span> Family
           </h2>
           <p className="text-lg md:text-xl text-neutral-300 mb-8 max-w-2xl mx-auto">
             Experience the difference that passion, quality, and dedication make. Start your premium dry fruits journey with us today.

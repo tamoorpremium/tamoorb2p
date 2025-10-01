@@ -84,7 +84,7 @@ In no event shall Tamoor’s aggregate liability, whether in contract, tort, neg
 
 📞 +91-72599 66388
 
-🏢 Tamoor - A Unit of FIFA FOODS,
+🏢 TAMOOR - A Unit of FIFA FOODS,
 office - Rahmania complex,doddapete, Kolar, Karnataka, India.`,
 };
 
@@ -153,7 +153,7 @@ const Terms: React.FC = () => {
                 className="text-amber-300 hover:underline"
               >care@tamoor.in</a> or call <span className="font-medium">+91-72599 66388</span>.
             </p>
-            <p className="mt-3">© {new Date().getFullYear()} Tamoor — All rights reserved.</p>
+            <p className="mt-3 font-serif font-extrabold">© {new Date().getFullYear()} Tamoor — All rights reserved.</p>
           </footer>
         </section>
       </motion.main>

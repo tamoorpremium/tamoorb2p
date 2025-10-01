@@ -156,11 +156,11 @@ const FaqSupport: React.FC = () => {
           <ul className="space-y-2 text-gray-300">
             <li>
               📧 Email:{" "}
-              <a href="mailto:support@example.com" className="text-yellow-500 underline">
-                support@example.com
+              <a href="mailto:support@tamoor.in" className="text-yellow-500 underline">
+                support@tamoor.in
               </a>
             </li>
-            <li>📱 Phone/WhatsApp: +91 9900 999786</li>
+            <li>📱 Phone/WhatsApp: +91 9900 999786 </li>
             <li>💬 Live Chat: Available on our website</li>
           </ul>
         </div>

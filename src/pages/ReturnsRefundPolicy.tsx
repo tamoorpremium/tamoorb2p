@@ -18,7 +18,7 @@ const sections = [
 ];
 
 const contentMap: Record<string, string> = {
-  general: `This Return & Refund Policy ("Policy") governs all returns, refunds, replacements, and cancellations for products purchased on www.tamoor.com ("Tamoor", "we", "our", or "us"). By purchasing from our website, you agree to abide by the terms of this Policy.
+  general: `This Return & Refund Policy ("Policy") governs all returns, refunds, replacements, and cancellations for products purchased on www.tamoor.in ("Tamoor", "we", "our", or "us"). By purchasing from our website, you agree to abide by the terms of this Policy.
 
 While Tamoor endeavors to provide a seamless shopping experience, certain restrictions are necessary to protect product quality, comply with food safety laws, and meet business, legal, and contractual obligations.`,
   
@@ -87,7 +87,7 @@ This Policy is governed by the laws of India and disputes shall be subject to th
 
 In compliance with the Information Technology Act, 2000 and rules thereunder, our designated Grievance Officer is:
 
-**Name:** Mr. [Insert Name]
+**Name:** Mr. IQBAL
 **Email:** grievance@tamoor.in
 **Phone:** +91-72599 66388
 **Address:** Same as above.`,
@@ -158,7 +158,7 @@ const ReturnsRefundPolicy: React.FC = () => {
               This Returns & Refunds Policy should be read together with Tamoor’s Terms of Service and Privacy Policy. For assistance or to exercise your rights, contact us at <a href="mailto:care@tamoor.in" className="text-amber-300 hover:underline">care@tamoor.in</a>.
             </p>
 
-            <p className="mt-3">© {new Date().getFullYear()} Tamoor — All rights reserved.</p>
+            <p className="mt-3 font-serif font-extrabold">© {new Date().getFullYear()} Tamoor — All rights reserved.</p>
           </footer>
         </section>
       </motion.main>

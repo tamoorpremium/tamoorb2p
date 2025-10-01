@@ -120,7 +120,7 @@ const ShippingPolicy: React.FC = () => {
               This Shipping & Delivery Policy should be read together with Tamoor’s Terms of Service, Privacy Policy, and Returns Policy. For assistance, contact us at <a href="mailto:care@tamoor.in" className="text-amber-300 hover:underline">care@tamoor.in</a>.
             </p>
 
-            <p className="mt-3">© {new Date().getFullYear()} Tamoor — All rights reserved.</p>
+            <p className="mt-3 font-serif font-extrabold">© {new Date().getFullYear()} TAMOOR — All rights reserved.</p>
           </footer>
         </section>
       </motion.main>

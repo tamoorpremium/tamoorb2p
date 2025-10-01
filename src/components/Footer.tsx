@@ -24,7 +24,7 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-8">
             <div>
-              <h3 className="text-3xl font-display font-bold tamoor-gradient mb-4">TAMOOR</h3>
+              <h3 className="text-5xl font-serif font-bold tamoor-gradient mb-4">TAMOOR</h3>
               <p className="text-neutral-400 leading-relaxed font-medium">
                 Your trusted destination for the world's finest dry fruits and nuts, curated with passion and delivered with luxury excellence.
               </p>
@@ -136,9 +136,9 @@ const Footer = () => {
               <div className="flex gap-3 flex-wrap">
                 {[
                   { icon: Facebook, color: 'hover:text-blue-500', bg: 'hover:bg-blue-500/10', link: 'https://www.facebook.com/people/Tamoor-Kolar/61572179471006/' },
-                  { icon: Twitter, color: 'hover:text-blue-400', bg: 'hover:bg-blue-400/10', link: '#' },
+                  { icon: Twitter, color: 'hover:text-blue-400', bg: 'hover:bg-blue-400/10', link: 'https://twitter.com' },
                   { icon: Instagram, color: 'hover:text-pink-500', bg: 'hover:bg-pink-500/10', link: 'https://www.instagram.com/tamoor_kolar/#' },
-                  { icon: Youtube, color: 'hover:text-red-500', bg: 'hover:bg-red-500/10', link: '#' },
+                  { icon: Youtube, color: 'hover:text-red-500', bg: 'hover:bg-red-500/10', link: 'https://youtube.com' },
                 ].map(({ icon: Icon, color, bg, link }, index) => (
                   <a
                     key={index}
@@ -181,7 +181,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="border-t border-neutral-800 mt-12 pt-8 text-center">
           <p className="text-neutral-400 font-medium">
-            © 2025 TAMOOR. All rights reserved. Crafted with ❤️ for luxury healthy living.
+            © 2025 <span className='font-serif font-extrabold'>TAMOOR</span>. All rights reserved. Crafted with ❤️ for luxury healthy living.
           </p>
         </div>
 

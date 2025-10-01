@@ -446,7 +446,7 @@ const SizeQualityGuide: React.FC = () => {
 
         {/* Shop with Confidence */}
         <section className="space-y-8 text-center">
-          <h2 className="text-4xl font-semibold tamoor-gradient">Experience Tamoor Luxury – Shop Now</h2>
+          <h2 className="text-4xl font-semibold font-serif tamoor-gradient">Experience TAMOOR Luxury – Shop Now</h2>
           <p className="text-neutral-400 leading-relaxed max-w-3xl mx-auto">
             Explore premium nuts, dried fruits, superfood seeds, chocolates, juices, and curated gift hampers. Elevate snacking, gifting, and culinary experiences with Tamoor’s luxurious products.
           </p>

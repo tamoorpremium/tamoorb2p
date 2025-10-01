@@ -368,7 +368,7 @@ const Auth = () => {
     <div className="min-h-screen bg-gradient-to-br from-luxury-cream via-white to-luxury-cream-dark flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-12">
-          <h1 className="text-3xl sm:text-4xl font-display font-bold tamoor-gradient mb-4">TAMOOR</h1>
+          <h1 className="text-3xl sm:text-5xl font-serif font-extrabold tamoor-gradient mb-4">TAMOOR</h1>
           <p className="text-neutral-600 font-medium">Premium Dry Fruits & Nuts</p>
         </div>
 
@@ -606,7 +606,7 @@ const Auth = () => {
 
 
             {/* OAuth Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+            <div className="grid grid-cols-3 sm:grid-cols-3 gap-3 mt-4">
               <button
                 type="button"
                 onClick={() => handleOAuthSignIn('google')}

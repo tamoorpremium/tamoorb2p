@@ -12,7 +12,7 @@ const Products = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | number>("all");
-  const [priceRange, setPriceRange] = useState([0, 3000]);
+  const [priceRange, setPriceRange] = useState([0, 10000]);
   const [sortBy, setSortBy] = useState('featured');
   const [viewMode, setViewMode] = useState('grid');
   const [showFilters, setShowFilters] = useState(false);
@@ -22,6 +22,10 @@ const Products = () => {
   const [customWeight, setCustomWeight] = useState(50);
   const [quantity, setQuantity] = useState(1);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage] = useState(20); // can adjust to 30 if needed
+  const [totalProducts, setTotalProducts] = useState(0);
+
   //const { addToCart } = useCart();
 
 
@@ -107,7 +111,7 @@ useEffect(() => {
     { label: '1 kg', value: 1000 }
   ];
 
-
+{/*
 useEffect(() => {
   const handleScroll = () => {
     if (window.scrollY > lastScrollY) {
@@ -121,47 +125,79 @@ useEffect(() => {
   window.addEventListener("scroll", handleScroll);
   return () => window.removeEventListener("scroll", handleScroll);
 }, [lastScrollY]);
-
+*/}
   // Fetch products from Supabase
 
+useEffect(() => {
+  setCurrentPage(1);
+}, [searchTerm, selectedCategory, priceRange, sortBy]);
 
 
-  useEffect(() => {
-    const fetchProductsAndWishlist = async () => {
-      setLoading(true);
+useEffect(() => {
+  const fetchProductsAndWishlist = async () => {
+    setLoading(true);
 
+    try {
+      // 1️⃣ Build filter conditions
+      const categoryIds = getCategoryIdsToFilter(selectedCategory);
 
-      // fetch products
-      const { data: productsData, error } = await supabase.from('products').select('*');
-      if (error) {
-        console.error('Error fetching products:', error.message);
-        setProducts([]);
-      } else {
-        setProducts(productsData || []);
-      }
+      let query = supabase
+        .from('products')
+        .select('*', { count: 'exact' })
+        .ilike('name', `%${searchTerm}%`) // search
+        .gte('price', priceRange[0])      // min price
+        .lte('price', priceRange[1]);     // max price
 
+      // Only apply category filter if categoryIds has values and not "all"
+      if (selectedCategory !== 'all' && categoryIds.length > 0) {
+        query = query.in('category_id', categoryIds);
+      }
 
-      // fetch wishlist if user is logged in
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: wishlist } = await supabase
-          .from('wishlists')
-          .select('product_id')
-          .eq('user_id', user.id);
+      // Optional: add sorting
+      if (sortBy === 'price-low') query = query.order('price', { ascending: true });
+      else if (sortBy === 'price-high') query = query.order('price', { ascending: false });
+      else if (sortBy === 'rating') query = query.order('rating', { ascending: false });
+      else if (sortBy === 'newest') query = query.order('created_at', { ascending: false });
 
+      // 2️⃣ Fetch paginated products
+      const { data: productsData, count, error } = await query.range(
+        (currentPage - 1) * productsPerPage,
+        currentPage * productsPerPage - 1
+      );
 
-        if (wishlist) {
-          setWishlistIds(wishlist.map((w) => w.product_id));
-        }
-      }
+      if (error) {
+        console.error('Error fetching products:', error.message);
+        setProducts([]);
+        setTotalProducts(0);
+      } else {
+        setProducts(productsData || []);
+        setTotalProducts(count || 0);
+      }
 
+      // 3️⃣ Fetch wishlist if user is logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: wishlist } = await supabase
+          .from('wishlists')
+          .select('product_id')
+          .eq('user_id', user.id);
 
-      setLoading(false);
-    };
+        if (wishlist) {
+          setWishlistIds(wishlist.map((w) => w.product_id));
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setProducts([]);
+      setTotalProducts(0);
+    }
 
+    setLoading(false);
+  };
 
-    fetchProductsAndWishlist();
-  }, []);
+  fetchProductsAndWishlist();
+}, [currentPage, selectedCategory, searchTerm, priceRange, sortBy]); // dependencies updated
+
 
 
 const toggleWishlist = async (productId: number) => {
@@ -264,7 +300,14 @@ const filteredProducts = products
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
 
     // Category filter
-    const categoryIds = getCategoryIdsToFilter(selectedCategory);
+    let categoryIds: (string | number)[] = [];
+
+    if (selectedCategory === 'all' || selectedCategory === null) {
+      categoryIds = []; // no filter on category
+    } else {
+      categoryIds = getCategoryIdsToFilter(selectedCategory);
+    }
+
     const matchesCategory =
       selectedCategory === 'all' || categoryIds.includes(product.category_id);
 
@@ -354,6 +397,16 @@ const handleAddCart = async () => {
 
 
 useEffect(() => {
+  if (!sectionRef.current) return;
+
+  const cards = sectionRef.current.querySelectorAll('.product-card');
+
+  // Make all cards visible immediately (avoids "0 products" issue)
+  cards.forEach((card) => {
+    card.classList.remove('opacity-0');
+    card.classList.add('opacity-100');
+  });
+
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -362,8 +415,6 @@ useEffect(() => {
           cards.forEach((card, index) => {
             setTimeout(() => {
               card.classList.add('animate-slide-up');
-              card.classList.remove('opacity-0');
-              card.classList.add('opacity-100');
             }, index * 100);
           });
         }
@@ -371,38 +422,45 @@ useEffect(() => {
     },
     { threshold: 0.1 }
   );
-  if (sectionRef.current) {
-    observer.observe(sectionRef.current);
-  }
+
+  observer.observe(sectionRef.current);
+
   return () => observer.disconnect();
 }, [filteredProducts]);
+
 
 return (
   <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white">
     {/* Hero Section */}
-      <section
-        className={`pt-14 ${showFilters ? "pb-4" : "pb-4"} sm:pt-24 sm:pb-12 bg-gradient-to-br from-luxury-cream via-white to-luxury-cream-dark`}
-      >
-      <div className="container mx-auto px-4">
+    <section
+      className={`pt-14 sm:pt-24 sm:pb-12 pb-4 relative`}
+      style={{
+        backgroundImage: `
+          linear-gradient(to bottom right, rgba(0,0,0,0.7), rgba(250,245,240,0)),
+          url('https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/prodherd.jpg')
+        `,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-12">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-neutral-800 mb-6">
-            Premium <span className="tamoor-gradient">TAMOOR</span> Collection
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-neutral-400 mb-6">
+            Premium <span className="tamoor-gradient font-extrabold font-serif">TAMOOR</span> Collection
           </h1>
-          <p className="text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed font-medium">
+          <p className="text-xl text-neutral-300 max-w-3xl mx-auto leading-relaxed font-serif">
             Discover our complete range of luxury dry fruits and nuts, carefully curated for the finest taste experience.
           </p>
         </div>
       </div>
     </section>
 
+
     {/* Filters & Search */}
     <section
-      className={`sticky z-40 glass backdrop-blur-xl border-b border-white/20 py-6
-        transition-transform duration-300 will-change-transform
-        top-0 lg:top-20
-        ${showFilters || showBar ? "translate-y-0" : "lg:-translate-y-full"}`}
+      className="sticky top-0 lg:top-20 z-40 bg-white/70 backdrop-blur-xl border-b border-white/20 py-6 shadow-md rounded-b-2xl"
     >
-
       <div className="container mx-auto px-4">
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-center justify-between">
           {/* Search Bar */}
@@ -428,19 +486,19 @@ return (
               <Filter className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="font-medium">Filters</span>
 
-              {(selectedCategory || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 3000) && (
+              {(selectedCategory || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 10000) && (
                 <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-luxury-gold text-white">
                   Active
                 </span>
               )}
             </button>
 
-            {(selectedCategory !== "all" || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 3000) && (
+            {(selectedCategory !== "all" || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 10000) && (
               <button
                 onClick={() => {
                   setSelectedCategory("all");
                   setSortBy("featured");
-                  setPriceRange([0, 3000]);
+                  setPriceRange([0, 10000]);
                 }}
                 className="text-sm text-red-500 hover:underline"
               >
@@ -466,17 +524,12 @@ return (
                 <List className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
-
           </div>
         </div>
 
         {/* Filter Panel */}
         {showFilters && (
-          <div
-            className={`mt-6 glass rounded-2xl p-6 flex flex-col overflow-hidden transition-all duration-500 max-h-0 ${
-              showFilters ? "max-h-[70vh] animate-slide-up" : ""
-            }`}
-          >
+          <div className="mt-6 glass rounded-2xl p-6 flex flex-col overflow-hidden transition-all duration-500 max-h-[70vh] animate-slide-up">
             {/* Categories */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
@@ -538,7 +591,7 @@ return (
                   <input
                     type="range"
                     min="0"
-                    max="3000"
+                    max="10000"
                     value={priceRange[1]}
                     onChange={(e) =>
                       setPriceRange([priceRange[0], parseInt(e.target.value)])
@@ -584,157 +637,220 @@ return (
       </div>
     </section>
 
-    {/* Products Grid */}
-    <section ref={sectionRef} className="py-16">
-      <div className="container mx-auto px-4">
-        <div className="mb-8 flex items-center justify-between">
-          <p className="text-neutral-600 font-medium">
-            Showing {filteredProducts.length} of {products.length} products
-          </p>
-        </div>
 
-        {loading ? (
-          <div className="text-center text-neutral-500 py-12 font-medium">Loading products...</div>
-        ) : (
-          <div
-            className={`grid gap-4 ${
-              viewMode === "grid"
-                ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3"
-                : "grid-cols-1"
-            }`}
-          >
-        {filteredProducts.map((product) => (
-          <Link
-            key={product.id}
-            to={`/product/${product.id}`}
-            className="block"
-          >
-            <div
-              className={`product-card luxury-card neomorphism rounded-3xl overflow-hidden group opacity-0 ${
-                viewMode === "list" ? "flex flex-col md:flex-row" : ""
-              }`}
+    {/* Products Grid */}
+  <section ref={sectionRef} className="py-16">
+    <div className="container mx-auto px-4">
+      <div className="mb-8 flex items-center justify-between">
+        <p className="text-neutral-600 font-medium">
+          Showing {(currentPage - 1) * productsPerPage + 1} - {Math.min(currentPage * productsPerPage, totalProducts)} of {totalProducts} products
+        </p>
+      </div>
+
+      {loading ? (
+        <div className="text-center text-neutral-500 py-12 font-medium">Loading products...</div>
+      ) : (
+        <div
+          className={`grid gap-4 ${
+            viewMode === "grid"
+              ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3"
+              : "grid-cols-1"
+          }`}
+        >
+          {filteredProducts.map((product) => (
+            <Link
+              key={product.id}
+              to={`/product/${product.id}`}
+              className="block"
             >
-              {/* Product Image */}
               <div
-                className={`relative overflow-hidden ${
-                  viewMode === "list" ? "md:w-1/3" : ""
+                className={`product-card luxury-card neomorphism rounded-3xl overflow-hidden group opacity-0 ${
+                  viewMode === "list" ? "flex flex-col md:flex-row" : ""
                 }`}
               >
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className={`w-full ${
+                {/* Product Image */}
+                <div
+                  className={`relative overflow-hidden ${
+                    viewMode === "list" ? "md:w-1/3" : ""
+                  }`}
+                >
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className={`w-full ${
+                      viewMode === "list"
+                        ? "h-40 md:h-full object-cover"
+                        : "h-40 sm:h-56 md:h-72 object-cover"
+                    } sm:group-hover:scale-110 transition-transform duration-700`}
+                  />
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                  <div className="absolute top-3 right-3 sm:top-6 sm:right-6 flex flex-col space-y-2 sm:space-y-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 transform sm:translate-x-2 sm:group-hover:translate-x-0">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toggleWishlist(product.id);
+                      }}
+                      className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
+                    >
+                      <Heart
+                        className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                          wishlistIds.includes(product.id)
+                            ? "text-red-500 fill-red-500"
+                            : "text-white hover:text-red-400"
+                        }`}
+                      />
+                    </button>
+                    <button
+                      onClick={(e) => e.preventDefault()}
+                      className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
+                    >
+                      <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Product Details */}
+                <div
+                  className={`${
                     viewMode === "list"
-                      ? "h-40 md:h-full object-cover"
-                      : "h-40 sm:h-56 md:h-72 object-cover"
-                  } sm:group-hover:scale-110 transition-transform duration-700`} // ✅ hover only on sm+
-                />
+                      ? "md:w-2/3 md:pl-6 flex flex-col justify-between"
+                      : "p-4 sm:p-6"
+                  }`}
+                >
+                  <div className="space-y-2 sm:space-y-3">
+                    <h3 className="font-display font-semibold text-sm sm:text-xl text-neutral-800 group-hover:text-luxury-gold transition-colors duration-300">
+                      {product.name}
+                    </h3>
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300"></div>
+                    {/* Hide description on mobile */}
+                    <p className="hidden sm:block text-neutral-600 text-sm font-medium">
+                      {product.description}
+                    </p>
 
-                <div className="absolute top-3 right-3 sm:top-6 sm:right-6 flex flex-col space-y-2 sm:space-y-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 transform sm:translate-x-2 sm:group-hover:translate-x-0">
+                    {/* Stars + rating */}
+                    <div className="flex items-center text-[10px] sm:text-sm">
+                      <div className="flex items-center space-x-0.5 sm:space-x-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-2.5 h-2.5 sm:w-4 sm:h-4 ${
+                              i < Math.floor(product.rating)
+                                ? "text-luxury-gold fill-current"
+                                : "text-neutral-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="ml-1 sm:ml-3 text-neutral-600 font-medium text-[10px] sm:text-sm">
+                        {product.rating} ({product.reviews})
+                      </span>
+                    </div>
+
+                    {/* Price + original + discount */}
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span className="text-lg sm:text-2xl font-display font-bold tamoor-gradient">
+                        ₹{product.price} /{" "}
+                        {product.measurement_unit === "kilograms" ? "kg" : "pcs"}
+                      </span>
+                      <span className="text-sm sm:text-lg text-neutral-400 line-through font-medium">
+                        ₹{product.original_price}
+                      </span>
+                      <span className="text-xs sm:text-sm text-luxury-sage font-semibold bg-luxury-sage/10 px-2 py-1 rounded-full">
+                        Save ₹{product.original_price - product.price}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Add to Cart button */}
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      toggleWishlist(product.id);
+                      if (product.measurement_unit === "kilograms") {
+                        setSelectedProduct(product);
+                        setShowQuantityModal(true);
+                      } else {
+                        handleAddCartDirect(product, 1);
+                      }
                     }}
-                    className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
+                    className="w-full btn-premium text-white py-1 px-0.5 sm:py-4 sm:px-4 rounded-full font-extrabold text-[8px] sm:text-lg flex items-center justify-center gap-1 sm:gap-3 mt-2 sm:mt-4"
                   >
-                    <Heart
-                      className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                        wishlistIds.includes(product.id)
-                          ? "text-red-500 fill-red-500"
-                          : "text-white hover:text-red-400"
-                      }`}
-                    />
-                  </button>
-                  <button
-                    onClick={(e) => e.preventDefault()}
-                    className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
-                  >
-                    <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    <ShoppingCart className="w-3 h-3 sm:w-5 sm:h-5" />
+                    Add to Cart
                   </button>
                 </div>
               </div>
+            </Link>
+          ))}
+        </div>
+      )}
 
-              {/* Product Details */}
-              <div
-                className={`${
-                  viewMode === "list"
-                    ? "md:w-2/3 md:pl-6 flex flex-col justify-between"
-                    : "p-4 sm:p-6"
-                }`}
-              >
-                <div className="space-y-2 sm:space-y-3">
-                  <h3 className="font-display font-semibold text-sm sm:text-xl text-neutral-800 group-hover:text-luxury-gold transition-colors duration-300">
-                    {product.name}
-                  </h3>
+      {/* Pagination */}
+      {totalProducts > productsPerPage && (
+        <div className="mt-4 flex justify-center items-center space-x-2">
 
-                  {/* Hide description on mobile */}
-                  <p className="hidden sm:block text-neutral-600 text-sm font-medium">
-                    {product.description}
-                  </p>
+          {/* Prev Button */}
+          <button
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded-lg border transition-all duration-300 ${
+              currentPage === 1
+                ? "bg-neutral-200 text-neutral-500 cursor-default"
+                : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
+            }`}
+          >
+            Prev
+          </button>
 
-                  {/* Stars + rating */}
-                  <div className="flex items-center text-[10px] sm:text-sm">
-                    <div className="flex items-center space-x-0.5 sm:space-x-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-2.5 h-2.5 sm:w-4 sm:h-4 ${
-                            i < Math.floor(product.rating)
-                              ? "text-luxury-gold fill-current"
-                              : "text-neutral-300"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="ml-1 sm:ml-3 text-neutral-600 font-medium text-[10px] sm:text-sm">
-                      {product.rating} ({product.reviews})
-                    </span>
-                  </div>
+          {/* Page Numbers */}
+          {Array.from({ length: Math.ceil(totalProducts / productsPerPage) }, (_, i) => {
+            const page = i + 1;
 
-                  {/* Price + original + discount */}
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-lg sm:text-2xl font-display font-bold tamoor-gradient">
-                      ₹{product.price} /{" "}
-                      {product.measurement_unit === "kilograms" ? "kg" : "pcs"}
-                    </span>
-                    <span className="text-sm sm:text-lg text-neutral-400 line-through font-medium">
-                      ₹{product.original_price}
-                    </span>
-                    <span className="text-xs sm:text-sm text-luxury-sage font-semibold bg-luxury-sage/10 px-2 py-1 rounded-full">
-                      Save ₹{product.original_price - product.price}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Add to Cart button */}
+            // Show first, last, and pages around current page
+            if (page === 1 || page === Math.ceil(totalProducts / productsPerPage) || (page >= currentPage - 2 && page <= currentPage + 2)) {
+              return (
                 <button
-                  onClick={(e) => {
-                    e.preventDefault(); // stop navigation when adding to cart
-                    if (product.measurement_unit === "kilograms") {
-                      setSelectedProduct(product);
-                      setShowQuantityModal(true);
-                    } else {
-                      handleAddCartDirect(product, 1);
-                    }
-                  }}
-                  className="w-full btn-premium text-white py-1 px-0.5 sm:py-4 sm:px-4 rounded-full font-extrabold text-[8px] sm:text-lg flex items-center justify-center gap-1 sm:gap-3 mt-2 sm:mt-4"
+                  key={i}
+                  onClick={() => setCurrentPage(page)}
+                  disabled={currentPage === page}
+                  className={`px-4 py-2 rounded-lg border transition-all duration-300 ${
+                    currentPage === page
+                      ? "bg-luxury-gold text-white border-luxury-gold cursor-default"
+                      : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
+                  }`}
                 >
-                  <ShoppingCart className="w-3 h-3 sm:w-5 sm:h-5" />
-                  Add to Cart
+                  {page}
                 </button>
-              </div>
-            </div>
-          </Link>
-        ))}
+              );
+            }
 
+            // Add "..." for skipped pages
+            if (page === currentPage - 3 || page === currentPage + 3) {
+              return <span key={i} className="px-2 text-neutral-400">...</span>;
+            }
 
-      </div>
-    )}
-  </div>
-</section>
+            return null;
+          })}
+
+          {/* Next Button */}
+          <button
+            onClick={() => setCurrentPage(Math.min(Math.ceil(totalProducts / productsPerPage), currentPage + 1))}
+            disabled={currentPage === Math.ceil(totalProducts / productsPerPage)}
+            className={`px-3 py-1 rounded-lg border transition-all duration-300 ${
+              currentPage === Math.ceil(totalProducts / productsPerPage)
+                ? "bg-neutral-200 text-neutral-500 cursor-default"
+                : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
+            }`}
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+    </div>
+  </section>
+
     {/* Quantity Selection Modal will be continued in the next part */}
         {/* Quantity Selection Modal */}
     {showQuantityModal && selectedProduct && (() => {

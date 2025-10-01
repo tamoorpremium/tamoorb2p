@@ -113,7 +113,7 @@ const Header = () => {
               alt="Tamoor Logo"
               className="w-10 h-10 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
             />
-            <h1 className="text-3xl font-display font-bold tamoor-gradient">
+            <h1 className="text-3xl font-serif font-bold tamoor-gradient">
               TAMOOR
             </h1>
           </div>
@@ -125,10 +125,10 @@ const Header = () => {
               alt="Tamoor Logo"
               className="w-16 h-16 object-contain mr-3 transition-transform duration-300 group-hover:scale-110"
             />
-            <h1 className="text-5xl sm:text-6xl font-display font-bold tamoor-gradient">
+            <h1 className="text-5xl sm:text-6xl font-serif font-bold tamoor-gradient">
               TAMOOR
             </h1>
-            <span className="ml-3 text-sm sm:text-base text-luxury-gold font-medium bg-luxury-gold/10 px-3 py-1 rounded-full">
+            <span className="ml-3 text-sm sm:text-base text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-3 py-1 rounded-full">
               Premium
             </span>
           </div>

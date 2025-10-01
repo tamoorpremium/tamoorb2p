@@ -13,10 +13,10 @@ const ExcelProductImport: React.FC = () => {
 
   // Unit mapping
   const unitMap: Record<number, string> = {
-    0: "Kilograms",
-    1: "Pieces",
-    2: "Liters",
-    3: "Grams",
+    0: "kilograms",
+    1: "pieces",
+    2: "liters",
+    3: "grams",
   };
 
   // Headers shown in Excel
@@ -129,8 +129,8 @@ const ExcelProductImport: React.FC = () => {
             : 0,
           category_id: categoryId,
           measurement_unit:
-            unitMap[Number(row["Measurement Unit"])] || "Kilograms",
-          stock_unit: unitMap[Number(row["Stock Unit"])] || "Kilograms",
+            unitMap[Number(row["Measurement Unit"])] || "kilograms",
+          stock_unit: unitMap[Number(row["Stock Unit"])] || "kilograms",
           stock_quantity: row["Stock Quantity"]
             ? Number(row["Stock Quantity"])
             : 0,

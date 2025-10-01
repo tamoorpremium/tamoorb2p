@@ -696,7 +696,7 @@ const handleSaveNewAddress = async () => {
       <div className="container mx-auto px-4 pb-20">
         <div className="mb-12">
           <h1 className="text-3xl sm:text-5xl font-display font-bold text-neutral-800 mb-4">
-            Secure <span className="tamoor-gradient">Checkout</span>
+            Secure <span className="tamoor-gradient font-serif font-extrabold">CHECKOUT</span>
           </h1>
           <p className="text-xl text-neutral-600 font-medium">
             Complete your order with our secure checkout process

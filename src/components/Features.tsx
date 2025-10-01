@@ -86,7 +86,7 @@ const Features = () => {
             <div className="w-12 h-0.5 bg-gradient-to-l from-transparent to-luxury-gold"></div>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-neutral-800 mb-6">
-            The <span className="luxury-gradient">Tamoor</span> Promise
+            The <span className="luxury-gradient font-serif">TAMOOR</span> Promise
           </h2>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed font-medium">
             We're committed to delivering the finest quality dry fruits with exceptional service,

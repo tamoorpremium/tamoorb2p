@@ -43,7 +43,7 @@ const Newsletter = () => {
           </div>
 
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-display font-bold mb-8">
-            Get <span className="luxury-gradient">15% Off</span> Your First Order
+            Get <span className="luxury-gradient">10% Off</span> Your First Order
           </h2>
 
           <p className="text-base sm:text-xl text-neutral-300 mb-12 max-w-2xl mx-auto leading-relaxed font-medium">

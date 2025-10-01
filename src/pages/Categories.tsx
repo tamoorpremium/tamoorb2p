@@ -136,7 +136,7 @@ const Categories = () => {
     <section ref={sectionRef} className="py-12 sm:py-24 bg-white">
       <div className="container mx-auto px-4">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-neutral-800 mb-16 text-center">
-          Explore <span className="luxury-gradient">TAMOOR</span> Categories
+          Explore <span className="luxury-gradient font-serif font-extrabold">TAMOOR</span> Categories
         </h1>
 
         {parents.map((parent) => {

@@ -139,7 +139,7 @@ const PrivacyPolicy: React.FC = () => {
               This Privacy Policy should be read together with Tamoor’s Terms of Service and Returns Policy. For assistance or to exercise your rights, contact us at <a href="mailto:care@tamoor.in" className="text-amber-300 hover:underline">care@tamoor.in</a>.
             </p>
 
-            <p className="mt-3">© {new Date().getFullYear()} Tamoor — All rights reserved.</p>
+            <p className="mt-3 font-serif font-extrabold">© {new Date().getFullYear()} Tamoor — All rights reserved.</p>
           </footer>
         </section>
       </motion.main>

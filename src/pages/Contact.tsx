@@ -120,7 +120,7 @@ const Contact = () => {
               <div className="w-12 h-0.5 bg-gradient-to-l from-transparent to-luxury-gold"></div>
             </div>
             <h1 className="text-5xl md:text-6xl font-display font-bold text-neutral-800 mb-6">
-              Contact <span className="tamoor-gradient">TAMOOR</span>
+              Contact <span className="tamoor-gradient font-serif font-extrabold">TAMOOR</span>
             </h1>
             <p className="text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed font-medium">
               Have questions about our premium dry fruits? Need personalized recommendations? 
@@ -386,7 +386,7 @@ const Contact = () => {
       <section className="py-16 bg-gradient-to-br from-neutral-900 via-neutral-800 to-luxury-charcoal text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-display font-bold mb-6">
-            Connect with <span className="tamoor-gradient">TAMOOR</span>
+            Connect with <span className="tamoor-gradient font-serif font-extrabold">TAMOOR</span>
           </h2>
           <p className="text-neutral-300 mb-8 max-w-2xl mx-auto">
             Follow us on social media for the latest updates, recipes, and exclusive offers
@@ -394,8 +394,8 @@ const Contact = () => {
           
           <div className="flex justify-center space-x-6">
             {[
-              { name: 'Facebook', icon: Facebook, color: 'hover:text-blue-400', url: 'https://facebook.com' },
-              { name: 'Instagram', icon: Instagram, color: 'hover:text-pink-400', url: 'https://instagram.com' },
+              { name: 'Facebook', icon: Facebook, color: 'hover:text-blue-400', url: 'https://www.facebook.com/people/Tamoor-Kolar/61572179471006/' },
+              { name: 'Instagram', icon: Instagram, color: 'hover:text-pink-400', url: 'https://www.instagram.com/tamoor_kolar/#' },
               { name: 'Twitter', icon: Twitter, color: 'hover:text-blue-300', url: 'https://twitter.com' },
               { name: 'YouTube', icon: Youtube, color: 'hover:text-red-400', url: 'https://youtube.com' },
               { name: 'LinkedIn', icon: Linkedin, color: 'hover:text-blue-500', url: 'https://linkedin.com' }

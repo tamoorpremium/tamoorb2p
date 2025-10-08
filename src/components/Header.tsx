@@ -3,15 +3,12 @@ import { Search, ShoppingCart, User, Menu, X, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import "./topbar.css";
 
-// Use useMemo to ensure sparkleCount is calculated only when necessary, if possible.
-// For simplicity, we keep it inside, but add the other enhancements.
-
 const Header = () => {
-  // ... (State and useEffect remain the same)
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showTopBar, setShowTopBar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [isSearchOpen, setIsSearchOpen] = useState(false); // NEW STATE for search overlay
   const SCROLL_THRESHOLD = 50;
 
   // Scroll behavior for hide/show topbar
@@ -47,6 +44,47 @@ const Header = () => {
   const sparkleCount = isLargeScreen ? 100 : 30;
 
 
+  // Component for the Full-Screen Search Overlay
+  const MobileSearchOverlay = () => {
+    if (!isSearchOpen) return null;
+
+    return (
+      <div 
+        className="fixed inset-0 bg-white z-[60] flex flex-col p-4 sm:p-8 transition-opacity duration-300"
+      >
+        <div className="flex items-center justify-between pb-6 border-b border-neutral-200">
+          <h2 className="text-xl font-bold text-neutral-800">Search Products</h2>
+          <button
+            onClick={() => setIsSearchOpen(false)}
+            className="p-2 hover:bg-neutral-100 rounded-full"
+            aria-label="Close search"
+          >
+            <X className="w-6 h-6 text-neutral-700" />
+          </button>
+        </div>
+        
+        <div className="flex items-center glass rounded-full px-4 py-3 w-full mt-6 shadow-md">
+          <Search className="w-6 h-6 text-neutral-500 mr-3 flex-shrink-0" />
+          <input
+            type="text"
+            placeholder="Search premium dry fruits..."
+            aria-label="Search"
+            // Auto-focus the input when the overlay opens for better UX
+            autoFocus 
+            className="bg-transparent flex-1 outline-none text-lg text-neutral-700 placeholder-neutral-400 min-w-0"
+          />
+        </div>
+
+        {/* You can add recent searches or popular categories here */}
+        <div className="mt-8">
+            <p className="text-sm text-neutral-500">Popular Searches:</p>
+            {/* Add quick links here if needed */}
+        </div>
+      </div>
+    );
+  };
+
+
   return (
     <header
       className={`sticky top-0 z-50 transition-all duration-500 ${
@@ -55,6 +93,9 @@ const Header = () => {
           : "bg-white/95 backdrop-blur-sm"
       }`}
     >
+      {/* 1. Insert the search overlay */}
+      <MobileSearchOverlay />
+      
       {/* Futuristic Top Bar (content unchanged) */}
       <div
         className={`metallic-bar w-full relative overflow-hidden py-2 transition-transform duration-300 ease-in-out ${
@@ -97,7 +138,6 @@ const Header = () => {
 
       {/* Main Header Container */}
       <div className="max-w-full w-full mx-auto px-4 overflow-x-hidden">
-        {/* IMPROVEMENT: Use 'items-center' for consistent vertical alignment */}
         <div className="flex items-center justify-between py-4">
 
           {/* LOGO CONTAINER */}
@@ -106,7 +146,6 @@ const Header = () => {
               <img
                 src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
                 alt="Tamoor Logo"
-                // IMPROVEMENT: Added loading="eager" for primary logo performance
                 loading="eager" 
                 className="w-10 h-10 md:w-12 md:h-12 xl:w-16 xl:h-16 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
               />
@@ -121,10 +160,9 @@ const Header = () => {
 
 
           {/* DESKTOP NAVIGATION & SEARCH BAR GROUP */}
-          {/* Hidden until the XL breakpoint (1280px) */}
           <div className="hidden xl:flex items-center space-x-8 flex-grow justify-end min-w-0">
             
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation (unchanged) */}
             <nav className="flex items-center space-x-8 flex-shrink-0">
               {[
                 { name: "Home", href: "/" },
@@ -144,13 +182,12 @@ const Header = () => {
               ))}
             </nav>
 
-            {/* Search Bar */}
+            {/* Desktop Search Bar (unchanged) */}
             <div className="flex items-center glass rounded-full px-4 py-2 w-full max-w-xs flex-shrink group hover:shadow-lg transition-all duration-300">
               <Search className="w-5 h-5 text-neutral-400 mr-3 group-hover:text-luxury-gold transition-colors duration-300 flex-shrink-0" />
               <input
                 type="text"
                 placeholder="Search premium dry fruits..."
-                // IMPROVEMENT: Added aria-label for accessibility
                 aria-label="Search premium dry fruits"
                 className="bg-transparent flex-1 outline-none text-sm text-neutral-700 placeholder-neutral-400 min-w-0"
               />
@@ -161,15 +198,16 @@ const Header = () => {
           {/* RIGHT ICONS & MENU BUTTON */}
           <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 flex-shrink-0 xl:mr-24">
             
-            {/* Search Icon (Visible on Tablet/MD screens to replace search bar) */}
+            {/* Search Icon - NOW Toggles the search overlay */}
             <button 
                 className="xl:hidden p-1 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 flex-shrink-0"
-                aria-label="Search" // IMPROVEMENT: Added aria-label
+                aria-label="Search"
+                onClick={() => setIsSearchOpen(true)} // Toggles the new state
             >
               <Search className="w-4 h-4 sm:w-7 sm:h-7 text-neutral-700 hover:text-luxury-gold transition-colors duration-300" />
             </button>
 
-            {/* Common Icons (Wishlist, User, Cart) */}
+            {/* Common Icons (Wishlist, User, Cart) - unchanged */}
             {[
               { icon: Heart, count: null, to: "/wishlist", label: "Wishlist" },
               { icon: User, count: null, to: "/profile", label: "Profile" },
@@ -178,7 +216,6 @@ const Header = () => {
               <Link
                 key={index}
                 to={to}
-                // IMPROVEMENT: Added aria-label for accessibility
                 aria-label={label} 
                 className={`p-1 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group flex-shrink-0 ${
                   index === 2 ? "cart-button" : ""
@@ -193,11 +230,10 @@ const Header = () => {
               </Link>
             ))}
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button - unchanged */}
             <button
               className="xl:hidden p-2 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              // IMPROVEMENT: Added aria-expanded for screen readers
               aria-expanded={isMenuOpen} 
               aria-controls="mobile-menu"
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
@@ -207,19 +243,11 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Removed internal search bar as it's now in the overlay */}
         {isMenuOpen && (
           <div id="mobile-menu" className="xl:hidden py-6 border-t border-neutral-200/50 animate-slide-up">
             <div className="flex flex-col space-y-6">
-              <div className="flex items-center glass rounded-full px-4 py-2 w-full">
-                <Search className="w-5 h-5 text-neutral-400 mr-3" />
-                <input
-                  type="text"
-                  placeholder="Search premium dry fruits..."
-                  aria-label="Search"
-                  className="bg-transparent flex-1 outline-none text-neutral-700 placeholder-neutral-400"
-                />
-              </div>
+              {/* Navigation links for mobile menu */}
               {[
                 { name: "Home", href: "/" },
                 { name: "Products", href: "/products" },

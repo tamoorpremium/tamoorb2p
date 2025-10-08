@@ -49,7 +49,7 @@ const Header = () => {
           : "bg-white/95 backdrop-blur-sm"
       }`}
     >
-      {/* Futuristic Top Bar (Top bar is fine as it's overflow-hidden) */}
+      {/* Futuristic Top Bar */}
       <div
         className={`metallic-bar w-full relative overflow-hidden py-2 transition-transform duration-300 ease-in-out ${
           showTopBar ? "translate-y-0" : "-translate-y-full"
@@ -90,12 +90,12 @@ const Header = () => {
       </div>
 
       {/* Main Header */}
-      {/* The container already has overflow-x-hidden, which is good. */}
       <div className="max-w-full w-full mx-auto px-4 overflow-x-hidden">
-        {/* Re-enabling justify-between for large screens, but keeping gap for general spacing. */}
-        <div className="flex items-center justify-between py-4 gap-4">
+        {/* CRITICAL FIX: Removed justify-between and flex-nowrap. Added gap-4 for controlled spacing. */}
+        <div className="flex items-center py-4 gap-4">
           
-          {/* Logo Container Group - MUST allow shrinking on smaller large screens */}
+          {/* Logo Container Group - Allow it to shrink, but prevent text wrapping */}
+          {/* FIX: Added min-w-0 and flex-shrink */}
           <div className="flex items-center flex-shrink min-w-0">
             {/* Mobile Logo (below 640px) */}
             <div className="flex items-center sm:hidden group whitespace-nowrap">
@@ -109,7 +109,7 @@ const Header = () => {
               </Link>
             </div>
 
-            {/* Tablet Logo (640px–1023px) - Still hidden on large screens */}
+            {/* Tablet Logo (640px–1023px) */}
             <div className="hidden sm:flex lg:hidden items-center group whitespace-nowrap overflow-hidden pr-4">
               <Link to="/home" className="flex items-center whitespace-nowrap overflow-hidden">
                 <img
@@ -126,16 +126,15 @@ const Header = () => {
               </Link>
             </div>
 
-            {/* Desktop Logo (from 1024px and above) - FIX: Reduced margin and font size for lg */}
-            <div className="hidden lg:flex items-center group whitespace-nowrap lg:ml-8 xl:ml-20 flex-shrink-0">
+            {/* Desktop Logo (from 1024px and above) */}
+            <div className="hidden lg:flex items-center group whitespace-nowrap ml-20 flex-shrink-0">
               <Link to="/home" className="flex items-center whitespace-nowrap">
                 <img
                   src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
                   alt="Tamoor Logo"
-                  className="w-12 h-12 object-contain mr-3 transition-transform duration-300 group-hover:scale-110 flex-shrink-0"
+                  className="w-16 h-16 object-contain mr-3 transition-transform duration-300 group-hover:scale-110 flex-shrink-0"
                 />
-                {/* Adjusted font size */}
-                <h1 className="text-4xl lg:text-5xl font-serif font-bold tamoor-gradient mr-3 flex-shrink-0">
+                <h1 className="text-5xl lg:text-6xl font-serif font-bold tamoor-gradient mr-3 flex-shrink-0">
                   TAMOOR
                 </h1>
                 <span className="text-sm lg:text-base text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-3 py-1 rounded-full flex-shrink-0">
@@ -147,9 +146,9 @@ const Header = () => {
           {/* End Logo Container Group */}
 
 
-          {/* Desktop Navigation - FLEX-GROW and reduced space-x for lg screen */}
-          <nav className="hidden lg:flex items-center lg:space-x-4 xl:space-x-8 flex-grow">
-            {/* Navigation items... */}
+          {/* Desktop Navigation - Hidden on tablet (md) */}
+          <nav className="hidden lg:flex items-center space-x-5 lg:space-x-8 flex-shrink-0">
+            {/* Navigation items... (same as before) */}
             {[
               { name: "Home", href: "/" },
               { name: "Products", href: "/products" },
@@ -160,7 +159,7 @@ const Header = () => {
               <a
                 key={item.name}
                 href={item.href}
-                className="text-neutral-800 hover:text-luxury-gold font-semibold transition-all duration-300 relative group text-sm xl:text-base whitespace-nowrap"
+                className="text-neutral-800 hover:text-luxury-gold font-semibold transition-all duration-300 relative group"
               >
                 {item.name}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-luxury-gold to-luxury-gold-light transition-all duration-300 group-hover:w-full"></span>
@@ -168,18 +167,19 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Search Bar - FIX: Ensure it shrinks and its width is controlled */}
-          <div className="hidden lg:flex items-center glass rounded-full px-4 py-2 w-full lg:max-w-xs xl:max-w-sm group hover:shadow-lg transition-all duration-300 flex-shrink">
+          {/* Search Bar - Hidden on tablet (md) */}
+          <div className="hidden lg:flex items-center glass rounded-full px-4 py-2 w-full lg:max-w-sm group hover:shadow-lg transition-all duration-300 flex-grow">
             <Search className="w-5 h-5 text-neutral-400 mr-3 group-hover:text-luxury-gold transition-colors duration-300 flex-shrink-0" />
             <input
               type="text"
               placeholder="Search premium dry fruits..."
-              className="bg-transparent flex-1 outline-none text-sm text-neutral-700 placeholder-neutral-400 min-w-0"
+              className="bg-transparent flex-1 outline-none text-sm text-neutral-700 placeholder-neutral-400"
             />
           </div>
 
-          {/* Right Icons - MUST NOT shrink and must not have margins pushing it out */}
-          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 lg:space-x-5 flex-shrink-0">
+          {/* Right Icons - Ensure this group does NOT shrink */}
+          {/* FIX: Added flex-shrink-0 and removed unnecessary lg:mr-24 which was only needed for desktop gap */}
+          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 flex-shrink-0">
             {[
               { icon: Heart, count: null, to: "/wishlist" },
               { icon: User, count: null, to: "/profile" },
@@ -188,11 +188,11 @@ const Header = () => {
               <Link
                 key={index}
                 to={to}
-                className={`p-1 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group flex-shrink-0 ${
+                className={`p-1 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group ${
                   index === 2 ? "cart-button" : ""
                 }`}
               >
-                <Icon className="w-4 h-4 sm:w-7 sm:h-7 text-neutral-700 group-hover:text-luxury-gold transition-colors duration-300 flex-shrink-0" />
+                <Icon className="w-4 h-4 sm:w-7 sm:h-7 text-neutral-700 group-hover:text-luxury-gold transition-colors duration-300" />
                 {count !== null && (
                   <span className="absolute -top-2 -right-2 bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium shadow-lg">
                     {count}
@@ -201,7 +201,7 @@ const Header = () => {
               </Link>
             ))}
 
-            {/* Mobile Menu Button (still hidden on large screens) */}
+            {/* Mobile Menu Button - Visibility changed to lg:hidden */}
             <button
               className="lg:hidden p-2 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 flex-shrink-0"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -211,7 +211,7 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Menu (still hidden on large screens) */}
+        {/* Mobile Menu - Visibility changed to lg:hidden */}
         {isMenuOpen && (
           <div className="lg:hidden py-6 border-t border-neutral-200/50 animate-slide-up">
             <div className="flex flex-col space-y-6">

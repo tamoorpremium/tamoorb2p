@@ -105,8 +105,8 @@ const Header = () => {
   </Link>
 </div>
 
-{/* Tablet Logo (640px–1023px) */}
-<div className="hidden sm:flex md:hidden items-center group whitespace-nowrap overflow-hidden px-3">
+{/* Tablet Logo (640px–1023px) - Ensure this doesn't conflict with lg:flex logo */}
+<div className="hidden sm:flex lg:hidden items-center group whitespace-nowrap overflow-hidden px-3">
   <Link to="/home" className="flex items-center whitespace-nowrap overflow-hidden">
     <img
       src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
@@ -140,8 +140,8 @@ const Header = () => {
 </div>
 
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-5 lg:space-x-8">
+          {/* Desktop Navigation - FIX: Changed md:flex to lg:flex to hide links on tablet */}
+          <nav className="hidden lg:flex items-center space-x-5 lg:space-x-8">
             {[
               { name: "Home", href: "/" },
               { name: "Products", href: "/products" },
@@ -160,8 +160,8 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Search Bar - FIX: Changed max-w-sm to md:max-w-xs for tablet space saving */}
-          <div className="hidden md:flex items-center glass rounded-full px-4 py-2 w-full md:max-w-xs lg:max-w-sm group hover:shadow-lg transition-all duration-300">
+          {/* Search Bar - Hiding search bar on tablet to ensure no overflow */}
+          <div className="hidden lg:flex items-center glass rounded-full px-4 py-2 w-full lg:max-w-sm group hover:shadow-lg transition-all duration-300">
             <Search className="w-5 h-5 text-neutral-400 mr-3 group-hover:text-luxury-gold transition-colors duration-300" />
             <input
               type="text"
@@ -170,8 +170,8 @@ const Header = () => {
             />
           </div>
 
-          {/* Right Icons - FIX: Changed md:mr-8 to md:mr-4 for tablet space saving */}
-          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 md:mr-4 lg:mr-24">
+          {/* Right Icons - Using flex-shrink-0 to prevent icons from shrinking */}
+          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 md:mr-0 lg:mr-24 flex-shrink-0">
             {[
               { icon: Heart, count: null, to: "/wishlist" },
               { icon: User, count: null, to: "/profile" },
@@ -195,7 +195,7 @@ const Header = () => {
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden p-2 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
+              className="lg:hidden p-2 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -205,7 +205,7 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-6 border-t border-neutral-200/50 animate-slide-up">
+          <div className="lg:hidden py-6 border-t border-neutral-200/50 animate-slide-up">
             <div className="flex flex-col space-y-6">
               <div className="flex items-center glass rounded-full px-4 py-2 w-full">
                 <Search className="w-5 h-5 text-neutral-400 mr-3" />
@@ -237,5 +237,4 @@ const Header = () => {
     </header>
   );
 };
-
 export default Header;

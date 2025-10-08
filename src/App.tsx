@@ -111,10 +111,7 @@ function App() {
   return (
     <CartProvider>
       <Router>
-        <FancyPageTransition>
-        <div className="min-h-screen">
-          <Header />
-          <ToastContainer
+        <ToastContainer
             position="top-center"
             autoClose={3000}
             hideProgressBar={false}
@@ -124,6 +121,10 @@ function App() {
             pauseOnHover
             theme="colored"
           />
+          
+        <FancyPageTransition>
+        <div className="min-h-screen">
+          <Header />
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Home />} />

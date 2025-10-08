@@ -425,8 +425,8 @@ useEffect(() => {
 
       {/* Quantity Modal */}
       {showQuantityModal && product.measurement_unit === "kilograms" && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start sm:items-center justify-center p-4 overflow-auto">
-          <div className="glass rounded-3xl p-6 max-w-md w-full animate-slide-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="glass rounded-3xl p-6 sm:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto animate-slide-up">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-amber-500">Select Quantity</h3>
               <button onClick={() => setShowQuantityModal(false)} className="p-2 hover:bg-white/20 rounded-full transition-all">
@@ -447,14 +447,18 @@ useEffect(() => {
                   <button
                     key={value}
                     onClick={() => setSelectedWeight(value)}
-                    className={`p-2 rounded-lg border-2 transition-all duration-300 text-sm ${selectedWeight === value ? "border-amber-500 bg-amber-100 text-amber-600" : "border-neutral-200 hover:border-amber-300"}`}
+                    className={`p-2 rounded-lg border-2 transition-all duration-300 text-sm ${
+                      selectedWeight === value ? "border-amber-500 bg-amber-100 text-amber-600" : "border-neutral-200 hover:border-amber-300"
+                    }`}
                   >
                     {label}
                   </button>
                 ))}
                 <button
                   onClick={() => setSelectedWeight("custom")}
-                  className={`p-2 rounded-lg border-2 transition-all duration-300 text-sm ${selectedWeight === "custom" ? "border-amber-500 bg-amber-100 text-amber-600" : "border-neutral-200 hover:border-amber-300"}`}
+                  className={`p-2 rounded-lg border-2 transition-all duration-300 text-sm ${
+                    selectedWeight === "custom" ? "border-amber-500 bg-amber-100 text-amber-600" : "border-neutral-200 hover:border-amber-300"
+                  }`}
                 >
                   Custom Weight
                 </button>
@@ -486,6 +490,7 @@ useEffect(() => {
           </div>
         </div>
       )}
+
 
       {/* Similar Products */}
       {similarProducts.length > 0 && (

@@ -4,6 +4,8 @@ import { Search, Filter, Grid, List, Star, Heart, Eye, ShoppingCart, X } from 'l
 import { supabase } from '../utils/supabaseClient';
 import { Listbox } from "@headlessui/react"
 import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+
 
 
 
@@ -22,7 +24,7 @@ const Products = () => {
   const [customWeight, setCustomWeight] = useState(50);
   const [quantity, setQuantity] = useState(1);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  
   const [productsPerPage] = useState(20); // can adjust to 30 if needed
   const [totalProducts, setTotalProducts] = useState(0);
 
@@ -32,6 +34,10 @@ const Products = () => {
   const [wishlistIds, setWishlistIds] = useState<number[]>([]);
   const [wishlistMessage, setWishlistMessage] = useState<{ text: string; type: 'success' | 'remove' } | null>(null);
   const [cartMessage, setCartMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const pageFromUrl = parseInt(searchParams.get("page") || "1", 10);
+  const [currentPage, setCurrentPage] = useState(pageFromUrl);
+
 
   const [showBar, setShowBar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -129,8 +135,21 @@ useEffect(() => {
   // Fetch products from Supabase
 
 useEffect(() => {
-  setCurrentPage(1);
+  setSearchParams(prev => {
+    const params = new URLSearchParams(prev);
+    params.set("page", "1");
+    return params;
+  });
 }, [searchTerm, selectedCategory, priceRange, sortBy]);
+
+
+useEffect(() => {
+  setSearchParams(prev => {
+    const params = new URLSearchParams(prev);
+    params.set("page", currentPage.toString());
+    return params;
+  });
+}, [currentPage, setSearchParams]);
 
 
 useEffect(() => {
@@ -786,178 +805,204 @@ return (
         </div>
       )}
 
-      {/* Pagination */}
-      {totalProducts > productsPerPage && (
-        <div className="mt-4 flex justify-center items-center space-x-2">
+      {/* Pagination (Top & Bottom) */}
+{totalProducts > productsPerPage && (
+  <div className="my-6 flex justify-center items-center space-x-2">
+    {/* Prev Button */}
+    <button
+      onClick={() =>
+        setSearchParams(prev => {
+          const params = new URLSearchParams(prev);
+          const newPage = Math.max(1, currentPage - 1);
+          params.set("page", newPage.toString());
+          return params;
+        })
+      }
+      disabled={currentPage === 1}
+      className={`px-3 py-1 rounded-lg border transition-all duration-300 ${
+        currentPage === 1
+          ? "bg-neutral-200 text-neutral-500 cursor-default"
+          : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
+      }`}
+    >
+      Prev
+    </button>
 
-          {/* Prev Button */}
+    {/* Page Numbers */}
+    {Array.from({ length: Math.ceil(totalProducts / productsPerPage) }, (_, i) => {
+      const page = i + 1;
+
+      if (
+        page === 1 ||
+        page === Math.ceil(totalProducts / productsPerPage) ||
+        (page >= currentPage - 2 && page <= currentPage + 2)
+      ) {
+        return (
           <button
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-            className={`px-3 py-1 rounded-lg border transition-all duration-300 ${
-              currentPage === 1
-                ? "bg-neutral-200 text-neutral-500 cursor-default"
+            key={i}
+            onClick={() =>
+              setSearchParams(prev => {
+                const params = new URLSearchParams(prev);
+                params.set("page", page.toString());
+                return params;
+              })
+            }
+            disabled={currentPage === page}
+            className={`px-4 py-2 rounded-lg border transition-all duration-300 ${
+              currentPage === page
+                ? "bg-luxury-gold text-white border-luxury-gold cursor-default"
                 : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
             }`}
           >
-            Prev
+            {page}
           </button>
+        );
+      }
 
-          {/* Page Numbers */}
-          {Array.from({ length: Math.ceil(totalProducts / productsPerPage) }, (_, i) => {
-            const page = i + 1;
+      if (page === currentPage - 3 || page === currentPage + 3) {
+        return (
+          <span key={i} className="px-2 text-neutral-400">
+            ...
+          </span>
+        );
+      }
 
-            // Show first, last, and pages around current page
-            if (page === 1 || page === Math.ceil(totalProducts / productsPerPage) || (page >= currentPage - 2 && page <= currentPage + 2)) {
-              return (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(page)}
-                  disabled={currentPage === page}
-                  className={`px-4 py-2 rounded-lg border transition-all duration-300 ${
-                    currentPage === page
-                      ? "bg-luxury-gold text-white border-luxury-gold cursor-default"
-                      : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
-                  }`}
-                >
-                  {page}
-                </button>
-              );
-            }
+      return null;
+    })}
 
-            // Add "..." for skipped pages
-            if (page === currentPage - 3 || page === currentPage + 3) {
-              return <span key={i} className="px-2 text-neutral-400">...</span>;
-            }
-
-            return null;
-          })}
-
-          {/* Next Button */}
-          <button
-            onClick={() => setCurrentPage(Math.min(Math.ceil(totalProducts / productsPerPage), currentPage + 1))}
-            disabled={currentPage === Math.ceil(totalProducts / productsPerPage)}
-            className={`px-3 py-1 rounded-lg border transition-all duration-300 ${
-              currentPage === Math.ceil(totalProducts / productsPerPage)
-                ? "bg-neutral-200 text-neutral-500 cursor-default"
-                : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
-            }`}
-          >
-            Next
-          </button>
-        </div>
-      )}
+    {/* Next Button */}
+    <button
+      onClick={() =>
+        setSearchParams(prev => {
+          const params = new URLSearchParams(prev);
+          const newPage = Math.min(
+            Math.ceil(totalProducts / productsPerPage),
+            currentPage + 1
+          );
+          params.set("page", newPage.toString());
+          return params;
+        })
+      }
+      disabled={currentPage === Math.ceil(totalProducts / productsPerPage)}
+      className={`px-3 py-1 rounded-lg border transition-all duration-300 ${
+        currentPage === Math.ceil(totalProducts / productsPerPage)
+          ? "bg-neutral-200 text-neutral-500 cursor-default"
+          : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
+      }`}
+    >
+      Next
+    </button>
+  </div>
+)}
 
     </div>
   </section>
 
-    {/* Quantity Selection Modal will be continued in the next part */}
-        {/* Quantity Selection Modal */}
-    {showQuantityModal && selectedProduct && (() => {
-      // Convert selectedWeight or customWeight to grams number
-      const grams = selectedWeight === 'custom' ? customWeight : selectedWeight;
+  {/* Quantity Selection Modal */}
+  {showQuantityModal && selectedProduct && (() => {
+    // Convert selectedWeight or customWeight to grams number
+    const grams = selectedWeight === 'custom' ? customWeight : selectedWeight;
 
-      // Calculate price per gram and total dynamic price
-      const pricePerGram = selectedProduct.price / 1000;
-      const dynamicPrice = Math.round(pricePerGram * grams);
+    // Calculate price per gram and total dynamic price
+    const pricePerGram = selectedProduct.price / 1000;
+    const dynamicPrice = Math.round(pricePerGram * grams);
 
-      return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass rounded-3xl p-8 max-w-md w-full animate-slide-up">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-display font-bold text-amber-500">
-                Select Quantity
-              </h3>
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="glass rounded-3xl p-6 sm:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto animate-slide-up">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-display font-bold text-amber-500">
+              Select Quantity
+            </h3>
+            <button
+              onClick={() => setShowQuantityModal(false)}
+              className="p-2 hover:bg-white/20 rounded-full transition-all duration-300"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          <div className="mb-6">
+            <img
+              src={selectedProduct.image}
+              alt={selectedProduct.name}
+              className="w-full h-32 object-cover rounded-2xl mb-4"
+            />
+            <h4 className="font-display font-semibold text-lg text-luxury-gold-light">{selectedProduct.name}</h4>
+            <p className="text-lime-400">{selectedProduct.description}</p>
+          </div>
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-luxury-gold-light mb-3">
+                Weight Options
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {weightOptions.map(({ label, value }) => (
+                  <button
+                    key={value}
+                    onClick={() => setSelectedWeight(value)}
+                    className={`p-3 rounded-lg border-2 transition-all duration-300 ${
+                      selectedWeight === value
+                        ? 'border-luxury-gold bg-luxury-gold/10 text-luxury-gold'
+                        : 'border-neutral-200 hover:border-luxury-gold/50'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
               <button
-                onClick={() => setShowQuantityModal(false)}
-                className="p-2 hover:bg-white/20 rounded-full transition-all duration-300"
+                onClick={() => setSelectedWeight('custom')}
+                className={`w-full mt-3 p-3 rounded-lg border-2 transition-all duration-300 ${
+                  selectedWeight === 'custom'
+                    ? 'border-luxury-gold bg-luxury-gold/10 text-luxury-gold'
+                    : 'border-neutral-200 hover:border-luxury-gold/50'
+                }`}
               >
-                <X className="w-6 h-6" />
+                Custom Weight (Min 50g)
               </button>
-            </div>
-            <div className="mb-6">
-              <img
-                src={selectedProduct.image}
-                alt={selectedProduct.name}
-                className="w-full h-32 object-cover rounded-2xl mb-4"
-              />
-              <h4 className="font-display font-semibold text-lg text-luxury-gold-light">{selectedProduct.name}</h4>
-              <p className="text-lime-400">{selectedProduct.description}</p>
-            </div>
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-luxury-gold-light mb-3">
-                  Weight Options
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {weightOptions.map(({ label, value }) => (
-                    <button
-                      key={value}
-                      onClick={() => setSelectedWeight(value)}
-                      className={`p-3 rounded-lg border-2 transition-all duration-300 ${
-                        selectedWeight === value
-                          ? 'border-luxury-gold bg-luxury-gold/10 text-luxury-gold'
-                          : 'border-neutral-200 hover:border-luxury-gold/50'
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
+              {selectedWeight === 'custom' && (
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                  <button
+                    onClick={() => setCustomWeight(Math.max(50, customWeight - 50))}
+                    className="p-2 glass rounded-lg hover:bg-white/20"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    value={customWeight}
+                    onChange={(e) => setCustomWeight(Math.max(50, parseInt(e.target.value) || 50))}
+                    className="flex-1 p-2 glass rounded-lg text-center"
+                    min="50"
+                  />
+                  <span className="text-sm text-neutral-800">grams</span>
+                  <button
+                    onClick={() => setCustomWeight(customWeight + 50)}
+                    className="p-2 glass rounded-lg hover:bg-white/20"
+                  >
+                    +
+                  </button>
                 </div>
-
-                <button
-                  onClick={() => setSelectedWeight('custom')}
-                  className={`w-full mt-3 p-3 rounded-lg border-2 transition-all duration-300 ${
-                    selectedWeight === 'custom'
-                      ? 'border-luxury-gold bg-luxury-gold/10 text-luxury-gold'
-                      : 'border-neutral-200 hover:border-luxury-gold/50'
-                  }`}
-                >
-                  Custom Weight (Min 50g)
-                </button>
-                {selectedWeight === 'custom' && (
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                    <button
-                      onClick={() => setCustomWeight(Math.max(50, customWeight - 50))}
-                      className="p-2 glass rounded-lg hover:bg-white/20"
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      value={customWeight}
-                      onChange={(e) => setCustomWeight(Math.max(50, parseInt(e.target.value) || 50))}
-                      className="flex-1 p-2 glass rounded-lg text-center"
-                      min="50"
-                    />
-                    <span className="text-sm text-neutral-800">grams</span>
-                    <button
-                      onClick={() => setCustomWeight(customWeight + 50)}
-                      className="p-2 glass rounded-lg hover:bg-white/20"
-                    >
-                      +
-                    </button>
-                  </div>
-                )}
+              )}
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t border-white/20">
+              <div className="text-2xl font-display font-bold tamoor-gradient">
+                ₹{dynamicPrice}
               </div>
-              <div className="flex items-center justify-between pt-4 border-t border-white/20">
-                <div className="text-2xl font-display font-bold tamoor-gradient">
-                  ₹{dynamicPrice}
-                </div>
-                <button
-                  onClick={handleAddCart}
-                  className="w-full btn-premium text-white px-8 py-3 rounded-full font-semibold text-lg flex items-center justify-center group/btn"
-                >
-                  <ShoppingCart className="w-5 h-5 mr-3 group-hover/btn:rotate-12 transition-transform duration-300" />
-                  Add to Cart
-                </button>
-              </div>
+              <button
+                onClick={handleAddCart}
+                className="w-full btn-premium text-white px-8 py-3 rounded-full font-semibold text-lg flex items-center justify-center group/btn"
+              >
+                <ShoppingCart className="w-5 h-5 mr-3 group-hover/btn:rotate-12 transition-transform duration-300" />
+                Add to Cart
+              </button>
             </div>
           </div>
         </div>
-      );
-    })()}
-
+      </div>
+    );
+  })}
     {/* Wishlist Message Popup */}
     {wishlistMessage && (
       <div className="fixed inset-0 flex items-start justify-center z-50">

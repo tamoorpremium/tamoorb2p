@@ -90,13 +90,13 @@ const Header = () => {
       </div>
 
       {/* Main Header */}
-      {/* FIX: Ensuring the container is responsive with overflow-x-hidden */}
       <div className="max-w-full w-full mx-auto px-4 overflow-x-hidden">
-        {/* FIX: Removing flex-nowrap to potentially allow wrapping if absolutely necessary */}
-        <div className="flex items-center justify-between py-4">
+        {/* CRITICAL FIX: Removed justify-between and flex-nowrap. Added gap-4 for controlled spacing. */}
+        <div className="flex items-center py-4 gap-4">
           
-          {/* Logo Container Group */}
-          <div className="flex items-center">
+          {/* Logo Container Group - Allow it to shrink, but prevent text wrapping */}
+          {/* FIX: Added min-w-0 and flex-shrink */}
+          <div className="flex items-center flex-shrink min-w-0">
             {/* Mobile Logo (below 640px) */}
             <div className="flex items-center sm:hidden group whitespace-nowrap">
               <Link to="/home" className="flex items-center whitespace-nowrap">
@@ -109,7 +109,7 @@ const Header = () => {
               </Link>
             </div>
 
-            {/* Tablet Logo (640px–1023px) - FIX: Use lg:hidden to cover the md range */}
+            {/* Tablet Logo (640px–1023px) */}
             <div className="hidden sm:flex lg:hidden items-center group whitespace-nowrap overflow-hidden pr-4">
               <Link to="/home" className="flex items-center whitespace-nowrap overflow-hidden">
                 <img
@@ -117,17 +117,17 @@ const Header = () => {
                   alt="Tamoor Logo"
                   className="w-10 h-10 object-contain mr-2 transition-transform duration-300 group-hover:scale-110 flex-shrink-0"
                 />
-                <h1 className="text-4xl font-serif font-bold tamoor-gradient mr-2 flex-shrink-0">
+                <h1 className="text-4xl font-serif font-bold tamoor-gradient mr-2 flex-shrink">
                   TAMOOR
                 </h1>
-                <span className="text-xs text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 py-0.5 rounded-full flex-shrink-0">
+                <span className="text-xs text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 py-0.5 rounded-full flex-shrink-0 hidden sm:inline">
                   Premium
                 </span>
               </Link>
             </div>
 
             {/* Desktop Logo (from 1024px and above) */}
-            <div className="hidden lg:flex items-center group whitespace-nowrap ml-20">
+            <div className="hidden lg:flex items-center group whitespace-nowrap ml-20 flex-shrink-0">
               <Link to="/home" className="flex items-center whitespace-nowrap">
                 <img
                   src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
@@ -146,9 +146,9 @@ const Header = () => {
           {/* End Logo Container Group */}
 
 
-          {/* Desktop Navigation - Hides links on tablet/md screen to prevent overflow */}
-          <nav className="hidden lg:flex items-center space-x-5 lg:space-x-8">
-            {/* Navigation items... */}
+          {/* Desktop Navigation - Hidden on tablet (md) */}
+          <nav className="hidden lg:flex items-center space-x-5 lg:space-x-8 flex-shrink-0">
+            {/* Navigation items... (same as before) */}
             {[
               { name: "Home", href: "/" },
               { name: "Products", href: "/products" },
@@ -167,8 +167,8 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Search Bar - Hides search bar on tablet to ensure no overflow */}
-          <div className="hidden lg:flex items-center glass rounded-full px-4 py-2 w-full lg:max-w-sm group hover:shadow-lg transition-all duration-300">
+          {/* Search Bar - Hidden on tablet (md) */}
+          <div className="hidden lg:flex items-center glass rounded-full px-4 py-2 w-full lg:max-w-sm group hover:shadow-lg transition-all duration-300 flex-grow">
             <Search className="w-5 h-5 text-neutral-400 mr-3 group-hover:text-luxury-gold transition-colors duration-300 flex-shrink-0" />
             <input
               type="text"
@@ -177,9 +177,9 @@ const Header = () => {
             />
           </div>
 
-          {/* Right Icons */}
-          {/* FIX: Removed all md:margins and added flex-shrink-0 to prevent icon section compression */}
-          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 lg:mr-24 flex-shrink-0">
+          {/* Right Icons - Ensure this group does NOT shrink */}
+          {/* FIX: Added flex-shrink-0 and removed unnecessary lg:mr-24 which was only needed for desktop gap */}
+          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 flex-shrink-0">
             {[
               { icon: Heart, count: null, to: "/wishlist" },
               { icon: User, count: null, to: "/profile" },
@@ -201,7 +201,7 @@ const Header = () => {
               </Link>
             ))}
 
-            {/* Mobile Menu Button - FIX: Changed md:hidden to lg:hidden */}
+            {/* Mobile Menu Button - Visibility changed to lg:hidden */}
             <button
               className="lg:hidden p-2 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 flex-shrink-0"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -211,8 +211,7 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {/* FIX: Changed md:hidden to lg:hidden */}
+        {/* Mobile Menu - Visibility changed to lg:hidden */}
         {isMenuOpen && (
           <div className="lg:hidden py-6 border-t border-neutral-200/50 animate-slide-up">
             <div className="flex flex-col space-y-6">

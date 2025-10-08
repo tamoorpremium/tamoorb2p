@@ -133,9 +133,9 @@ const Header = () => {
           <img
             src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
             alt="Tamoor Logo"
-            className="w-10 h-10 mr-2 transition-transform duration-300 group-hover:scale-110 flex-shrink-0"
+            className="w-8 h-8 mr-1 transition-transform duration-300 group-hover:scale-110 flex-shrink-0"
           />
-          <h1 className="text-4xl font-serif font-bold tamoor-gradient mr-2 flex-shrink-0">
+          <h1 className="text-2xl font-serif font-bold tamoor-gradient mr-1 flex-shrink-0">
             TAMOOR
           </h1>
           <span className="text-xs text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 py-0.5 rounded-full flex-shrink-0">
@@ -145,13 +145,13 @@ const Header = () => {
 
         <div className="flex items-center space-x-3">
           <Link to="/wishlist">
-            <Heart className="w-6 h-6 text-neutral-700 hover:text-luxury-gold" />
+            <Heart className="w-4 h-4 text-neutral-700 hover:text-luxury-gold" />
           </Link>
           <Link to="/profile">
-            <User className="w-6 h-6 text-neutral-700 hover:text-luxury-gold" />
+            <User className="w-4 h-4 text-neutral-700 hover:text-luxury-gold" />
           </Link>
           <Link to="/cart">
-            <ShoppingCart className="w-6 h-6 text-neutral-700 hover:text-luxury-gold" />
+            <ShoppingCart className="w-4 h-4 text-neutral-700 hover:text-luxury-gold" />
           </Link>
         </div>
       </div>

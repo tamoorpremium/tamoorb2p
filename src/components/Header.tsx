@@ -79,10 +79,7 @@ const Header = () => {
 
           <div className="animate-scroll whitespace-nowrap flex">
             {Array.from({ length: 20 }).map((_, i) => (
-              <span
-                key={i}
-                className="futuristic-text mx-8 text-sm font-bold"
-              >
+              <span key={i} className="futuristic-text mx-8 text-sm font-bold">
                 {i % 2 === 0
                   ? "✨ Free shipping on orders above ₹999!"
                   : "⚡ Use Code: WELCOME10 & Unlock 10% Savings On Your First Order! 🎉"}
@@ -110,7 +107,7 @@ const Header = () => {
           </div>
 
           {/* Desktop Logo */}
-          <div className="hidden sm:flex items-center group whitespace-nowrap ml-20">
+          <div className="hidden sm:flex items-center group whitespace-nowrap ml-6 md:ml-10 lg:ml-20">
             <Link to="/home" className="flex items-center whitespace-nowrap">
               <img
                 src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
@@ -127,7 +124,7 @@ const Header = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-5 lg:space-x-8">
             {[
               { name: "Home", href: "/" },
               { name: "Products", href: "/products" },
@@ -157,7 +154,7 @@ const Header = () => {
           </div>
 
           {/* Right Icons */}
-          <div className="flex items-center space-x-1 sm:space-x-2 lg:mr-24">
+          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 md:mr-8 lg:mr-24">
             {[
               { icon: Heart, count: null, to: "/wishlist" },
               { icon: User, count: null, to: "/profile" },

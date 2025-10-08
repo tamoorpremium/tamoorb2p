@@ -105,21 +105,22 @@ const Header = () => {
           </div>
 
           {/* Tablet Logo (medium screens) */}
-          <div className="hidden sm:flex md:hidden items-center group whitespace-nowrap">
-            <Link to="/home" className="flex items-center whitespace-nowrap">
+          <div className="hidden sm:flex md:hidden items-center group whitespace-nowrap max-w-full overflow-hidden px-2">
+            <Link to="/home" className="flex items-center whitespace-nowrap max-w-full overflow-hidden">
               <img
                 src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
                 alt="Tamoor Logo"
-                className="w-12 h-12 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
+                className="w-12 h-12 object-contain mr-2 transition-transform duration-300 group-hover:scale-110 flex-shrink-0"
               />
-              <h1 className="text-4xl font-serif font-bold tamoor-gradient mr-2">
+              <h1 className="text-4xl font-serif font-bold tamoor-gradient mr-2 flex-shrink-0">
                 TAMOOR
               </h1>
-              <span className="text-xs text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 py-0.5 rounded-full">
+              <span className="text-xs text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 py-0.5 rounded-full flex-shrink-0">
                 Premium
               </span>
             </Link>
           </div>
+
 
           {/* Desktop Logo (large screens) */}
           <div className="hidden md:flex items-center group whitespace-nowrap ml-20">

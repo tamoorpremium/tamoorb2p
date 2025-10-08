@@ -106,7 +106,7 @@ const Header = () => {
       {/* Main Header */}
       <div className="max-w-screen-xl w-full mx-auto px-4 sm:px-6 lg:px-10 overflow-x-hidden">
         <div className="flex items-center justify-between py-3 sm:py-4 flex-wrap">
-          {/* Mobile Logo */}
+          {/* Mobile / Tablet Logo */}
             <div className="flex items-center sm:hidden group">
               <Link to="/home" className="flex items-center">
                 <img
@@ -114,9 +114,12 @@ const Header = () => {
                   alt="Tamoor Logo"
                   className="w-10 h-10 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
                 />
-                <h1 className="text-3xl font-serif font-bold tamoor-gradient">
+                <h1 className="text-3xl font-serif font-bold tamoor-gradient mr-2">
                   TAMOOR
                 </h1>
+                <span className="text-xs text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 py-0.5 rounded-full">
+                  Premium
+                </span>
               </Link>
             </div>
 
@@ -126,19 +129,16 @@ const Header = () => {
                 <img
                   src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
                   alt="Tamoor Logo"
-                  className="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 object-contain mr-2 sm:mr-3 transition-transform duration-300 group-hover:scale-110"
+                  className="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 object-contain mr-3 transition-transform duration-300 group-hover:scale-110"
                 />
-                <div className="flex flex-col sm:flex-row sm:items-center">
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold tamoor-gradient">
-                    TAMOOR
-                  </h1>
-                  <span className="mt-1 sm:mt-0 sm:ml-2 md:ml-3 text-xs sm:text-sm md:text-base text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
-                    Premium
-                  </span>
-                </div>
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold tamoor-gradient mr-3">
+                  TAMOOR
+                </h1>
+                <span className="text-xs sm:text-sm md:text-base text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
+                  Premium
+                </span>
               </Link>
             </div>
-
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
             {[

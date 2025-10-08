@@ -390,8 +390,8 @@ const Wishlist = () => {
 
       {/* Quantity Selection Modal */}
       {showQuantityModal && selectedProduct && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="glass rounded-3xl p-6 sm:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto animate-slide-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass rounded-3xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto animate-slide-up">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-display font-bold text-neutral-800">
                 Select Quantity
@@ -470,7 +470,6 @@ const Wishlist = () => {
           </div>
         </div>
       )}
-
 
       {popup && (
         <div className="fixed bottom-6 inset-x-0 flex items-center justify-center px-4 z-50">

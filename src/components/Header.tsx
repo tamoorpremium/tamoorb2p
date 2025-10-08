@@ -1,23 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Search, ShoppingCart, User, Menu, X, Heart } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
-import './topbar.css';
-
-
+import React, { useState, useEffect } from "react";
+import { Search, ShoppingCart, User, Menu, X, Heart } from "lucide-react";
+import { Link } from "react-router-dom";
+import "./topbar.css";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showTopBar, setShowTopBar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const SCROLL_THRESHOLD = 50;
 
-
-  const SCROLL_THRESHOLD = 50; // minimum scroll difference to toggle
-
+  // Scroll behavior for hide/show topbar
   useEffect(() => {
-    let ticking = false; // to throttle scroll events
-
+    let ticking = false;
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
@@ -26,29 +21,25 @@ const Header = () => {
           const delta = currentScrollY - lastScrollY;
 
           if (delta > SCROLL_THRESHOLD && showTopBar && currentScrollY > 50) {
-            // scrolling down
             setShowTopBar(false);
-            setLastScrollY(currentScrollY);
           } else if (delta < -SCROLL_THRESHOLD && !showTopBar) {
-            // scrolling up
             setShowTopBar(true);
-            setLastScrollY(currentScrollY);
           }
 
-          // header background effect
           setIsScrolled(currentScrollY > 20);
-
+          setLastScrollY(currentScrollY);
           ticking = false;
         });
         ticking = true;
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY, showTopBar]);
 
-
+  // Reduce sparkles on mobile
+  const sparkleCount = window.innerWidth < 768 ? 30 : 100;
 
   return (
     <header
@@ -60,12 +51,12 @@ const Header = () => {
     >
       {/* Futuristic Top Bar */}
       <div
-        className={`metallic-bar w-screen relative overflow-hidden py-2 transition-all duration-500 ${
-          showTopBar ? "mt-0" : "-mt-10"  // negative margin pulls up the header
+        className={`metallic-bar w-full relative overflow-hidden py-2 transition-transform duration-300 ease-in-out ${
+          showTopBar ? "translate-y-0" : "-translate-y-full"
         }`}
       >
         <div className="relative overflow-hidden">
-          {Array.from({ length: 100 }).map((_, i) => {
+          {Array.from({ length: sparkleCount }).map((_, i) => {
             const size = Math.floor(Math.random() * 4) + 2;
             const top = Math.floor(Math.random() * 100);
             const left = Math.floor(Math.random() * 100);
@@ -101,40 +92,45 @@ const Header = () => {
         </div>
       </div>
 
-
-
-       {/* Main header */}
-       <div className="max-w-full w-full mx-auto px-4 overflow-x-hidden">
-        <div className="flex items-center justify-between py-4">
-          {/* Mobile Logo (visible only on small screens) */}
-          <div className="flex items-center sm:hidden group">
-            <img
-              src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
-              alt="Tamoor Logo"
-              className="w-10 h-10 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
-            />
-            <h1 className="text-3xl font-serif font-bold tamoor-gradient">
-              TAMOOR
-            </h1>
+      {/* Main Header */}
+      <div className="max-w-full w-full mx-auto px-4 overflow-x-hidden">
+        <div className="flex items-center justify-between py-4 flex-nowrap">
+          {/* Mobile Logo */}
+          <div className="flex items-center sm:hidden group whitespace-nowrap">
+            <Link to="/home" className="flex items-center whitespace-nowrap">
+              <img
+                src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
+                alt="Tamoor Logo"
+                className="w-10 h-10 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
+              />
+              <h1 className="text-3xl font-serif font-bold tamoor-gradient mr-2">
+                TAMOOR
+              </h1>
+              <span className="text-xs text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 py-0.5 rounded-full">
+                Premium
+              </span>
+            </Link>
           </div>
 
-          {/* Desktop Logo (hidden on small screens, visible from sm+) */}
-          <div className="hidden sm:flex items-start group ml-20">
-            <img
-              src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
-              alt="Tamoor Logo"
-              className="w-16 h-16 object-contain mr-3 transition-transform duration-300 group-hover:scale-110"
-            />
-            <h1 className="text-5xl sm:text-6xl font-serif font-bold tamoor-gradient">
-              TAMOOR
-            </h1>
-            <span className="ml-3 text-sm sm:text-base text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-3 py-1 rounded-full">
-              Premium
-            </span>
+          {/* Desktop Logo */}
+          <div className="hidden sm:flex items-center group whitespace-nowrap ml-20">
+            <Link to="/home" className="flex items-center whitespace-nowrap">
+              <img
+                src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
+                alt="Tamoor Logo"
+                className="w-16 h-16 object-contain mr-3 transition-transform duration-300 group-hover:scale-110"
+              />
+              <h1 className="text-5xl sm:text-6xl font-serif font-bold tamoor-gradient mr-3">
+                TAMOOR
+              </h1>
+              <span className="text-sm sm:text-base text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-3 py-1 rounded-full">
+                Premium
+              </span>
+            </Link>
           </div>
 
-          {/* Navigation - Desktop */}
-          <nav className="hidden md:flex items-center space-x-8 lg:space-x-8">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
             {[
               { name: "Home", href: "/" },
               { name: "Products", href: "/products" },
@@ -153,7 +149,7 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Search bar */}
+          {/* Search Bar */}
           <div className="hidden md:flex items-center glass rounded-full px-4 py-2 w-full max-w-sm group hover:shadow-lg transition-all duration-300">
             <Search className="w-5 h-5 text-neutral-400 mr-3 group-hover:text-luxury-gold transition-colors duration-300" />
             <input
@@ -163,8 +159,8 @@ const Header = () => {
             />
           </div>
 
-          {/* Right icons */}
-          <div className="flex items-center space-x-1 sm:space-x-2 lg:mr-24">
+          {/* Right Icons */}
+          <div className="flex items-center space-x-2 lg:mr-24">
             {[
               { icon: Heart, count: null, to: "/wishlist" },
               { icon: User, count: null, to: "/profile" },
@@ -173,20 +169,20 @@ const Header = () => {
               <Link
                 key={index}
                 to={to}
-                className={`p-1 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group luxury-card ${
+                className={`p-2 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group ${
                   index === 2 ? "cart-button" : ""
                 }`}
               >
-                <Icon className="w-4 h-4 sm:w-7 sm:h-7 text-neutral-700 group-hover:text-luxury-gold transition-colors duration-300" />
+                <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-700 group-hover:text-luxury-gold transition-colors duration-300" />
                 {count !== null && (
-                  <span className="cart-count absolute -top-3 -right-3 sm:-top-1 sm:-right-1 bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white text-xs sm:text-sm rounded-full w-7 h-7 flex items-center justify-center font-medium shadow-lg ">
+                  <span className="absolute -top-2 -right-2 bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium shadow-lg">
                     {count}
                   </span>
                 )}
               </Link>
             ))}
 
-            {/* Mobile menu button */}
+            {/* Mobile Menu Button */}
             <button
               className="md:hidden p-2 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -196,7 +192,7 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile menu */}
+        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden py-6 border-t border-neutral-200/50 animate-slide-up">
             <div className="flex flex-col space-y-6">
@@ -228,7 +224,6 @@ const Header = () => {
         )}
       </div>
     </header>
-
   );
 };
 

@@ -93,6 +93,7 @@ const Header = () => {
       <div className="max-w-full w-full mx-auto px-4 overflow-x-hidden">
         <div className="flex items-center justify-between py-4 flex-nowrap">
           {/* Mobile Logo (below 640px) */}
+          {/* Mobile Logo (below 640px) */}
 <div className="flex items-center sm:hidden group whitespace-nowrap">
   <Link to="/home" className="flex items-center whitespace-nowrap">
     <img
@@ -104,8 +105,8 @@ const Header = () => {
   </Link>
 </div>
 
-{/* Tablet Logo (640px–1023px only) */}
-<div className="hidden sm:flex md:hidden items-center group whitespace-nowrap max-w-full overflow-hidden px-3">
+{/* Tablet Logo (640px–1023px) */}
+<div className="hidden sm:flex md:hidden items-center group whitespace-nowrap overflow-hidden px-3">
   <Link to="/home" className="flex items-center whitespace-nowrap overflow-hidden">
     <img
       src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
@@ -121,7 +122,7 @@ const Header = () => {
   </Link>
 </div>
 
-{/* Desktop Logo (≥1024px) */}
+{/* Desktop Logo (from 1024px and above) */}
 <div className="hidden lg:flex items-center group whitespace-nowrap ml-20">
   <Link to="/home" className="flex items-center whitespace-nowrap">
     <img

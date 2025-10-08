@@ -10,22 +10,16 @@ const Header = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const SCROLL_THRESHOLD = 50;
 
-  // Scroll behavior for hide/show topbar
+  // Scroll behavior
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const delta = currentScrollY - lastScrollY;
-
-          if (delta > SCROLL_THRESHOLD && showTopBar && currentScrollY > 50) {
-            setShowTopBar(false);
-          } else if (delta < -SCROLL_THRESHOLD && !showTopBar) {
-            setShowTopBar(true);
-          }
-
+          if (delta > SCROLL_THRESHOLD && showTopBar && currentScrollY > 50) setShowTopBar(false);
+          else if (delta < -SCROLL_THRESHOLD && !showTopBar) setShowTopBar(true);
           setIsScrolled(currentScrollY > 20);
           setLastScrollY(currentScrollY);
           ticking = false;
@@ -33,11 +27,11 @@ const Header = () => {
         ticking = true;
       }
     };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY, showTopBar]);
 
+  // Sparkles
   const sparkleCount = window.innerWidth < 768 ? 30 : 100;
 
   return (
@@ -48,14 +42,13 @@ const Header = () => {
           : "bg-white/95 backdrop-blur-sm"
       }`}
     >
-      {/* --- TOP BAR --- */}
+      {/* ─── Top Bar ─────────────────────────────── */}
       <div
         className={`metallic-bar w-full relative overflow-hidden py-2 transition-transform duration-300 ease-in-out ${
           showTopBar ? "translate-y-0" : "-translate-y-full"
         }`}
       >
         <div className="relative overflow-hidden">
-          {/* Sparkles */}
           {Array.from({ length: sparkleCount }).map((_, i) => {
             const size = Math.floor(Math.random() * 4) + 2;
             const top = Math.floor(Math.random() * 100);
@@ -77,7 +70,6 @@ const Header = () => {
             );
           })}
 
-          {/* Scrolling Text */}
           <div className="animate-scroll whitespace-nowrap flex">
             {Array.from({ length: 20 }).map((_, i) => (
               <span key={i} className="futuristic-text mx-8 text-sm font-bold">
@@ -90,148 +82,129 @@ const Header = () => {
         </div>
       </div>
 
-      {/* --- MAIN HEADER --- */}
-      <div className="max-w-full w-full mx-auto px-4 overflow-x-hidden">
-        {/* --- MOBILE HEADER (<640px) --- */}
-        <div className="flex items-center justify-between py-3 sm:hidden">
-          <Link to="/home" className="flex items-center group">
-            <img
-              src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
-              alt="Tamoor Logo"
-              className="w-10 h-10 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
-            />
-            <h1 className="text-3xl font-serif font-bold tamoor-gradient">
-              TAMOOR
-            </h1>
-          </Link>
+      {/* ─── Mobile Layout (<640px) ─────────────────────────────── */}
+      <div className="sm:hidden px-4 py-3 flex items-center justify-between">
+        <Link to="/home" className="flex items-center group">
+          <img
+            src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
+            alt="Tamoor Logo"
+            className="w-10 h-10 mr-2 transition-transform duration-300 group-hover:scale-110"
+          />
+          <h1 className="text-3xl font-serif font-bold tamoor-gradient">
+            TAMOOR
+          </h1>
+        </Link>
 
-          <div className="flex items-center space-x-2">
-            <Link
-              to="/cart"
-              className="p-2 hover:bg-luxury-gold/10 rounded-full transition"
-            >
-              <ShoppingCart className="w-6 h-6 text-neutral-800" />
-            </Link>
-            <button
-              className="p-2 hover:bg-luxury-gold/10 rounded-full transition"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
+        <div className="flex items-center space-x-2">
+          <Link to="/cart">
+            <ShoppingCart className="w-6 h-6 text-neutral-700 hover:text-luxury-gold" />
+          </Link>
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="p-2 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
+          >
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
 
-        {/* --- TABLET HEADER (640px–1023px) --- */}
-        <div className="hidden sm:flex lg:hidden items-center justify-between py-4">
-          <Link to="/home" className="flex items-center group whitespace-nowrap">
-            <img
-              src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
-              alt="Tamoor Logo"
-              className="w-10 h-10 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
-            />
-            <h1 className="text-4xl font-serif font-bold tamoor-gradient mr-2">
-              TAMOOR
-            </h1>
-            <span className="text-xs text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 py-0.5 rounded-full">
-              Premium
-            </span>
-          </Link>
-
-          <div className="flex items-center space-x-3">
-            <Search className="w-6 h-6 text-neutral-700" />
-            <Link to="/wishlist">
-              <Heart className="w-6 h-6 text-neutral-700" />
-            </Link>
-            <Link to="/profile">
-              <User className="w-6 h-6 text-neutral-700" />
-            </Link>
-            <Link to="/cart">
-              <ShoppingCart className="w-6 h-6 text-neutral-700" />
-            </Link>
-          </div>
-        </div>
-
-        {/* --- DESKTOP HEADER (≥1024px) --- */}
-        <div className="hidden lg:flex items-center justify-between py-5">
-          {/* Left: Logo */}
-          <Link to="/home" className="flex items-center group ml-8">
-            <img
-              src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
-              alt="Tamoor Logo"
-              className="w-16 h-16 object-contain mr-3 transition-transform duration-300 group-hover:scale-110"
-            />
-            <h1 className="text-6xl font-serif font-bold tamoor-gradient mr-3">
-              TAMOOR
-            </h1>
-            <span className="text-base text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-3 py-1 rounded-full">
-              Premium
-            </span>
-          </Link>
-
-          {/* Middle: Navigation */}
-          <nav className="flex items-center space-x-8">
-            {["Home", "Products", "Categories", "About", "Contact"].map(
-              (name, i) => (
+        {isMenuOpen && (
+          <div className="absolute top-full left-0 w-full bg-white shadow-lg py-4 animate-slide-up z-40">
+            <div className="flex flex-col items-center space-y-4">
+              {["Home", "Products", "Categories", "About", "Contact"].map((name) => (
                 <Link
-                  key={i}
+                  key={name}
                   to={`/${name.toLowerCase()}`}
-                  className="text-neutral-800 hover:text-luxury-gold font-semibold transition-all duration-300 relative group"
+                  className="text-neutral-700 font-medium hover:text-luxury-gold transition"
                 >
                   {name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-luxury-gold to-luxury-gold-light transition-all duration-300 group-hover:w-full"></span>
                 </Link>
-              )
-            )}
-          </nav>
-
-          {/* Right: Search + Icons */}
-          <div className="flex items-center space-x-5 mr-12">
-            <div className="flex items-center glass rounded-full px-4 py-2 w-72 group hover:shadow-lg transition-all duration-300">
-              <Search className="w-5 h-5 text-neutral-400 mr-3 group-hover:text-luxury-gold" />
-              <input
-                type="text"
-                placeholder="Search premium dry fruits..."
-                className="bg-transparent flex-1 outline-none text-neutral-700 placeholder-neutral-400"
-              />
-            </div>
-            {[Heart, User, ShoppingCart].map((Icon, idx) => (
-              <Link
-                key={idx}
-                to={idx === 0 ? "/wishlist" : idx === 1 ? "/profile" : "/cart"}
-                className="p-3 hover:bg-luxury-gold/10 rounded-full transition"
-              >
-                <Icon className="w-7 h-7 text-neutral-700 hover:text-luxury-gold transition" />
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* --- MOBILE MENU DROPDOWN --- */}
-        {isMenuOpen && (
-          <div className="sm:hidden py-6 border-t border-neutral-200/50 animate-slide-up">
-            <div className="flex flex-col space-y-6">
-              <div className="flex items-center glass rounded-full px-4 py-2 w-full">
-                <Search className="w-5 h-5 text-neutral-400 mr-3" />
-                <input
-                  type="text"
-                  placeholder="Search premium dry fruits..."
-                  className="bg-transparent flex-1 outline-none text-neutral-700 placeholder-neutral-400"
-                />
-              </div>
-              {["Home", "Products", "Categories", "About", "Contact"].map(
-                (item, i) => (
-                  <Link
-                    key={i}
-                    to={`/${item.toLowerCase()}`}
-                    className="text-neutral-700 hover:text-luxury-gold font-medium transition-colors duration-300 py-2"
-                  >
-                    {item}
-                  </Link>
-                )
-              )}
+              ))}
             </div>
           </div>
         )}
+      </div>
+
+      {/* ─── Tablet Layout (640px–1023px) ─────────────────────────────── */}
+      <div className="hidden sm:flex lg:hidden items-center justify-between px-6 py-3 overflow-x-hidden">
+        <Link
+          to="/home"
+          className="flex items-center group whitespace-nowrap overflow-hidden"
+        >
+          <img
+            src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
+            alt="Tamoor Logo"
+            className="w-10 h-10 mr-2 transition-transform duration-300 group-hover:scale-110 flex-shrink-0"
+          />
+          <h1 className="text-4xl font-serif font-bold tamoor-gradient mr-2 flex-shrink-0">
+            TAMOOR
+          </h1>
+          <span className="text-xs text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 py-0.5 rounded-full flex-shrink-0">
+            Premium
+          </span>
+        </Link>
+
+        <div className="flex items-center space-x-3">
+          <Link to="/wishlist">
+            <Heart className="w-6 h-6 text-neutral-700 hover:text-luxury-gold" />
+          </Link>
+          <Link to="/profile">
+            <User className="w-6 h-6 text-neutral-700 hover:text-luxury-gold" />
+          </Link>
+          <Link to="/cart">
+            <ShoppingCart className="w-6 h-6 text-neutral-700 hover:text-luxury-gold" />
+          </Link>
+        </div>
+      </div>
+
+      {/* ─── Desktop Layout (≥1024px) ─────────────────────────────── */}
+      <div className="hidden lg:flex items-center justify-between px-12 py-4">
+        <Link to="/home" className="flex items-center group whitespace-nowrap">
+          <img
+            src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
+            alt="Tamoor Logo"
+            className="w-16 h-16 object-contain mr-3 transition-transform duration-300 group-hover:scale-110"
+          />
+          <h1 className="text-6xl font-serif font-bold tamoor-gradient mr-3">
+            TAMOOR
+          </h1>
+          <span className="text-sm text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-3 py-1 rounded-full">
+            Premium
+          </span>
+        </Link>
+
+        <nav className="flex items-center space-x-8">
+          {["Home", "Products", "Categories", "About", "Contact"].map((name) => (
+            <Link
+              key={name}
+              to={`/${name.toLowerCase()}`}
+              className="text-neutral-800 hover:text-luxury-gold font-semibold transition relative group"
+            >
+              {name}
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-luxury-gold to-luxury-gold-light transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center space-x-4">
+          <div className="glass rounded-full px-4 py-2 flex items-center w-72">
+            <Search className="w-5 h-5 text-neutral-400 mr-3" />
+            <input
+              type="text"
+              placeholder="Search premium dry fruits..."
+              className="bg-transparent flex-1 outline-none text-neutral-700 placeholder-neutral-400"
+            />
+          </div>
+
+          {[Heart, User, ShoppingCart].map((Icon, i) => (
+            <Link
+              key={i}
+              to={i === 0 ? "/wishlist" : i === 1 ? "/profile" : "/cart"}
+              className="p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
+            >
+              <Icon className="w-7 h-7 text-neutral-700 hover:text-luxury-gold" />
+            </Link>
+          ))}
+        </div>
       </div>
     </header>
   );

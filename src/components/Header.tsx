@@ -157,7 +157,7 @@ const Header = () => {
           </div>
 
           {/* Right Icons */}
-          <div className="flex items-center space-x-2 lg:mr-24">
+          <div className="flex items-center space-x-1 sm:space-x-2 lg:mr-24">
             {[
               { icon: Heart, count: null, to: "/wishlist" },
               { icon: User, count: null, to: "/profile" },
@@ -166,7 +166,7 @@ const Header = () => {
               <Link
                 key={index}
                 to={to}
-                className={`p-2 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group ${
+                className={`p-1 sm:p-3 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group ${
                   index === 2 ? "cart-button" : ""
                 }`}
               >

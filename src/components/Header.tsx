@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Search, ShoppingCart, User, Menu, X, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
 import './topbar.css';
-
-
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showTopBar, setShowTopBar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [sparkleCount, setSparkleCount] = useState(100);
 
+  const SCROLL_THRESHOLD = 50;
 
-  const SCROLL_THRESHOLD = 50; // minimum scroll difference to toggle
+  // Set sparkle count once and update on resize
+  useEffect(() => {
+    const updateSparkleCount = () => {
+      setSparkleCount(window.innerWidth < 768 ? 30 : 100);
+    };
+    updateSparkleCount();
+    window.addEventListener("resize", updateSparkleCount);
+    return () => window.removeEventListener("resize", updateSparkleCount);
+  }, []);
 
+  // Scroll behavior
   useEffect(() => {
     let ticking = false;
 
@@ -25,19 +33,13 @@ const Header = () => {
         window.requestAnimationFrame(() => {
           const delta = currentScrollY - lastScrollY;
 
-          // Hide top bar on scroll down
           if (delta > SCROLL_THRESHOLD && showTopBar && currentScrollY > 50) {
             setShowTopBar(false);
-          }
-          // Show top bar on scroll up
-          else if (delta < -SCROLL_THRESHOLD && !showTopBar) {
+          } else if (delta < -SCROLL_THRESHOLD && !showTopBar) {
             setShowTopBar(true);
           }
 
-          // Update header background
           setIsScrolled(currentScrollY > 20);
-
-          // Always update lastScrollY
           setLastScrollY(currentScrollY);
 
           ticking = false;
@@ -47,14 +49,11 @@ const Header = () => {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY, showTopBar]);
 
-
-
   return (
-   <header
+    <header
       className={`sticky top-0 z-50 transition-all duration-500 ${
         isScrolled
           ? "glass backdrop-blur-xl shadow-luxury"
@@ -64,12 +63,10 @@ const Header = () => {
       {/* Futuristic Top Bar */}
       <div
         className="metallic-bar w-full relative overflow-hidden py-2 transition-transform duration-300 ease-in-out"
-        style={{
-          transform: showTopBar ? "translateY(0)" : "translateY(-100%)",
-        }}
+        style={{ transform: showTopBar ? "translateY(0)" : "translateY(-100%)" }}
       >
         <div className="relative overflow-hidden">
-          {Array.from({ length: window.innerWidth < 768 ? 30 : 100 }).map((_, i) => {
+          {Array.from({ length: sparkleCount }).map((_, i) => {
             const size = Math.floor(Math.random() * 4) + 2;
             const top = Math.floor(Math.random() * 100);
             const left = Math.floor(Math.random() * 100);
@@ -102,43 +99,41 @@ const Header = () => {
         </div>
       </div>
 
-
       {/* Main Header */}
       <div className="max-w-screen-xl w-full mx-auto px-4 sm:px-6 lg:px-10 overflow-x-hidden">
         <div className="flex items-center justify-between py-3 sm:py-4 flex-wrap">
           {/* Mobile / Tablet Logo */}
-            <div className="flex items-center sm:hidden group">
-              <Link to="/home" className="flex items-center">
-                <img
-                  src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
-                  alt="Tamoor Logo"
-                  className="w-10 h-10 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
-                />
-                <h1 className="text-3xl font-serif font-bold tamoor-gradient mr-2">
-                  TAMOOR
-                </h1>
-                <span className="text-xs text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 py-0.5 rounded-full">
-                  Premium
-                </span>
-              </Link>
-            </div>
+          <div className="flex items-center sm:hidden group">
+            <Link to="/home" className="flex items-center">
+              <img
+                src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
+                alt="Tamoor Logo"
+                className="w-10 h-10 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
+              />
+              <h1 className="text-3xl font-serif font-bold tamoor-gradient mr-2">TAMOOR</h1>
+              <span className="text-xs text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 py-0.5 rounded-full">
+                Premium
+              </span>
+            </Link>
+          </div>
 
-            {/* Desktop Logo */}
-            <div className="hidden sm:flex items-center group">
-              <Link to="/home" className="flex items-center">
-                <img
-                  src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
-                  alt="Tamoor Logo"
-                  className="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 object-contain mr-3 transition-transform duration-300 group-hover:scale-110"
-                />
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold tamoor-gradient mr-3">
-                  TAMOOR
-                </h1>
-                <span className="text-xs sm:text-sm md:text-base text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
-                  Premium
-                </span>
-              </Link>
-            </div>
+          {/* Desktop Logo */}
+          <div className="hidden sm:flex items-center group">
+            <Link to="/home" className="flex items-center">
+              <img
+                src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
+                alt="Tamoor Logo"
+                className="w-12 h-12 md:w-14 lg:w-16 object-contain mr-3 transition-transform duration-300 group-hover:scale-110"
+              />
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold tamoor-gradient mr-3">
+                TAMOOR
+              </h1>
+              <span className="text-xs sm:text-sm md:text-base text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
+                Premium
+              </span>
+            </Link>
+          </div>
+
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
             {[
@@ -161,7 +156,6 @@ const Header = () => {
 
           {/* Search + Right Icons */}
           <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
-            {/* Search Bar */}
             <div className="hidden md:flex items-center glass rounded-full px-3 sm:px-4 py-1.5 sm:py-2 w-full max-w-[200px] sm:max-w-xs md:max-w-sm group transition-all duration-300">
               <Search className="w-5 h-5 text-neutral-400 mr-2 sm:mr-3 transition-colors duration-300" />
               <input
@@ -171,7 +165,6 @@ const Header = () => {
               />
             </div>
 
-            {/* Right Icons */}
             {[{ icon: Heart, count: null, to: "/wishlist" },
               { icon: User, count: null, to: "/profile" },
               { icon: ShoppingCart, count: 0, to: "/cart" },
@@ -190,7 +183,6 @@ const Header = () => {
               </Link>
             ))}
 
-            {/* Mobile Menu Button */}
             <button
               className="lg:hidden p-2 sm:p-3 rounded-full transition-all duration-300"
               onClick={(e) => {
@@ -235,8 +227,6 @@ const Header = () => {
         )}
       </div>
     </header>
-
-
   );
 };
 

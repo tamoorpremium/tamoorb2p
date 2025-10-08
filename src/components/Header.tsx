@@ -106,9 +106,6 @@ const Header = () => {
               <h1 className="text-3xl font-serif font-bold tamoor-gradient mr-2">
                 TAMOOR
               </h1>
-              <span className="text-xs text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-2 py-0.5 rounded-full">
-                Premium
-              </span>
             </Link>
           </div>
 

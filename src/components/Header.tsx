@@ -92,21 +92,21 @@ const Header = () => {
       {/* Main Header */}
       <div className="max-w-full w-full mx-auto px-4 overflow-x-hidden">
         <div className="flex items-center justify-between py-4 flex-nowrap">
-          {/* Mobile Logo (smaller devices) */}
-          <div className="flex items-center sm:hidden group whitespace-nowrap">
-            <Link to="/home" className="flex items-center whitespace-nowrap">
-              <img
-                src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
-                alt="Tamoor Logo"
-                className="w-10 h-10 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
-              />
-              <h1 className="text-3xl font-serif font-bold tamoor-gradient">TAMOOR</h1>
-            </Link>
-          </div>
+          {/* Mobile Logo (below 640px) */}
+<div className="flex items-center sm:hidden group whitespace-nowrap">
+  <Link to="/home" className="flex items-center whitespace-nowrap">
+    <img
+      src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
+      alt="Tamoor Logo"
+      className="w-10 h-10 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"
+    />
+    <h1 className="text-3xl font-serif font-bold tamoor-gradient">TAMOOR</h1>
+  </Link>
+</div>
 
-     {/* Tablet Logo (medium screens 640px–1023px) */}
-<div className="hidden sm:flex lg:hidden items-center group whitespace-nowrap max-w-full overflow-hidden px-3">
-  <Link to="/home" className="flex items-center whitespace-nowrap max-w-full overflow-hidden">
+{/* Tablet Logo (640px–1023px only) */}
+<div className="hidden sm:flex md:hidden items-center group whitespace-nowrap max-w-full overflow-hidden px-3">
+  <Link to="/home" className="flex items-center whitespace-nowrap overflow-hidden">
     <img
       src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
       alt="Tamoor Logo"
@@ -121,23 +121,23 @@ const Header = () => {
   </Link>
 </div>
 
+{/* Desktop Logo (≥1024px) */}
+<div className="hidden lg:flex items-center group whitespace-nowrap ml-20">
+  <Link to="/home" className="flex items-center whitespace-nowrap">
+    <img
+      src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
+      alt="Tamoor Logo"
+      className="w-16 h-16 object-contain mr-3 transition-transform duration-300 group-hover:scale-110"
+    />
+    <h1 className="text-5xl lg:text-6xl font-serif font-bold tamoor-gradient mr-3">
+      TAMOOR
+    </h1>
+    <span className="text-sm lg:text-base text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-3 py-1 rounded-full">
+      Premium
+    </span>
+  </Link>
+</div>
 
-          {/* Desktop Logo (large screens) */}
-          <div className="hidden md:flex items-center group whitespace-nowrap ml-20">
-            <Link to="/home" className="flex items-center whitespace-nowrap">
-              <img
-                src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
-                alt="Tamoor Logo"
-                className="w-16 h-16 object-contain mr-3 transition-transform duration-300 group-hover:scale-110"
-              />
-              <h1 className="text-5xl lg:text-6xl font-serif font-bold tamoor-gradient mr-3">
-                TAMOOR
-              </h1>
-              <span className="text-sm lg:text-base text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-3 py-1 rounded-full">
-                Premium
-              </span>
-            </Link>
-          </div>
 
 
           {/* Desktop Navigation */}

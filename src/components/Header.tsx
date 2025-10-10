@@ -139,41 +139,44 @@ const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOp
 
     return (
         <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
-            <button 
-                className="lg:hidden p-2 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
-                aria-label="Search"
-                onClick={handleSearchToggle}
-            >
-                <Search className="w-5 h-5 text-neutral-700 hover:text-luxury-gold transition-colors duration-300" />
-            </button>
+        <button
+            className="lg:hidden p-2 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
+            aria-label="Search"
+            onClick={handleSearchToggle}
+        >
+            {/* Changed from w-5 h-5 */}
+            <Search className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-700 hover:text-luxury-gold transition-colors duration-300" />
+        </button>
 
-            {iconData.map(({ icon: Icon, count, to, label }, index) => (
-                <Link
-                    key={index}
-                    to={to}
-                    aria-label={label} 
-                    className={`p-2 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group`}
-                >
-                    <Icon className="w-5 h-5 text-neutral-700 group-hover:text-luxury-gold transition-colors duration-300" />
-                    {count !== null && (
-                        <span className="absolute -top-1 -right-1 bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-medium shadow-lg">
-                            {count}
-                        </span>
-                    )}
-                </Link>
-            ))}
-
-            <button
-                className="lg:hidden p-2 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
-                onClick={handleMenuToggle}
-                aria-expanded={isMenuOpen} 
-                aria-controls="mobile-menu"
-                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+        {iconData.map(({ icon: Icon, count, to, label }, index) => (
+            <Link
+                key={index}
+                to={to}
+                aria-label={label}
+                className={`p-2 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group`}
             >
-                <span className="sr-only">{isMenuOpen ? "Close menu" : "Open menu"}</span>
-                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-        </div>
+                {/* Changed from w-5 h-5 */}
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-700 group-hover:text-luxury-gold transition-colors duration-300" />
+                {count !== null && (
+                    <span className="absolute -top-1 -right-1 bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-medium shadow-lg">
+                        {count}
+                    </span>
+                )}
+            </Link>
+        ))}
+
+        <button
+            className="lg:hidden p-2 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
+            onClick={handleMenuToggle}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu"
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+        >
+            <span className="sr-only">{isMenuOpen ? "Close menu" : "Open menu"}</span>
+            {/* Changed from w-6 h-6 */}
+            {isMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
+        </button>
+    </div>
     );
 };
 
@@ -279,7 +282,7 @@ const Header: React.FC = () => {
                                 loading="eager" 
                                 className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 object-contain mr-1 transition-transform duration-300 group-hover:scale-110"
                             />
-                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold tamoor-gradient mr-1">
+                            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-serif font-bold tamoor-gradient mr-1">
                                 TAMOOR
                             </h1>
                             <span className="hidden sm:inline-block text-xs lg:text-sm text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-1 py-0.5 rounded-full">

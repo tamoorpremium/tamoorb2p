@@ -35,7 +35,7 @@ const NAV_LINKS = [
   { name: "Contact", href: "/contact" },
 ];
 
-// --- 1. TopBar Component (Memoized) ---
+// --- 1. TopBar Component (Unchanged) ---
 const TopBar: React.FC<TopBarProps> = React.memo(({ showTopBar }) => {
   const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
   const sparkleCount = isDesktop ? 100 : 30;
@@ -81,40 +81,27 @@ const TopBar: React.FC<TopBarProps> = React.memo(({ showTopBar }) => {
   );
 });
 
-// --- 2. DesktopNav Component (FIXED for Medium Screens) ---
+// --- 2. DesktopNav Component (CHANGED: Search bar removed) ---
 const DesktopNav: React.FC = () => (
-    // {/* CHANGED: Made spacing responsive to tighten up on medium laptops */}
-    <div className="flex items-center lg:space-x-6 xl:space-x-12">
-        {/* CHANGED: Made spacing responsive here as well */}
-        <nav className="flex items-center lg:space-x-4 xl:space-x-8">
-            {NAV_LINKS.map((item) => (
-                <a
-                    key={item.name}
-                    href={item.href}
-                    className="text-neutral-800 text-sm font-semibold transition-all duration-300 relative group whitespace-nowrap hover:text-luxury-gold"
-                >
-                    {item.name}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-luxury-gold to-luxury-gold-light transition-all duration-300 group-hover:w-full"></span>
-                </a>
-            ))}
-        </nav>
-        <div className="flex items-center glass rounded-full px-3 py-1.5 w-full max-w-xs group hover:shadow-lg transition-all duration-300">
-            <Search className="w-4 h-4 text-neutral-400 mr-2 group-hover:text-luxury-gold transition-colors duration-300" />
-            <input
-                type="text"
-                placeholder="Search dry fruits..."
-                aria-label="Search premium dry fruits"
-                className="bg-transparent flex-1 outline-none text-xs text-neutral-700 placeholder-neutral-400"
-            />
-        </div>
-    </div>
+    // This component now ONLY renders the navigation links.
+    <nav className="flex items-center space-x-8">
+        {NAV_LINKS.map((item) => (
+            <a
+                key={item.name}
+                href={item.href}
+                className="text-neutral-800 text-sm font-semibold transition-all duration-300 relative group whitespace-nowrap hover:text-luxury-gold"
+            >
+                {item.name}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-luxury-gold to-luxury-gold-light transition-all duration-300 group-hover:w-full"></span>
+            </a>
+        ))}
+    </nav>
 );
 
 
-// --- 3. MobileMenu Component ---
+// --- 3. MobileMenu Component (Unchanged) ---
 const MobileMenu: React.FC<MobileMenuProps> = ({ isMenuOpen, setIsMenuOpen }) => {
     if (!isMenuOpen) return null;
-
     return (
         <div id="mobile-menu" className="lg:hidden py-4 border-t border-neutral-200/50 animate-slide-up">
             <div className="flex flex-col space-y-3">
@@ -133,7 +120,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isMenuOpen, setIsMenuOpen }) =>
     );
 };
 
-// --- 4. IconSet Component (FIXED for Mobile) ---
+// --- 4. IconSet Component (CHANGED: Hiding mobile buttons on desktop) ---
 const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOpen, setIsSearchOpen }) => {
     const iconData = useMemo(() => ([
         { icon: Heart, count: null, to: "/wishlist", label: "Wishlist" },
@@ -152,8 +139,8 @@ const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOp
     };
 
     return (
-        // {/* CHANGED: Responsive spacing to tighten icons on small mobile screens */}
         <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
+            {/* CHANGED: This button is now correctly hidden on large screens */}
             <button 
                 className="lg:hidden p-2 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
                 aria-label="Search"
@@ -162,6 +149,7 @@ const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOp
                 <Search className="w-5 h-5 text-neutral-700 hover:text-luxury-gold transition-colors duration-300" />
             </button>
 
+            {/* These icons are visible on all screen sizes */}
             {iconData.map(({ icon: Icon, count, to, label }, index) => (
                 <Link
                     key={index}
@@ -178,6 +166,7 @@ const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOp
                 </Link>
             ))}
 
+            {/* CHANGED: This button is now correctly hidden on large screens */}
             <button
                 className="lg:hidden p-2 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
                 onClick={handleMenuToggle}
@@ -193,10 +182,9 @@ const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOp
 };
 
 
-// --- 5. MobileSearchOverlay Component ---
+// --- 5. MobileSearchOverlay Component (Unchanged) ---
 const MobileSearchOverlay: React.FC<MobileSearchOverlayProps> = ({ isSearchOpen, setIsSearchOpen }) => {
     if (!isSearchOpen) return null;
-
     return (
       <div className="fixed inset-0 bg-white z-[60] flex flex-col p-4 sm:p-8 transition-opacity duration-300">
         <div className="flex items-center justify-between pb-6 border-b border-neutral-200">
@@ -209,7 +197,6 @@ const MobileSearchOverlay: React.FC<MobileSearchOverlayProps> = ({ isSearchOpen,
             <X className="w-6 h-6 text-neutral-700" />
           </button>
         </div>
-        
         <div className="flex items-center glass rounded-full px-4 py-3 w-full mt-6 shadow-md">
           <Search className="w-6 h-6 text-neutral-500 mr-3 flex-shrink-0" />
           <input
@@ -220,7 +207,6 @@ const MobileSearchOverlay: React.FC<MobileSearchOverlayProps> = ({ isSearchOpen,
             className="bg-transparent flex-1 outline-none text-lg text-neutral-700 placeholder-neutral-400 min-w-0"
           />
         </div>
-
         <div className="mt-8">
             <p className="text-sm text-neutral-500">Popular Searches:</p>
         </div>
@@ -228,7 +214,7 @@ const MobileSearchOverlay: React.FC<MobileSearchOverlayProps> = ({ isSearchOpen,
     );
 };
 
-// --- FINAL HEADER COMPONENT (REFACTORED) ---
+// --- FINAL HEADER COMPONENT (RESTRUCTURED) ---
 const Header: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
@@ -237,7 +223,6 @@ const Header: React.FC = () => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const SCROLL_THRESHOLD = 50;
 
-    // --- Keyboard Accessibility Hook ---
     const handleEscape = useCallback((event: KeyboardEvent) => {
         if (event.key === 'Escape') {
             if (isMenuOpen) setIsMenuOpen(false);
@@ -250,7 +235,6 @@ const Header: React.FC = () => {
         return () => document.removeEventListener('keydown', handleEscape);
     }, [handleEscape]);
 
-    // --- Scroll Behavior Hook ---
     useEffect(() => {
         let ticking = false;
         const handleScroll = () => {
@@ -284,26 +268,22 @@ const Header: React.FC = () => {
             }`}
         >
             <MobileSearchOverlay isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen} />
-            
             <TopBar showTopBar={showTopBar} />
             
             <div className="w-full px-4 sm:px-6 lg:px-8">
+                {/* CHANGED: A more robust flex layout. 'justify-between' pushes the logo left and the right-group right. */}
                 <div className="flex items-center justify-between py-4 lg:py-6">
                     
-                    {/* --- Left Zone --- */}
-                    <div className="flex justify-start lg:flex-1">
+                    {/* --- Left Zone (Logo) --- */}
+                    <div className="flex-shrink-0">
                         <Link to="/" className="flex items-center whitespace-nowrap group">
                             <img
                                 src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
                                 alt="Tamoor Logo"
                                 loading="eager" 
-                                // {/* CHANGED: Made logo size responsive to prevent mobile overflow */}
                                 className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 object-contain mr-1 transition-transform duration-300 group-hover:scale-110"
                             />
-                            <h1 
-                                // {/* CHANGED: Made text size responsive to prevent mobile overflow */}
-                                className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold tamoor-gradient mr-1"
-                            >
+                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold tamoor-gradient mr-1">
                                 TAMOOR
                             </h1>
                             <span className="hidden sm:inline-block text-xs lg:text-sm text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-1 py-0.5 rounded-full">
@@ -312,13 +292,32 @@ const Header: React.FC = () => {
                         </Link>
                     </div>
 
-                    {/* --- Center Zone (Desktop Only) --- */}
-                    <div className="hidden lg:flex justify-center">
+                    {/* --- Right Zone (Desktop: Nav + Search + Icons) --- */}
+                    {/* This entire group is hidden on mobile */}
+                    <div className="hidden lg:flex items-center space-x-6">
                         <DesktopNav />
+                        
+                        {/* The desktop search bar now lives here */}
+                        <div className="flex items-center glass rounded-full px-3 py-1.5 group hover:shadow-lg transition-all duration-300">
+                            <Search className="w-4 h-4 text-neutral-400 mr-2 group-hover:text-luxury-gold transition-colors duration-300" />
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                aria-label="Search premium dry fruits"
+                                className="bg-transparent outline-none text-xs text-neutral-700 placeholder-neutral-400 w-28 xl:w-36 transition-all duration-300 focus:w-44"
+                            />
+                        </div>
+
+                        <IconSet 
+                           isMenuOpen={isMenuOpen}
+                           setIsMenuOpen={setIsMenuOpen}
+                           isSearchOpen={isSearchOpen}
+                           setIsSearchOpen={setIsSearchOpen}
+                        />
                     </div>
-                    
-                    {/* --- Right Zone --- */}
-                    <div className="flex justify-end lg:flex-1">
+
+                    {/* --- Mobile-Only Icons --- */}
+                    <div className="lg:hidden">
                         <IconSet 
                             isMenuOpen={isMenuOpen}
                             setIsMenuOpen={setIsMenuOpen}
@@ -326,7 +325,6 @@ const Header: React.FC = () => {
                             setIsSearchOpen={setIsSearchOpen}
                         />
                     </div>
-
                 </div>
 
                 <MobileMenu isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />

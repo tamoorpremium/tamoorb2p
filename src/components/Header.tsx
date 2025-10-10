@@ -88,7 +88,7 @@ const DesktopNav: React.FC = () => (
             <a
                 key={item.name}
                 href={item.href}
-                className="text-neutral-800 text-sm font-semibold transition-all duration-300 relative group whitespace-nowrap hover:text-luxury-gold"
+                className="text-neutral-800 text-sm lg:text-base font-bold transition-all duration-300 relative group whitespace-nowrap hover:text-luxury-gold"
             >
                 {item.name}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-luxury-gold to-luxury-gold-light transition-all duration-300 group-hover:w-full"></span>
@@ -282,7 +282,7 @@ const Header: React.FC = () => {
                                 loading="eager" 
                                 className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 object-contain mr-1 transition-transform duration-300 group-hover:scale-110"
                             />
-                            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold tamoor-gradient mr-1">
+                            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-serif font-bold tamoor-gradient mr-1">
                                 TAMOOR
                             </h1>
                             <span className="hidden sm:inline-block text-xs lg:text-sm text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-1 py-0.5 rounded-full">
@@ -292,7 +292,7 @@ const Header: React.FC = () => {
                     </div>
                     
                     {/* --- Zone 2: Navigation (Center, Desktop Only) --- */}
-                    <div className="hidden lg:flex justify-center lg:text-base xl:text-lg">
+                    <div className="hidden lg:flex justify-center">
                         <DesktopNav />
                     </div>
 

@@ -282,7 +282,7 @@ const Header: React.FC = () => {
                                 loading="eager" 
                                 className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 object-contain mr-1 transition-transform duration-300 group-hover:scale-110"
                             />
-                            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-serif font-bold tamoor-gradient mr-1">
+                            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold tamoor-gradient mr-1">
                                 TAMOOR
                             </h1>
                             <span className="hidden sm:inline-block text-xs lg:text-sm text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-1 py-0.5 rounded-full">
@@ -292,7 +292,7 @@ const Header: React.FC = () => {
                     </div>
                     
                     {/* --- Zone 2: Navigation (Center, Desktop Only) --- */}
-                    <div className="hidden lg:flex justify-center">
+                    <div className="hidden lg:flex justify-center lg:text-base xl:text-lg">
                         <DesktopNav />
                     </div>
 

@@ -37,10 +37,10 @@ const HeaderStyles = () => (
       text-fill-color: transparent;
     }
     .glass {
-      background-color: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background-color: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
     }
     .shadow-luxury { box-shadow: 0 8px 32px 0 rgba(135, 115, 69, 0.15); }
     @keyframes slide-up {
@@ -176,17 +176,16 @@ const HeaderStyles = () => (
 
 
 // =================================================================================
-// 1. TOP BAR COMPONENT (REVERTED TO STATIC SPARKLES)
+// 1. TOP BAR COMPONENT
 // =================================================================================
 const TopBar: React.FC<TopBarProps> = React.memo(({ showTopBar }) => {
   return (
     <div className={`metallic-bar w-full transition-transform duration-300 ease-in-out ${showTopBar ? "translate-y-0" : "-translate-y-full"}`}>
-      <div className="relative overflow-hidden py-2.5">
-        {/* Render 50 empty divs for your CSS to target with :nth-child */}
+      <div className="relative overflow-hidden py-2">
         {Array.from({ length: 50 }).map((_, i) => <div key={i} className="sparkle" />)}
         <div className="animate-scroll whitespace-nowrap flex">
           {[...Array(20)].map((_, i) => (
-            <span key={i} className="futuristic-text text-sm font-bold">
+            <span key={i} className="futuristic-text text-xs sm:text-sm font-bold">
               {i % 2 === 0 ? "✨ Free shipping on orders above ₹999!" : "⚡ Use Code: WELCOME10 & Unlock 10% Savings! 🎉"}
             </span>
           ))}
@@ -197,28 +196,27 @@ const TopBar: React.FC<TopBarProps> = React.memo(({ showTopBar }) => {
 });
 
 // =================================================================================
-// 2. LOGO COMPONENT (SIZES INCREASED)
+// 2. LOGO COMPONENT (RESPONSIVELY SIZED)
 // =================================================================================
 const Logo: React.FC = () => (
   <div className="flex-shrink-0">
     <Link to="/" className="flex items-center whitespace-nowrap group">
-      <img src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png" alt="Tamoor Logo" loading="eager" className="h-12 w-12 md:h-14 md:w-14 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"/>
-      <h1 className="text-4xl md:text-5xl font-serif font-bold tamoor-gradient mr-2">TAMOOR</h1>
-      <span className="hidden sm:inline-block text-sm text-[--luxury-gold] font-serif font-medium bg-[#f2d78e]/20 px-2 py-1 rounded-full">Premium</span>
+      <img src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png" alt="Tamoor Logo" loading="eager" className="h-9 w-9 sm:h-10 sm:w-10 lg:h-12 lg:w-12 object-contain mr-2 transition-transform duration-300 group-hover:scale-110"/>
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold tamoor-gradient">TAMOOR</h1>
     </Link>
   </div>
 );
 
 // =================================================================================
-// 3. DESKTOP NAVIGATION COMPONENT (SIZES INCREASED)
+// 3. DESKTOP NAVIGATION COMPONENT (RESPONSIVELY SIZED)
 // =================================================================================
 const DesktopNav: React.FC = () => (
   <nav className="hidden lg:flex items-center justify-center flex-grow">
-    <div className="flex items-center space-x-10">
+    <div className="flex items-center space-x-8">
       {NAV_LINKS.map((item) => (
-        <a key={item.name} href={item.href} className="text-neutral-800 text-base font-semibold transition-all duration-300 relative group whitespace-nowrap hover:text-[--luxury-gold]">
+        <a key={item.name} href={item.href} className="text-neutral-700 text-sm font-semibold transition-all duration-300 relative group whitespace-nowrap hover:text-b-8a3c]">
           {item.name}
-          <span className="absolute -bottom-1.5 left-0 w-0 h-[2px] bg-gradient-to-r from-[--luxury-gold] to-[#f2d78e] transition-all duration-300 group-hover:w-full"></span>
+          <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#b48a3c] to-[#f2d78e] transition-all duration-300 group-hover:w-full"></span>
         </a>
       ))}
     </div>
@@ -226,7 +224,7 @@ const DesktopNav: React.FC = () => (
 );
 
 // =================================================================================
-// 4. ACTION ICONS COMPONENT (SIZES INCREASED)
+// 4. ACTION ICONS COMPONENT (RESPONSIVELY SIZED)
 // =================================================================================
 const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOpen, setIsSearchOpen }) => {
     const iconData = useMemo(() => ([
@@ -238,64 +236,63 @@ const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOp
     const handleMenuToggle = useCallback(() => { if (isSearchOpen) setIsSearchOpen(false); setIsMenuOpen(prev => !prev); }, [isSearchOpen, setIsSearchOpen, setIsMenuOpen]);
 
     return (
-        <div className="flex items-center space-x-2 md:space-x-3">
-            <button className="lg:hidden p-2 hover:bg-[#b48a3c]/10 rounded-full transition-colors duration-300" aria-label="Open search" onClick={handleSearchToggle}><Search className="w-6 h-6 text-neutral-700" /></button>
+        <div className="flex items-center space-x-1 sm:space-x-2">
+            <button className="lg:hidden p-2 hover:bg-[#b48a3c]/10 rounded-full" aria-label="Open search" onClick={handleSearchToggle}><Search className="w-5 h-5 text-neutral-600" /></button>
             {iconData.map(({ icon: Icon, count, to, label }, index) => (
-                <Link key={index} to={to} aria-label={label} className="p-2 hover:bg-[#b48a3c]/10 rounded-full transition-colors duration-300 relative group">
-                    <Icon className="w-6 h-6 text-neutral-700 group-hover:text-[--luxury-gold] transition-colors" />
-                    {count !== null && (<span className="absolute -top-1 -right-1 bg-gradient-to-r from-[--luxury-gold] to-[#f2d78e] text-white text-[11px] rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-md">{count}</span>)}
+                <Link key={index} to={to} aria-label={label} className="p-2 hover:bg-[#b48a3c]/10 rounded-full relative group">
+                    <Icon className="w-5 h-5 text-neutral-600 group-hover:text-[#b48a3c] transition-colors" />
+                    {count !== null && (<span className="absolute -top-1 -right-1 bg-gradient-to-r from-[#b48a3c] to-[#f2d78e] text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">{count}</span>)}
                 </Link>
             ))}
-            <button className="lg:hidden p-2 hover:bg-[#b48a3c]/10 rounded-full transition-colors duration-300" onClick={handleMenuToggle} aria-expanded={isMenuOpen} aria-controls="mobile-menu" aria-label={isMenuOpen ? "Close menu" : "Open menu"}>
-                {isMenuOpen ? <X className="w-7 h-7 text-neutral-700" /> : <Menu className="w-7 h-7 text-neutral-700" />}
+            <button className="lg:hidden p-2 hover:bg-[#b48a3c]/10 rounded-full" onClick={handleMenuToggle} aria-expanded={isMenuOpen} aria-controls="mobile-menu" aria-label={isMenuOpen ? "Close menu" : "Open menu"}>
+                {isMenuOpen ? <X className="w-6 h-6 text-neutral-700" /> : <Menu className="w-6 h-6 text-neutral-700" />}
             </button>
         </div>
     );
 };
 
 // =================================================================================
-// 5. RIGHT-SIDE ACTIONS (SIZES INCREASED)
+// 5. RIGHT-SIDE ACTIONS (RESPONSIVELY SIZED)
 // =================================================================================
 const RightActions: React.FC<IconSetProps> = (props) => (
     <div className="flex items-center justify-end flex-shrink-0">
-        <div className="hidden lg:flex items-center glass rounded-full px-4 py-2 w-full max-w-xs group hover:shadow-lg transition-shadow duration-300 mr-4">
-            <Search className="w-5 h-5 text-neutral-500 mr-3 group-hover:text-[--luxury-gold] transition-colors" />
-            <input type="text" placeholder="Search dry fruits..." aria-label="Search premium dry fruits" className="bg-transparent flex-1 outline-none text-sm text-neutral-800 placeholder-neutral-500"/>
+        <div className="hidden lg:flex items-center glass rounded-full px-3 py-1.5 w-full max-w-[240px] group hover:shadow-sm transition-shadow duration-300 mr-3">
+            <Search className="w-4 h-4 text-neutral-400 mr-2 group-hover:text-[#b48a3c] transition-colors" />
+            <input type="text" placeholder="Search..." aria-label="Search" className="bg-transparent flex-1 outline-none text-xs text-neutral-700 placeholder-neutral-500"/>
         </div>
         <IconSet {...props} />
     </div>
 );
 
 // =================================================================================
-// 6. MOBILE NAVIGATION MENU (SIZES INCREASED)
+// 6. MOBILE NAVIGATION MENU (RESPONSIVELY SIZED)
 // =================================================================================
 const MobileMenu: React.FC<MobileMenuProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   if (!isMenuOpen) return null;
   return (
-    <div id="mobile-menu" className="lg:hidden py-4 border-t border-neutral-200/50 animate-slide-up">
-      <div className="flex flex-col space-y-4">
-        {NAV_LINKS.map((item) => (<Link key={item.name} to={item.href} className="text-neutral-800 hover:text-[--luxury-gold] text-lg font-semibold transition-colors duration-300 py-2 text-center" onClick={() => setIsMenuOpen(false)}>{item.name}</Link>))}
+    <div id="mobile-menu" className="lg:hidden py-3 border-t border-neutral-200/75 animate-slide-up">
+      <div className="flex flex-col">
+        {NAV_LINKS.map((item) => (<Link key={item.name} to={item.href} className="text-neutral-700 hover:text-[#b48a3c] text-sm font-medium transition-colors duration-300 py-2.5 text-center" onClick={() => setIsMenuOpen(false)}>{item.name}</Link>))}
       </div>
     </div>
   );
 };
 
 // =================================================================================
-// 7. MOBILE SEARCH OVERLAY (SIZES INCREASED)
+// 7. MOBILE SEARCH OVERLAY (RESPONSIVELY SIZED)
 // =================================================================================
 const MobileSearchOverlay: React.FC<MobileSearchOverlayProps> = ({ isSearchOpen, setIsSearchOpen }) => {
   if (!isSearchOpen) return null;
   return (
-    <div className="fixed inset-0 bg-white z-[60] flex flex-col p-5 sm:p-8 transition-opacity duration-300 animate-slide-up">
-      <div className="flex items-center justify-between pb-5 border-b border-neutral-200">
-        <h2 className="text-2xl font-bold text-neutral-800">Search Products</h2>
-        <button onClick={() => setIsSearchOpen(false)} className="p-2 hover:bg-neutral-100 rounded-full" aria-label="Close search"><X className="w-7 h-7 text-neutral-700" /></button>
+    <div className="fixed inset-0 bg-white z-[60] flex flex-col p-4 sm:p-6 transition-opacity duration-300 animate-slide-up">
+      <div className="flex items-center justify-between pb-4 border-b border-neutral-200">
+        <h2 className="text-lg font-bold text-neutral-800">Search Products</h2>
+        <button onClick={() => setIsSearchOpen(false)} className="p-2 hover:bg-neutral-100 rounded-full" aria-label="Close search"><X className="w-6 h-6 text-neutral-700" /></button>
       </div>
-      <div className="flex items-center glass rounded-full px-4 py-3 w-full mt-8 shadow-md">
-        <Search className="w-6 h-6 text-neutral-500 mr-4" />
-        <input type="text" placeholder="Search..." aria-label="Search" autoFocus className="bg-transparent flex-1 outline-none text-lg text-neutral-800 placeholder-neutral-500"/>
+      <div className="flex items-center glass rounded-full px-4 py-2 w-full mt-6 shadow-sm">
+        <Search className="w-5 h-5 text-neutral-500 mr-3" />
+        <input type="text" placeholder="Search..." aria-label="Search" autoFocus className="bg-transparent flex-1 outline-none text-base text-neutral-700 placeholder-neutral-500"/>
       </div>
-      <div className="mt-8 text-center"><p className="text-base text-neutral-600">Popular: Almonds, Cashews, Dates...</p></div>
     </div>
   );
 };
@@ -347,11 +344,11 @@ const Header: React.FC = () => {
   return (
     <>
       <HeaderStyles />
-      <header className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? "glass backdrop-blur-xl shadow-luxury" : "bg-white/95"}`}>
+      <header className={`sticky top-0 z-50 transition-shadow duration-300 ${isScrolled ? "glass shadow-luxury" : "bg-white/95"}`}>
         <MobileSearchOverlay isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen} />
         <TopBar showTopBar={showTopBar} />
         <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-4 py-4 lg:py-5">
+          <div className="flex items-center justify-between gap-4 py-3 lg:py-4">
             <Logo />
             <DesktopNav />
             <RightActions isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen}/>

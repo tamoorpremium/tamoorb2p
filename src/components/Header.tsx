@@ -7,9 +7,8 @@ import "./topbar.css";
 // --- Type Definitions (Interfaces) ---
 type SetState<T> = React.Dispatch<React.SetStateAction<T>>;
 
-interface TopBarProps {
-  showTopBar: boolean;
-}
+// REMOVED: showTopBar from TopBarProps as it's no longer needed there.
+interface TopBarProps {}
 
 interface MobileMenuProps {
   isMenuOpen: boolean;
@@ -35,16 +34,17 @@ const NAV_LINKS = [
   { name: "Contact", href: "/contact" },
 ];
 
-// --- 1. TopBar Component (Unchanged) ---
-const TopBar: React.FC<TopBarProps> = React.memo(({ showTopBar }) => {
-  const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+// --- 1. TopBar Component (MODIFIED) ---
+// The TopBar is now simpler. It doesn't handle its own animation.
+// We give it a fixed height (h-10) to make the parent animation precise.
+const TopBar: React.FC<TopBarProps> = React.memo(() => {
+  const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024;
   const sparkleCount = isDesktop ? 100 : 30;
 
   return (
     <div
-      className={`metallic-bar w-full relative overflow-hidden py-2 transition-transform duration-300 ease-in-out ${
-        showTopBar ? "translate-y-0" : "-translate-y-full"
-      }`}
+      // CHANGED: Removed animation classes, added fixed height and flexbox for alignment.
+      className="metallic-bar w-full h-10 flex items-center relative overflow-hidden"
     >
       <div className="relative overflow-hidden">
         {Array.from({ length: sparkleCount }).map((_, i) => {
@@ -81,7 +81,7 @@ const TopBar: React.FC<TopBarProps> = React.memo(({ showTopBar }) => {
   );
 });
 
-// --- 2. DesktopNav Component (Correctly simplified) ---
+// --- 2. DesktopNav Component (Unchanged) ---
 const DesktopNav: React.FC = () => (
     <nav className="flex items-center space-x-8">
         {NAV_LINKS.map((item) => (
@@ -96,7 +96,6 @@ const DesktopNav: React.FC = () => (
         ))}
     </nav>
 );
-
 
 // --- 3. MobileMenu Component (Unchanged) ---
 const MobileMenu: React.FC<MobileMenuProps> = ({ isMenuOpen, setIsMenuOpen }) => {
@@ -119,7 +118,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isMenuOpen, setIsMenuOpen }) =>
     );
 };
 
-// --- 4. IconSet Component (Correctly hides mobile controls) ---
+// --- 4. IconSet Component (Unchanged) ---
 const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOpen, setIsSearchOpen }) => {
     const iconData = useMemo(() => ([
         { icon: Heart, count: null, to: "/wishlist", label: "Wishlist" },
@@ -144,7 +143,6 @@ const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOp
             aria-label="Search"
             onClick={handleSearchToggle}
         >
-            {/* Changed from w-5 h-5 */}
             <Search className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-700 hover:text-luxury-gold transition-colors duration-300" />
         </button>
 
@@ -155,7 +153,6 @@ const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOp
                 aria-label={label}
                 className={`p-2 hover:bg-luxury-gold/10 rounded-full transition-all duration-300 relative group`}
             >
-                {/* Changed from w-5 h-5 */}
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-700 group-hover:text-luxury-gold transition-colors duration-300" />
                 {count !== null && (
                     <span className="absolute -top-1 -right-1 bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-medium shadow-lg">
@@ -173,13 +170,11 @@ const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOp
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
         >
             <span className="sr-only">{isMenuOpen ? "Close menu" : "Open menu"}</span>
-            {/* Changed from w-6 h-6 */}
             {isMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
         </button>
     </div>
     );
 };
-
 
 // --- 5. MobileSearchOverlay Component (Unchanged) ---
 const MobileSearchOverlay: React.FC<MobileSearchOverlayProps> = ({ isSearchOpen, setIsSearchOpen }) => {
@@ -213,123 +208,143 @@ const MobileSearchOverlay: React.FC<MobileSearchOverlayProps> = ({ isSearchOpen,
     );
 };
 
-// --- FINAL HEADER COMPONENT (FINAL STRUCTURE) ---
+// --- FINAL HEADER COMPONENT (MODIFIED) ---
 const Header: React.FC = () => {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isScrolled, setIsScrolled] = useState(false);
-    const [showTopBar, setShowTopBar] = useState(true);
-    const [lastScrollY, setLastScrollY] = useState(0);
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const SCROLL_THRESHOLD = 50;
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [showTopBar, setShowTopBar] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const SCROLL_THRESHOLD = 50;
 
-    const handleEscape = useCallback((event: KeyboardEvent) => {
-        if (event.key === 'Escape') {
-            if (isMenuOpen) setIsMenuOpen(false);
-            if (isSearchOpen) setIsSearchOpen(false);
-        }
-    }, [isMenuOpen, isSearchOpen]);
+  const handleEscape = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        if (isMenuOpen) setIsMenuOpen(false);
+        if (isSearchOpen) setIsSearchOpen(false);
+      }
+    },
+    [isMenuOpen, isSearchOpen]
+  );
 
-    useEffect(() => {
-        document.addEventListener('keydown', handleEscape);
-        return () => document.removeEventListener('keydown', handleEscape);
-    }, [handleEscape]);
+  useEffect(() => {
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [handleEscape]);
 
-    useEffect(() => {
-        let ticking = false;
-        const handleScroll = () => {
-            const currentScrollY = window.scrollY;
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    const delta = currentScrollY - lastScrollY;
-                    if (delta > SCROLL_THRESHOLD && showTopBar && currentScrollY > 50) {
-                        setShowTopBar(false);
-                    } else if (delta < -SCROLL_THRESHOLD && !showTopBar) {
-                        setShowTopBar(true);
-                    }
-                    setIsScrolled(currentScrollY > 20);
-                    setLastScrollY(currentScrollY);
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        };
-        window.addEventListener("scroll", handleScroll, { passive: true });
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, [lastScrollY, showTopBar]);
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const delta = currentScrollY - lastScrollY;
+          if (delta > SCROLL_THRESHOLD && showTopBar && currentScrollY > 50) {
+            setShowTopBar(false);
+          } else if (delta < -SCROLL_THRESHOLD && !showTopBar) {
+            setShowTopBar(true);
+          }
+          setIsScrolled(currentScrollY > 20);
+          setLastScrollY(currentScrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY, showTopBar]);
 
+  return (
+    <header
+      // CHANGED: The header is now just a sticky container that clips its content.
+      // The background styles have been moved to the main content div below.
+      className="sticky top-0 z-50 overflow-hidden"
+    >
+      <MobileSearchOverlay
+        isSearchOpen={isSearchOpen}
+        setIsSearchOpen={setIsSearchOpen}
+      />
 
-    return (
-        <header
-            className={`sticky top-0 z-50 transition-all duration-500 ${
-                isScrolled
-                    ? "glass backdrop-blur-xl shadow-luxury"
-                    : "bg-white/95 backdrop-blur-sm"
-            }`}
+      {/* ADDED: This wrapper groups the TopBar and main content for a unified animation. */}
+      <div
+        className={`transition-transform duration-300 ease-in-out ${
+          showTopBar ? "translate-y-0" : "-translate-y-10" // Moves up by 2.5rem (h-10)
+        }`}
+      >
+        <TopBar />
+
+        {/* This is the main header content area */}
+        <div
+          // CHANGED: This div now holds the background and shadow styles.
+          className={`w-full px-4 sm:px-6 lg:px-8 transition-all duration-500 ${
+            isScrolled
+              ? "glass backdrop-blur-xl shadow-luxury"
+              : "bg-white/95 backdrop-blur-sm"
+          }`}
         >
-            <MobileSearchOverlay isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen} />
-            <TopBar showTopBar={showTopBar} />
-            
-            <div className="w-full px-4 sm:px-6 lg:px-8">
-                {/* CHANGED: Reverted to a three-zone layout for desktop for perfect balance. */}
-                <div className="flex items-center justify-between py-4 lg:py-6">
-                    
-                    {/* --- Zone 1: Logo (Left) --- */}
-                    <div className="flex-shrink-0">
-                        <Link to="/" className="flex items-center whitespace-nowrap group">
-                            <img
-                                src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
-                                alt="Tamoor Logo"
-                                loading="eager" 
-                                className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 object-contain mr-1 transition-transform duration-300 group-hover:scale-110"
-                            />
-                            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-serif font-bold tamoor-gradient mr-1">
-                                TAMOOR
-                            </h1>
-                            <span className="hidden sm:inline-block text-xs lg:text-sm text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-1 py-0.5 rounded-full">
-                                Premium
-                            </span>
-                        </Link>
-                    </div>
-                    
-                    {/* --- Zone 2: Navigation (Center, Desktop Only) --- */}
-                    <div className="hidden lg:flex justify-center">
-                        <DesktopNav />
-                    </div>
-
-                    {/* --- Zone 3: Actions (Right, Desktop Only) --- */}
-                    <div className="hidden lg:flex items-center justify-end space-x-6">
-                        <div className="flex items-center glass rounded-full px-3 py-1.5 group hover:shadow-lg transition-all duration-300">
-                            <Search className="w-4 h-4 text-neutral-400 mr-2 group-hover:text-luxury-gold transition-colors duration-300" />
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                aria-label="Search premium dry fruits"
-                                className="bg-transparent outline-none text-xs text-neutral-700 placeholder-neutral-400 w-28 xl:w-36 transition-all duration-300 focus:w-44"
-                            />
-                        </div>
-                        <IconSet 
-                           isMenuOpen={isMenuOpen}
-                           setIsMenuOpen={setIsMenuOpen}
-                           isSearchOpen={isSearchOpen}
-                           setIsSearchOpen={setIsSearchOpen}
-                        />
-                    </div>
-
-                    {/* --- Mobile-Only Icons --- */}
-                    <div className="lg:hidden">
-                        <IconSet 
-                            isMenuOpen={isMenuOpen}
-                            setIsMenuOpen={setIsMenuOpen}
-                            isSearchOpen={isSearchOpen}
-                            setIsSearchOpen={setIsSearchOpen}
-                        />
-                    </div>
-                </div>
-
-                <MobileMenu isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+          <div className="flex items-center justify-between py-4 lg:py-6">
+            {/* --- Zone 1: Logo (Left) --- */}
+            <div className="flex-shrink-0">
+              <Link to="/" className="flex items-center whitespace-nowrap group">
+                <img
+                  src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
+                  alt="Tamoor Logo"
+                  loading="eager"
+                  className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 object-contain mr-1 transition-transform duration-300 group-hover:scale-110"
+                />
+                <h1 className="text-2xl sm:text-4xl lg:text-5xl font-serif font-bold tamoor-gradient mr-1">
+                  TAMOOR
+                </h1>
+                <span className="hidden sm:inline-block text-xs lg:text-sm text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-1 py-0.5 rounded-full">
+                  Premium
+                </span>
+              </Link>
             </div>
-        </header>
-    );
+
+            {/* --- Zone 2: Navigation (Center, Desktop Only) --- */}
+            <div className="hidden lg:flex justify-center">
+              <DesktopNav />
+            </div>
+
+            {/* --- Zone 3: Actions (Right, Desktop Only) --- */}
+            <div className="hidden lg:flex items-center justify-end space-x-6">
+              <div className="flex items-center glass rounded-full px-3 py-1.5 group hover:shadow-lg transition-all duration-300">
+                <Search className="w-4 h-4 text-neutral-400 mr-2 group-hover:text-luxury-gold transition-colors duration-300" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  aria-label="Search premium dry fruits"
+                  className="bg-transparent outline-none text-xs text-neutral-700 placeholder-neutral-400 w-28 xl:w-36 transition-all duration-300 focus:w-44"
+                />
+              </div>
+              <IconSet
+                isMenuOpen={isMenuOpen}
+                setIsMenuOpen={setIsMenuOpen}
+                isSearchOpen={isSearchOpen}
+                setIsSearchOpen={setIsSearchOpen}
+              />
+            </div>
+
+            {/* --- Mobile-Only Icons --- */}
+            <div className="lg:hidden">
+              <IconSet
+                isMenuOpen={isMenuOpen}
+                setIsMenuOpen={setIsMenuOpen}
+                isSearchOpen={isSearchOpen}
+                setIsSearchOpen={setIsSearchOpen}
+              />
+            </div>
+          </div>
+
+          <MobileMenu
+            isMenuOpen={isMenuOpen}
+            setIsMenuOpen={setIsMenuOpen}
+          />
+        </div>
+      </div>
+    </header>
+  );
 };
 
 export default Header;

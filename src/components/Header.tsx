@@ -81,9 +81,8 @@ const TopBar: React.FC<TopBarProps> = React.memo(({ showTopBar }) => {
   );
 });
 
-// --- 2. DesktopNav Component (CHANGED: Search bar removed) ---
+// --- 2. DesktopNav Component (Correctly simplified) ---
 const DesktopNav: React.FC = () => (
-    // This component now ONLY renders the navigation links.
     <nav className="flex items-center space-x-8">
         {NAV_LINKS.map((item) => (
             <a
@@ -120,7 +119,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isMenuOpen, setIsMenuOpen }) =>
     );
 };
 
-// --- 4. IconSet Component (CHANGED: Hiding mobile buttons on desktop) ---
+// --- 4. IconSet Component (Correctly hides mobile controls) ---
 const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOpen, setIsSearchOpen }) => {
     const iconData = useMemo(() => ([
         { icon: Heart, count: null, to: "/wishlist", label: "Wishlist" },
@@ -140,7 +139,6 @@ const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOp
 
     return (
         <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
-            {/* CHANGED: This button is now correctly hidden on large screens */}
             <button 
                 className="lg:hidden p-2 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
                 aria-label="Search"
@@ -149,7 +147,6 @@ const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOp
                 <Search className="w-5 h-5 text-neutral-700 hover:text-luxury-gold transition-colors duration-300" />
             </button>
 
-            {/* These icons are visible on all screen sizes */}
             {iconData.map(({ icon: Icon, count, to, label }, index) => (
                 <Link
                     key={index}
@@ -166,7 +163,6 @@ const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOp
                 </Link>
             ))}
 
-            {/* CHANGED: This button is now correctly hidden on large screens */}
             <button
                 className="lg:hidden p-2 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
                 onClick={handleMenuToggle}
@@ -214,7 +210,7 @@ const MobileSearchOverlay: React.FC<MobileSearchOverlayProps> = ({ isSearchOpen,
     );
 };
 
-// --- FINAL HEADER COMPONENT (RESTRUCTURED) ---
+// --- FINAL HEADER COMPONENT (FINAL STRUCTURE) ---
 const Header: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
@@ -271,10 +267,10 @@ const Header: React.FC = () => {
             <TopBar showTopBar={showTopBar} />
             
             <div className="w-full px-4 sm:px-6 lg:px-8">
-                {/* CHANGED: A more robust flex layout. 'justify-between' pushes the logo left and the right-group right. */}
+                {/* CHANGED: Reverted to a three-zone layout for desktop for perfect balance. */}
                 <div className="flex items-center justify-between py-4 lg:py-6">
                     
-                    {/* --- Left Zone (Logo) --- */}
+                    {/* --- Zone 1: Logo (Left) --- */}
                     <div className="flex-shrink-0">
                         <Link to="/" className="flex items-center whitespace-nowrap group">
                             <img
@@ -291,13 +287,14 @@ const Header: React.FC = () => {
                             </span>
                         </Link>
                     </div>
-
-                    {/* --- Right Zone (Desktop: Nav + Search + Icons) --- */}
-                    {/* This entire group is hidden on mobile */}
-                    <div className="hidden lg:flex items-center space-x-6">
+                    
+                    {/* --- Zone 2: Navigation (Center, Desktop Only) --- */}
+                    <div className="hidden lg:flex justify-center">
                         <DesktopNav />
-                        
-                        {/* The desktop search bar now lives here */}
+                    </div>
+
+                    {/* --- Zone 3: Actions (Right, Desktop Only) --- */}
+                    <div className="hidden lg:flex items-center justify-end space-x-6">
                         <div className="flex items-center glass rounded-full px-3 py-1.5 group hover:shadow-lg transition-all duration-300">
                             <Search className="w-4 h-4 text-neutral-400 mr-2 group-hover:text-luxury-gold transition-colors duration-300" />
                             <input
@@ -307,7 +304,6 @@ const Header: React.FC = () => {
                                 className="bg-transparent outline-none text-xs text-neutral-700 placeholder-neutral-400 w-28 xl:w-36 transition-all duration-300 focus:w-44"
                             />
                         </div>
-
                         <IconSet 
                            isMenuOpen={isMenuOpen}
                            setIsMenuOpen={setIsMenuOpen}

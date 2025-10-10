@@ -81,12 +81,12 @@ const TopBar: React.FC<TopBarProps> = React.memo(({ showTopBar }) => {
   );
 });
 
-// --- 2. DesktopNav Component (SIMPLIFIED) ---
+// --- 2. DesktopNav Component (FIXED for Medium Screens) ---
 const DesktopNav: React.FC = () => (
-    // REMOVED: All outer div and flex layout classes.
-    // The parent container in Header now handles positioning.
-    <div className="flex items-center space-x-12">
-        <nav className="flex items-center space-x-8">
+    // {/* CHANGED: Made spacing responsive to tighten up on medium laptops */}
+    <div className="flex items-center lg:space-x-6 xl:space-x-12">
+        {/* CHANGED: Made spacing responsive here as well */}
+        <nav className="flex items-center lg:space-x-4 xl:space-x-8">
             {NAV_LINKS.map((item) => (
                 <a
                     key={item.name}
@@ -133,7 +133,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isMenuOpen, setIsMenuOpen }) =>
     );
 };
 
-// --- 4. IconSet Component ---
+// --- 4. IconSet Component (FIXED for Mobile) ---
 const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOpen, setIsSearchOpen }) => {
     const iconData = useMemo(() => ([
         { icon: Heart, count: null, to: "/wishlist", label: "Wishlist" },
@@ -152,7 +152,8 @@ const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOp
     };
 
     return (
-        <div className="flex items-center space-x-2 md:space-x-3">
+        // {/* CHANGED: Responsive spacing to tighten icons on small mobile screens */}
+        <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             <button 
                 className="lg:hidden p-2 hover:bg-luxury-gold/10 rounded-full transition-all duration-300"
                 aria-label="Search"
@@ -236,6 +237,7 @@ const Header: React.FC = () => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const SCROLL_THRESHOLD = 50;
 
+    // --- Keyboard Accessibility Hook ---
     const handleEscape = useCallback((event: KeyboardEvent) => {
         if (event.key === 'Escape') {
             if (isMenuOpen) setIsMenuOpen(false);
@@ -248,6 +250,7 @@ const Header: React.FC = () => {
         return () => document.removeEventListener('keydown', handleEscape);
     }, [handleEscape]);
 
+    // --- Scroll Behavior Hook ---
     useEffect(() => {
         let ticking = false;
         const handleScroll = () => {
@@ -283,10 +286,8 @@ const Header: React.FC = () => {
             <MobileSearchOverlay isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen} />
             
             <TopBar showTopBar={showTopBar} />
-
-            {/* CHANGED: Removed max-w-7xl and mx-auto to make the container full-width */}
+            
             <div className="w-full px-4 sm:px-6 lg:px-8">
-                {/* RESTRUCTURED: Implemented a three-zone flex layout */}
                 <div className="flex items-center justify-between py-4 lg:py-6">
                     
                     {/* --- Left Zone --- */}
@@ -296,9 +297,13 @@ const Header: React.FC = () => {
                                 src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
                                 alt="Tamoor Logo"
                                 loading="eager" 
-                                className="w-10 h-10 md:w-12 md:h-12 object-contain mr-1 transition-transform duration-300 group-hover:scale-110"
+                                // {/* CHANGED: Made logo size responsive to prevent mobile overflow */}
+                                className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 object-contain mr-1 transition-transform duration-300 group-hover:scale-110"
                             />
-                            <h1 className="text-3xl lg:text-4xl font-serif font-bold tamoor-gradient mr-1">
+                            <h1 
+                                // {/* CHANGED: Made text size responsive to prevent mobile overflow */}
+                                className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold tamoor-gradient mr-1"
+                            >
                                 TAMOOR
                             </h1>
                             <span className="hidden sm:inline-block text-xs lg:text-sm text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-1 py-0.5 rounded-full">

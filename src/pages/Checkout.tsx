@@ -1012,7 +1012,9 @@ const handleSaveNewAddress = async () => {
                     {/* Order Items */}
                     <div className="neomorphism rounded-2xl p-4 sm:p-6 space-y-4">
                       <h3 className="font-display font-semibold text-lg mb-2 sm:mb-4">Order Items</h3>
-                      <div className="space-y-3 sm:space-y-4">
+                      
+                      {/* THIS IS THE MODIFIED CONTAINER */}
+                      <div className="max-h-72 overflow-y-auto space-y-3 sm:space-y-4 pr-2">
                         {cartItems.map((item) => (
                           <div key={`${item.id}-${item.weight}`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                             <div className="flex items-center space-x-3 sm:space-x-4">
@@ -1040,6 +1042,9 @@ const handleSaveNewAddress = async () => {
                         <p>{formData.countryCode} {formData.phone}</p>
                       </div>
                     </div>
+                    
+                    {/* Your buttons would go here and will now always be visible */}
+
                   </div>
                 </div>
               )}

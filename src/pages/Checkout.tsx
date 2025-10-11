@@ -37,6 +37,45 @@ const Checkout = () => {
 
   //const [localPromoCode, setLocalPromoCode] = useState(promo);
 
+  const indianStates = [
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chhattisgarh",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
+  "Andaman and Nicobar Islands",
+  "Chandigarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi",
+  "Jammu and Kashmir",
+  "Ladakh",
+  "Lakshadweep",
+  "Puducherry"
+];
+
   const roundedSubtotal = Math.round(cartTotal);
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -709,8 +748,7 @@ const handleSaveNewAddress = async () => {
           <div className="flex flex-wrap items-center justify-center sm:justify-between gap-3 sm:gap-6">
             {[{ id: 1, name: 'Address', icon: MapPin }, { id: 2, name: 'Delivery', icon: Truck }, { id: 3, name: 'Review', icon: Check }, { id: 4, name: 'Payment', icon: CreditCard }].map((step, i, arr) => (
               <div key={step.id} className="flex items-center flex-1 min-w-[90px] sm:min-w-[120px]">
-                <div className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full transition-all duration-300
-                  ${currentStep >= step.id ? 'bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white shadow-lg' : 'bg-neutral-200 text-neutral-500'}`}>
+                <div className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full transition-all duration-300 ${currentStep >= step.id ? 'bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white shadow-lg' : 'bg-neutral-200 text-neutral-500'}`}>
                   <step.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <div className="ml-3 sm:ml-4 text-sm sm:text-base">
@@ -728,263 +766,103 @@ const handleSaveNewAddress = async () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Main Form */}
           <div className="lg:col-span-2">
-            <div className="luxury-card glass rounded-3xl p-4 sm:p-8 max-h-[80vh] sm:max-h-[90vh] overflow-y-auto space-y-6">
+            <div className="luxury-card glass rounded-3xl p-4 sm:p-8 space-y-6">
 
-              {/* Step 1: Address */}
+              {/* Step 1: Address - State list updated */}
               {currentStep === 1 && (
                 <div className="animate-slide-up space-y-4">
                   <h2 className="text-xl sm:text-2xl font-display font-bold text-neutral-800 mb-4 sm:mb-6">Delivery Address</h2>
 
-                  {/* Saved Addresses */}
                   {savedAddresses.length === 0 && <p className="text-neutral-500">No saved addresses found.</p>}
+                  
+                  <div className="max-h-60 overflow-y-auto space-y-3 sm:space-y-4 pr-2">
+                    {savedAddresses.map(addr => (
+                      <div key={addr.id} className="border border-white/20 p-3 rounded-lg">
+                        {editingAddressId === addr.id ? (
+                          <div className="space-y-3">
+                            <input name="full_name" value={editAddressData.full_name} onChange={handleEditAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" placeholder="Full Name" />
+                            <input name="email" value={editAddressData.email} onChange={handleEditAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" placeholder="Email" />
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              <input name="country_code" value={editAddressData.country_code} onChange={handleEditAddressChange} placeholder="+91" className="p-3 rounded-xl neomorphism-inset w-full sm:w-24 focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" />
+                              <input name="phone" value={editAddressData.phone} onChange={handleEditAddressChange} placeholder="Phone" className="p-3 rounded-xl neomorphism-inset flex-1 w-full focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" />
+                            </div>
+                            <input name="address" value={editAddressData.address} onChange={handleEditAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" placeholder="Address" />
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              <input name="city" value={editAddressData.city} onChange={handleEditAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" placeholder="City" />
+                              
+                              {/* UPDATED: Full list of Indian states */}
+                              <select name="state" value={editAddressData.state} onChange={handleEditAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base">
+                                <option value="">Select State</option>
+                                {indianStates.map(state => <option key={state} value={state}>{state}</option>)}
+                              </select>
 
-                  {savedAddresses.map(addr => (
-                    <div key={addr.id} className="mb-2 sm:mb-4 border p-3 rounded-lg">
-                      {editingAddressId === addr.id ? (
-                        <div className="border p-4 sm:p-6 rounded-xl shadow-lg space-y-3">
-                          <input
-                            name="full_name"
-                            value={editAddressData.full_name}
-                            onChange={handleEditAddressChange}
-                            className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                            placeholder="Full Name"
-                          />
-                          <input
-                            name="email"
-                            value={editAddressData.email}
-                            onChange={handleEditAddressChange}
-                            className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                            placeholder="Email"
-                          />
-                          <div className="flex flex-col sm:flex-row gap-2">
-                            <input
-                              name="country_code"
-                              value={editAddressData.country_code}
-                              onChange={handleEditAddressChange}
-                              placeholder="+91"
-                              className="p-3 rounded-xl neomorphism-inset w-full sm:w-24 focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                            />
-                            <input
-                              name="phone"
-                              value={editAddressData.phone}
-                              onChange={handleEditAddressChange}
-                              placeholder="Phone"
-                              className="p-3 rounded-xl neomorphism-inset flex-1 w-full focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                            />
+                            </div>
+                            <input name="pincode" value={editAddressData.pincode} onChange={handleEditAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" placeholder="PIN Code" />
+                            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                              <button type="button" className="btn-premium text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold flex-1" onClick={handleUpdateAddress}>Update</button>
+                              <button type="button" className="btn-outline-danger px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold flex-1" onClick={handleDeleteAddress}>Delete</button>
+                              <button type="button" className="px-4 sm:px-6 py-2 sm:py-3 rounded-full text-gray-600 hover:text-gray-900 flex-1" onClick={() => setEditingAddressId(null)}>Cancel</button>
+                            </div>
                           </div>
-                          <input
-                            name="address"
-                            value={editAddressData.address}
-                            onChange={handleEditAddressChange}
-                            className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                            placeholder="Address"
-                          />
-                          <div className="flex flex-col sm:flex-row gap-2">
-                            <input
-                              name="city"
-                              value={editAddressData.city}
-                              onChange={handleEditAddressChange}
-                              className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                              placeholder="City"
-                            />
-                            <select
-                              name="state"
-                              value={editAddressData.state}
-                              onChange={handleEditAddressChange}
-                              className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                            >
-                              <option value="">Select State</option>
-                              <option value="maharashtra">Maharashtra</option>
-                              <option value="delhi">Delhi</option>
-                              <option value="karnataka">Karnataka</option>
-                              <option value="gujarat">Gujarat</option>
-                            </select>
+                        ) : (
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+                            <label className="flex items-start cursor-pointer text-sm sm:text-base break-words w-full">
+                              <input type="radio" name="selectedAddress" checked={selectedAddressId === addr.id} onChange={() => handleAddressSelect(addr.id)} className="mr-3 mt-1 flex-shrink-0" />
+                              <span className="flex-1">{addr.full_name}, {addr.address}, {addr.city}, {addr.state} - {addr.pincode}</span>
+                            </label>
+                            <div className="flex items-center gap-2 sm:gap-3 self-end sm:self-center">
+                              {defaultAddressId === addr.id ? (
+                                <span className="text-green-600 font-semibold text-xs sm:text-sm">Default</span>
+                              ) : (
+                                <button type="button" className="px-3 py-1 text-xs rounded-full font-semibold text-white bg-gradient-to-r from-luxury-gold to-luxury-gold-light shadow-lg hover:brightness-110 transition" onClick={async (e) => { e.preventDefault(); if (!userId) return; await supabase.from('addresses').update({ is_default: false }).eq('user_id', userId); const { error } = await supabase.from('addresses').update({ is_default: true }).eq('id', addr.id); if (!error) setDefaultAddressId(addr.id); else setErrorMsg('Failed to set default: ' + error.message); }}>Set Default</button>
+                              )}
+                              <button type="button" className="px-3 py-1 text-xs rounded-full font-semibold text-white bg-gradient-to-r from-luxury-gold to-luxury-gold-light shadow-lg hover:brightness-110 transition" onClick={() => handleEditClick(addr)}>Edit</button>
+                            </div>
                           </div>
-                          <input
-                            name="pincode"
-                            value={editAddressData.pincode}
-                            onChange={handleEditAddressChange}
-                            className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                            placeholder="PIN Code"
-                          />
-                          <div className="flex flex-col sm:flex-row gap-2">
-                            <button
-                              type="button"
-                              className="btn-premium text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold flex-1"
-                              onClick={handleUpdateAddress}
-                            >
-                              Update
-                            </button>
-                            <button
-                              type="button"
-                              className="btn-outline-danger px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold flex-1"
-                              onClick={handleDeleteAddress}
-                            >
-                              Delete
-                            </button>
-                            <button
-                              type="button"
-                              className="px-4 sm:px-6 py-2 sm:py-3 rounded-full text-gray-600 hover:text-gray-900 flex-1"
-                              onClick={() => setEditingAddressId(null)}
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
-                          <label className="flex items-center cursor-pointer text-sm sm:text-base break-words">
-                            <input
-                              type="radio"
-                              name="selectedAddress"
-                              checked={selectedAddressId === addr.id}
-                              onChange={() => handleAddressSelect(addr.id)}
-                              className="mr-2"
-                            />
-                            {addr.full_name}, {addr.address}, {addr.city}, {addr.state} - {addr.pincode}
-                          </label>
-                          <div className="flex items-center gap-2 sm:gap-3">
-                            {defaultAddressId === addr.id ? (
-                              <span className="text-green-600 font-semibold text-sm sm:text-base">Default</span>
-                            ) : (
-                              <button
-                                type="button"
-                                className="px-3 sm:px-4 py-2 rounded-full font-semibold text-white bg-gradient-to-r from-luxury-gold to-luxury-gold-light shadow-lg hover:brightness-110 transition duration-300 text-sm sm:text-base"
-                                onClick={async (e) => {
-                                  e.preventDefault();
-                                  if (!userId) return;
-                                  await supabase.from('addresses').update({ is_default: false }).eq('user_id', userId);
-                                  const { error } = await supabase.from('addresses').update({ is_default: true }).eq('id', addr.id);
-                                  if (!error) setDefaultAddressId(addr.id);
-                                  else setErrorMsg('Failed to set default address: ' + error.message);
-                                }}
-                              >
-                                Set Default
-                              </button>
-                            )}
-                            <button
-                              type="button"
-                              className="px-3 sm:px-4 py-2 rounded-full font-semibold text-white bg-gradient-to-r from-luxury-gold to-luxury-gold-light shadow-lg hover:brightness-110 transition duration-300 text-sm sm:text-base"
-                              onClick={() => handleEditClick(addr)}
-                            >
-                              Edit
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        )}
+                      </div>
+                    ))}
+                  </div>
 
-                  {/* Add New Address Toggle */}
-                  <button
-                    type="button"
-                    className="btn-premium text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold"
-                    onClick={() => setAddingNewAddress(!addingNewAddress)}
-                  >
+                  <button type="button" className="btn-premium text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold" onClick={() => setAddingNewAddress(!addingNewAddress)}>
                     {addingNewAddress ? 'Cancel New Address' : 'Add New Address'}
                   </button>
-
-                  {/* New Address Form */}
+                  
                   {addingNewAddress && (
-                    <div className="border p-4 sm:p-6 rounded-xl shadow-lg space-y-3 max-h-[80vh] overflow-y-auto">
-                      <input
-                        name="full_name"
-                        placeholder="Full Name"
-                        value={newAddress.full_name}
-                        onChange={handleNewAddressChange}
-                        className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                      />
-                      <input
-                        name="email"
-                        placeholder="Email"
-                        value={newAddress.email}
-                        onChange={handleNewAddressChange}
-                        className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                      />
+                    <div className="border border-white/20 p-4 sm:p-6 rounded-xl shadow-lg space-y-3">
+                      <input name="full_name" placeholder="Full Name" value={newAddress.full_name} onChange={handleNewAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" />
+                      <input name="email" placeholder="Email" value={newAddress.email} onChange={handleNewAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" />
                       <div className="flex flex-col sm:flex-row gap-2">
-                        <input
-                          name="country_code"
-                          value={newAddress.country_code}
-                          onChange={handleNewAddressChange}
-                          placeholder="+91"
-                          className="p-3 rounded-xl neomorphism-inset w-full sm:w-24 focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                        />
-                        <input
-                          name="phone"
-                          value={newAddress.phone}
-                          onChange={handleNewAddressChange}
-                          placeholder="Phone"
-                          className="p-3 rounded-xl neomorphism-inset flex-1 w-full focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                        />
+                        <input name="country_code" value={newAddress.country_code} onChange={handleNewAddressChange} placeholder="+91" className="p-3 rounded-xl neomorphism-inset w-full sm:w-24 focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" />
+                        <input name="phone" value={newAddress.phone} onChange={handleNewAddressChange} placeholder="Phone" className="p-3 rounded-xl neomorphism-inset flex-1 w-full focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" />
                       </div>
-                      <input
-                        name="address"
-                        placeholder="Address"
-                        value={newAddress.address}
-                        onChange={handleNewAddressChange}
-                        className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                      />
+                      <input name="address" placeholder="Address" value={newAddress.address} onChange={handleNewAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" />
                       <div className="flex flex-col sm:flex-row gap-2">
-                        <input
-                          name="city"
-                          placeholder="City"
-                          value={newAddress.city}
-                          onChange={handleNewAddressChange}
-                          className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                        />
-                        <select
-                          name="state"
-                          value={newAddress.state}
-                          onChange={handleNewAddressChange}
-                          className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                        >
+                        <input name="city" placeholder="City" value={newAddress.city} onChange={handleNewAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" />
+                        
+                        {/* UPDATED: Full list of Indian states */}
+                        <select name="state" value={newAddress.state} onChange={handleNewAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base">
                           <option value="">Select State</option>
-                          <option value="maharashtra">Maharashtra</option>
-                          <option value="delhi">Delhi</option>
-                          <option value="karnataka">Karnataka</option>
-                          <option value="gujarat">Gujarat</option>
+                          {indianStates.map(state => <option key={state} value={state}>{state}</option>)}
                         </select>
                       </div>
-                      <input
-                        name="pincode"
-                        placeholder="PIN Code"
-                        value={newAddress.pincode}
-                        onChange={handleNewAddressChange}
-                        className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                      />
-                      <button
-                        type="button"
-                        className="btn-premium text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold w-full"
-                        onClick={handleSaveNewAddress}
-                      >
-                        Save Address
-                      </button>
+                      <input name="pincode" placeholder="PIN Code" value={newAddress.pincode} onChange={handleNewAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" />
+                      <button type="button" className="btn-premium text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold w-full" onClick={handleSaveNewAddress}>Save Address</button>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* Step 2, 3, 4 sections will remain mostly the same, just compact spacing and responsive paddings */}
-              {/* You can paste your existing Step 2, Step 3, Step 4 code here but wrap top-level divs with `space-y-4 sm:space-y-6` and adjust padding */}
               {/* Step 2: Delivery */}
               {currentStep === 2 && (
                 <div className="animate-slide-up space-y-4 sm:space-y-6">
                   <h2 className="text-2xl sm:text-3xl font-display font-bold text-neutral-800 mb-6 sm:mb-8">Delivery Options</h2>
-                  <div className="space-y-4">
+                  <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
                     {deliveryOptions.map(option => (
-                      <div
-                        key={option.id}
-                        className={`neomorphism rounded-2xl p-4 sm:p-6 cursor-pointer transition-all duration-300
-                          ${formData.deliveryOption === option.id ? 'ring-2 ring-luxury-gold bg-luxury-gold/5' : 'hover:shadow-lg'}
-                          ${!option.enabled ? 'opacity-50 cursor-not-allowed' : ''}
-                        `}
-                        onClick={() => option.enabled && setFormData(prev => ({ ...prev, deliveryOption: option.id }))}
-                      >
+                      <div key={option.id} className={`neomorphism rounded-2xl p-4 sm:p-6 cursor-pointer transition-all duration-300 ${formData.deliveryOption === option.id ? 'ring-2 ring-luxury-gold bg-luxury-gold/5' : 'hover:shadow-lg'} ${!option.enabled ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={() => option.enabled && setFormData(prev => ({ ...prev, deliveryOption: option.id }))}>
                         <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 sm:gap-0">
                           <div className="flex items-center space-x-3 sm:space-x-4">
-                            <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 transition-all duration-300
-                              ${formData.deliveryOption === option.id ? 'border-luxury-gold bg-luxury-gold' : 'border-neutral-300'}
-                            `}>
+                            <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 transition-all duration-300 ${formData.deliveryOption === option.id ? 'border-luxury-gold bg-luxury-gold' : 'border-neutral-300'}`}>
                               {formData.deliveryOption === option.id && <div className="w-2 h-2 bg-white rounded-full mx-auto mt-1"></div>}
                             </div>
                             <div>
@@ -1008,12 +886,8 @@ const handleSaveNewAddress = async () => {
                 <div className="animate-slide-up space-y-4 sm:space-y-6">
                   <h2 className="text-2xl sm:text-3xl font-display font-bold text-neutral-800 mb-6 sm:mb-8">Review Your Order</h2>
                   <div className="space-y-4 sm:space-y-6">
-                    
-                    {/* Order Items */}
                     <div className="neomorphism rounded-2xl p-4 sm:p-6 space-y-4">
                       <h3 className="font-display font-semibold text-lg mb-2 sm:mb-4">Order Items</h3>
-                      
-                      {/* THIS IS THE MODIFIED CONTAINER */}
                       <div className="max-h-72 overflow-y-auto space-y-3 sm:space-y-4 pr-2">
                         {cartItems.map((item) => (
                           <div key={`${item.id}-${item.weight}`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
@@ -1031,8 +905,6 @@ const handleSaveNewAddress = async () => {
                         ))}
                       </div>
                     </div>
-
-                    {/* Delivery Address */}
                     <div className="neomorphism rounded-2xl p-4 sm:p-6">
                       <h3 className="font-display font-semibold text-lg mb-2 sm:mb-4">Delivery Address</h3>
                       <div className="text-neutral-700 text-sm sm:text-base space-y-1">
@@ -1042,9 +914,6 @@ const handleSaveNewAddress = async () => {
                         <p>{formData.countryCode} {formData.phone}</p>
                       </div>
                     </div>
-                    
-                    {/* Your buttons would go here and will now always be visible */}
-
                   </div>
                 </div>
               )}
@@ -1054,51 +923,27 @@ const handleSaveNewAddress = async () => {
                 <div className="animate-slide-up space-y-4 sm:space-y-6">
                   <h2 className="text-2xl sm:text-3xl font-display font-bold text-neutral-800 mb-6 sm:mb-8">Payment Method</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-                    {[{ id: 'card', name: 'Credit/Debit Card', icon: '💳' }, 
-                      { id: 'upi', name: 'UPI Payment', icon: '📱' }, 
-                      { id: 'cod', name: 'Cash on Delivery', icon: '💰' }]
-                      .map((method) => (
-                        <button
-                          key={method.id}
-                          type="button"
-                          onClick={() => setFormData(prev => ({ ...prev, paymentMethod: method.id }))}
-                          className={`glass rounded-2xl p-4 sm:p-6 w-full max-w-xs mx-auto sm:max-w-none cursor-pointer text-center transition-all duration-300 outline-none focus:outline-none
-                            ${formData.paymentMethod === method.id
-                              ? 'ring-2 ring-red-600 bg-red-700 text-luxury-gold shadow-rose-600'
-                              : 'hover:shadow-2xl bg-white/10 text-green-900'}
-                          `}
-                        >
-                          <div className="text-3xl sm:text-4xl mb-2 sm:mb-3 select-none">{method.icon}</div>
-                          <div className="font-display font-semibold select-none text-sm sm:text-base">{method.name}</div>
-                        </button>
+                    {[{ id: 'card', name: 'Credit/Debit Card', icon: '💳' }, { id: 'upi', name: 'UPI Payment', icon: '📱' }, { id: 'cod', name: 'Cash on Delivery', icon: '💰' }].map((method) => (
+                      <button key={method.id} type="button" onClick={() => setFormData(prev => ({ ...prev, paymentMethod: method.id }))} className={`glass rounded-2xl p-4 sm:p-6 w-full max-w-xs mx-auto sm:max-w-none cursor-pointer text-center transition-all duration-300 outline-none focus:outline-none ${formData.paymentMethod === method.id ? 'ring-2 ring-red-600 bg-red-700 text-luxury-gold shadow-rose-600' : 'hover:shadow-2xl bg-white/10 text-green-900'}`}>
+                        <div className="text-3xl sm:text-4xl mb-2 sm:mb-3 select-none">{method.icon}</div>
+                        <div className="font-display font-semibold select-none text-sm sm:text-base">{method.name}</div>
+                      </button>
                     ))}
                   </div>
                 </div>
               )}
 
-
               {/* Navigation Buttons */}
-              <div className="flex flex-col sm:flex-row justify-between mt-6 sm:mt-8 gap-3 sm:gap-0">
-                <button
-                  onClick={handlePrevStep}
-                  disabled={currentStep === 1}
-                  className="px-6 sm:px-8 py-3 sm:py-4 glass rounded-full font-semibold text-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/20 transition-all duration-300 w-full sm:w-auto"
-                >
+              <div className="flex flex-col sm:flex-row justify-between pt-4 gap-3">
+                <button onClick={handlePrevStep} disabled={currentStep === 1} className="px-6 sm:px-8 py-3 sm:py-4 glass rounded-full font-semibold text-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/20 transition-all duration-300 w-full sm:w-auto">
                   Previous
                 </button>
                 {currentStep < 4 ? (
-                  <button
-                    onClick={handleNextStep}
-                    className="btn-premium text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold w-full sm:w-auto"
-                  >
+                  <button onClick={handleNextStep} className="btn-premium text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold w-full sm:w-auto">
                     Continue
                   </button>
                 ) : (
-                  <button
-                    onClick={onPlaceOrderClicked}
-                    disabled={isProcessing}
-                    className="btn-premium text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold w-full sm:w-auto"
-                  >
+                  <button onClick={onPlaceOrderClicked} disabled={isProcessing} className="btn-premium text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold w-full sm:w-auto">
                     {isProcessing ? "Processing..." : "Place Order"}
                   </button>
                 )}
@@ -1111,32 +956,23 @@ const handleSaveNewAddress = async () => {
             <div className="luxury-card glass rounded-3xl p-4 sm:p-8 lg:sticky top-24 space-y-4">
               <h3 className="font-display font-semibold text-lg sm:text-xl mb-4">Order Summary</h3>
               <div className="space-y-2 sm:space-y-4">
-                {/* Subtotal */}
                 <div className="flex justify-between text-sm sm:text-base font-medium text-neutral-600">
                   <span>Subtotal</span>
                   <span className="font-semibold">₹{subtotalFromCart.toFixed(2)}</span>
                 </div>
-
-                {/* Discount */}
                 {discountFromCart > 0 && (
                   <div className="flex justify-between text-green-600 font-medium text-sm sm:text-base">
                     <span>Discount {promoCodeFromCart ? `(${promoCodeFromCart.code})` : ""}</span>
                     <span>-₹{discountFromCart.toFixed(2)}</span>
                   </div>
                 )}
-
-                {/* Delivery */}
                 <div className="flex justify-between text-sm sm:text-base font-medium text-neutral-600">
                   <span>Delivery</span>
                   <span className="font-semibold">
-                    {deliveryOptions.find(opt => opt.id === formData.deliveryOption)?.price === 0
-                      ? "FREE"
-                      : `₹${deliveryPrice}`}
+                    {deliveryOptions.find(opt => opt.id === formData.deliveryOption)?.price === 0 ? "FREE" : `₹${deliveryPrice}`}
                   </span>
                 </div>
               </div>
-
-              {/* Total */}
               <div className="border-t border-white/20 pt-2 sm:pt-4">
                 <div className="flex justify-between items-center text-sm sm:text-base">
                   <span className="text-lg sm:text-xl font-display font-semibold">Total</span>
@@ -1145,8 +981,6 @@ const handleSaveNewAddress = async () => {
                   </span>
                 </div>
               </div>
-
-              {/* Secure Info */}
               <div className="text-center text-xs sm:text-sm text-neutral-500 mt-2">
                 <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mb-2">
                   <span>🔒 Secure Payment</span>

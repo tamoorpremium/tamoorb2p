@@ -363,172 +363,303 @@ const Auth = () => {
   }
 };
 
-const authWelcomeImage = 'https://images.unsplash.com/photo-1627993043232-94b901a16601?q=80&w=1887&auto=format&fit=crop'; // A high-quality placeholder
 
   return (
-    <div className="min-h-screen bg-luxury-cream">
-      <div className="flex flex-col lg:flex-row min-h-screen">
-        
-        {/* Left Welcome Panel (Visible on Desktop) */}
-        <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12 bg-gradient-to-br from-luxury-gold to-yellow-200 relative">
-            <div 
-                className="absolute inset-0 bg-cover bg-center opacity-20"
-                style={{backgroundImage: `url(${authWelcomeImage})`}}
-            ></div>
-            <div className="text-center text-white relative z-10">
-                <h1 className="text-5xl font-serif font-extrabold mb-4 drop-shadow-lg">Welcome to TAMOOR</h1>
-                <p className="text-xl max-w-md mx-auto drop-shadow-md">
-                    Indulge in the finest selection of premium dry fruits and nuts, curated for a luxurious experience.
-                </p>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-luxury-cream via-white to-luxury-cream-dark flex items-center justify-center py-12 px-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-12">
+          <h1 className="text-3xl sm:text-5xl font-serif font-extrabold tamoor-gradient mb-4">TAMOOR</h1>
+          <p className="text-neutral-600 font-medium">Premium Dry Fruits & Nuts</p>
         </div>
 
-        {/* Right Auth Form Panel (Full width on mobile) */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-            <div className="w-full max-w-md">
-                <div className="text-center mb-10">
-                    <h1 className="text-3xl sm:text-5xl font-serif font-extrabold tamoor-gradient mb-4">TAMOOR</h1>
-                    <p className="text-neutral-600 font-medium">Premium Dry Fruits & Nuts</p>
+        <div className="luxury-card glass rounded-3xl p-8">
+          <div className="flex mb-8 neomorphism rounded-full p-2">
+            <button
+              onClick={() => setIsLogin(true)}
+              className={`flex-1 py-3 px-6 rounded-full font-semibold transition-all duration-300 ${
+                isLogin
+                  ? 'bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white shadow-lg'
+                  : 'text-neutral-600 hover:text-luxury-gold'
+              }`}
+            >
+              Login
+            </button>
+            <button
+              onClick={() => setIsLogin(false)}
+              className={`flex-1 py-3 px-6 rounded-full font-semibold transition-all duration-300 ${
+                !isLogin
+                  ? 'bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white shadow-lg'
+                  : 'text-neutral-600 hover:text-luxury-gold'
+              }`}
+            >
+              Register
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {!isLogin && (
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Full Name</label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className={`w-full pl-12 pr-4 py-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${
+                      errors.name ? 'ring-2 ring-red-500' : ''
+                    }`}
+                    placeholder="Enter your full name"
+                  />
                 </div>
+                {errors.name && <p className="text-red-500 text-sm mt-1 animate-pulse">{errors.name}</p>}
+              </div>
+            )}
 
-                <div className="luxury-card glass rounded-3xl p-6 sm:p-8">
-                    <div className="flex mb-8 neomorphism rounded-full p-1.5 sm:p-2">
-                        <button
-                            onClick={() => setIsLogin(true)}
-                            className={`flex-1 py-2.5 px-4 sm:py-3 sm:px-6 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${isLogin ? 'bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white shadow-md' : 'text-neutral-600 hover:text-luxury-gold'}`}
-                        >
-                            Login
-                        </button>
-                        <button
-                            onClick={() => setIsLogin(false)}
-                            className={`flex-1 py-2.5 px-4 sm:py-3 sm:px-6 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 ${!isLogin ? 'bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white shadow-md' : 'text-neutral-600 hover:text-luxury-gold'}`}
-                        >
-                            Register
-                        </button>
-                    </div>
+            {/* …rest of the form (email, phone, password, confirm password, reset, OAuth buttons, submit) stays the same… */}
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {!isLogin && (
-                            <div>
-                                <label className="block text-sm font-medium text-neutral-700 mb-2">Full Name</label>
-                                <div className="relative">
-                                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
-                                    <input type="text" name="name" value={formData.name} onChange={handleInputChange} className={`w-full pl-12 pr-4 py-3 sm:py-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${errors.name ? 'ring-2 ring-red-500' : ''}`} placeholder="Enter your full name" />
-                                </div>
-                                {errors.name && <p className="text-red-500 text-sm mt-1 animate-pulse">{errors.name}</p>}
-                            </div>
-                        )}
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-neutral-700 mb-2">Email Address</label>
-                            <div className="relative">
-                                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
-                                <input type="email" name="email" value={formData.email} onChange={handleInputChange} className={`w-full pl-12 pr-4 py-3 sm:py-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${errors.email ? 'ring-2 ring-red-500' : ''}`} placeholder="Enter your email" />
-                            </div>
-                            {errors.email && <p className="text-red-500 text-sm mt-1 animate-pulse">{errors.email}</p>}
-                        </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-neutral-700 mb-2">Phone Number {isLogin ? '(optional)' : ''}</label>
-                            <div className="flex flex-col sm:flex-row gap-2">
-                                <select value={formData.country?.code} onChange={e => handleCountryChange(e.target.value)} className="p-3 sm:p-4 rounded-xl neomorphism-inset focus:ring-2 focus:ring-luxury-gold/50 w-full sm:w-auto">
-                                    {countryCodes.map(c => (<option key={c.code} value={c.code}>{c.name} ({c.code})</option>))}
-                                </select>
-                                <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className={`w-full p-3 sm:p-4 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 ${errors.phone ? 'ring-2 ring-red-500' : ''}`} placeholder="Your phone number" />
-                            </div>
-                            {errors.phone && <p className="text-red-500 text-sm mt-1 animate-pulse">{errors.phone}</p>}
-                        </div>
+            {/* …rest of the form (email, phone, password, confirm password, reset, OAuth buttons, submit) stays the same… */}
 
-                        <div>
-                            <label className="block text-sm font-medium text-neutral-700 mb-2">Password</label>
-                            <div className="relative">
-                                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
-                                <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleInputChange} className={`w-full pl-12 pr-12 py-3 sm:py-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${errors.password ? 'ring-2 ring-red-500' : ''}`} placeholder="Enter your password" />
-                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-luxury-gold">
-                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                </button>
-                            </div>
-                            {errors.password && <p className="text-red-500 text-sm mt-1 animate-pulse">{errors.password}</p>}
-                        </div>
 
-                        {!isLogin && (
-                            <div>
-                                <label className="block text-sm font-medium text-neutral-700 mb-2">Confirm Password</label>
-                                <div className="relative">
-                                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
-                                    <input type={showPassword ? 'text' : 'password'} name="confirmPassword" value={formData.confirmPassword} onChange={handleInputChange} className={`w-full pl-12 pr-4 py-3 sm:py-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${errors.confirmPassword ? 'ring-2 ring-red-500' : ''}`} placeholder="Confirm your password" />
-                                </div>
-                                {errors.confirmPassword && <p className="text-red-500 text-sm mt-1 animate-pulse">{errors.confirmPassword}</p>}
-                            </div>
-                        )}
-
-                        {isLogin && (
-                            <p className="text-blue-500 cursor-pointer text-right text-sm font-medium hover:underline" onClick={() => setShowReset(!showReset)}>
-                                Forgot Password?
-                            </p>
-                        )}
-                        
-                        {showReset && (
-                          <div className="space-y-4 pt-2">
-                            <div className="flex gap-4">
-                                <label className="flex items-center gap-2 text-sm"><input type="radio" value="email" checked={resetMethod === 'email'} onChange={() => setResetMethod('email')} />Email</label>
-                                <label className="flex items-center gap-2 text-sm"><input type="radio" value="phone" checked={resetMethod === 'phone'} onChange={() => setResetMethod('phone')} />Phone</label>
-                            </div>
-                            {resetMethod === 'email' ? (<input type="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} placeholder="Enter your email" className="w-full p-3 neomorphism-inset rounded-xl"/>) : (
-                                <div className="flex flex-col sm:flex-row gap-2">
-                                    <select 
-                                        value={resetCountry.code} 
-                                        onChange={(e) => {
-                                            const country = countryCodes.find(c => c.code === e.target.value);
-                                            if (country) setResetCountry(country);
-                                        }} 
-                                        className="p-3 rounded-xl neomorphism-inset w-full sm:w-auto"
-                                    >
-                                        {countryCodes.map(c => (<option key={c.code} value={c.code}>{c.name} ({c.code})</option>))}
-                                    </select>
-                                    <input type="tel" value={resetPhone} onChange={(e) => setResetPhone(e.target.value)} placeholder="Phone number" className="w-full p-3 rounded-xl neomorphism-inset"/>
-                                </div>
-                            )}
-                            <button type="button" onClick={handleResetPassword} disabled={resetLoading} className="w-full btn-premium text-white py-3 rounded-full font-semibold flex items-center justify-center disabled:opacity-50">
-                                {resetLoading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : 'Send Reset Link'}
-                            </button>
-                          </div>
-                        )}
-
-                        <button type="submit" disabled={isLoading} className="w-full btn-premium text-white py-4 rounded-full font-semibold text-lg flex items-center justify-center group disabled:opacity-50">
-                            {isLoading ? (<div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>) : (
-                                <>
-                                    <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
-                                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                                </>
-                            )}
-                        </button>
-                        
-                        <div className="relative flex items-center py-2">
-                            <div className="flex-grow border-t border-neutral-300"></div>
-                            <span className="flex-shrink mx-4 text-neutral-500 text-sm">Or continue with</span>
-                            <div className="flex-grow border-t border-neutral-300"></div>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-3">
-                            <button type="button" onClick={() => handleOAuthSignIn('google')} className="p-3 neomorphism rounded-xl hover:shadow-lg transition-shadow"><img src={googleimg} alt="Google" className="w-6 h-6 mx-auto" /></button>
-                            <button type="button" onClick={() => handleOAuthSignIn('facebook')} className="p-3 neomorphism rounded-xl hover:shadow-lg transition-shadow"><img src={facebookimg} alt="Facebook" className="w-6 h-6 mx-auto" /></button>
-                            <button type="button" onClick={() => handleOAuthSignIn('apple')} className="p-3 neomorphism rounded-xl hover:shadow-lg transition-shadow"><img src={appleimg} alt="Apple" className="w-6 h-6 mx-auto" /></button>
-                        </div>
-
-                        {errorMsg && <div className="text-red-500 text-center text-sm pt-2">{errorMsg}</div>}
-                        {successMsg && <div className="text-green-600 text-center text-sm pt-2">{successMsg}</div>}
-                        {infoMsg && <div className="text-yellow-600 text-center text-sm pt-2">{infoMsg}</div>}
-                    </form>
-                </div>
-                <div className="text-center mt-8">
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-neutral-500 text-sm">
-                        <span>🔒 Secure & Encrypted</span>
-                        <span>⚡ Instant Access</span>
-                        <span>🎁 Welcome Bonus</span>
-                    </div>
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">Email Address</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className={`w-full pl-12 pr-4 py-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${
+                    errors.email ? 'ring-2 ring-red-500' : ''
+                  }`}
+                  placeholder="Enter your email"
+                />
+              </div>
+              {errors.email && <p className="text-red-500 text-sm mt-1 animate-pulse">{errors.email}</p>}
             </div>
+
+            {/* Phone + Country */}
+            <div className="w-full">
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Phone Number {isLogin ? '(optional)' : ''}
+              </label>
+              <div className="flex gap-2 w-full">
+                <select
+                  value={formData.country?.code}
+                  onChange={e => handleCountryChange(e.target.value)}
+                  className="p-4 rounded-xl neomorphism-inset focus:ring-2 focus:ring-luxury-gold/50 flex-shrink-0 w-32"
+                >
+                  {countryCodes.map(c => (
+                    <option key={c.code} value={c.code}>
+                      {c.name} ({c.code})
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className={`w-full sm:flex-1 p-4 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 ${
+                    errors.phone ? 'ring-2 ring-red-500' : ''
+                  }`}
+                  placeholder={isLogin ? 'Phone number (optional)' : 'Phone number'}
+                />
+              </div>
+              {errors.phone && <p className="text-red-500 text-sm mt-1 animate-pulse">{errors.phone}</p>}
+            </div>
+
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className={`w-full pl-12 pr-12 py-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${
+                    errors.password ? 'ring-2 ring-red-500' : ''
+                  }`}
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-luxury-gold transition-colors duration-300"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+              {errors.password && <p className="text-red-500 text-sm mt-1 animate-pulse">{errors.password}</p>}
+            </div>
+
+            {!isLogin && (
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Confirm Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className={`w-full pl-12 pr-4 py-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${
+                      errors.confirmPassword ? 'ring-2 ring-red-500' : ''
+                    }`}
+                    placeholder="Confirm your password"
+                  />
+                </div>
+                {errors.confirmPassword && <p className="text-red-500 text-sm mt-1 animate-pulse">{errors.confirmPassword}</p>}
+              </div>
+            )}
+
+            {/* Forgot Password */}
+            {isLogin && (
+              <p
+                className="text-blue-500 cursor-pointer text-right mt-2 hover:underline"
+                onClick={() => setShowReset(!showReset)}
+              >
+                Forgot Password?
+              </p>
+            )}
+            {showReset && (
+              <div className="mt-4">
+                {/* Method selection */}
+                <p className="font-medium mb-2">Reset Password Via:</p>
+                <div className="flex gap-4 mb-4">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      value="email"
+                      checked={resetMethod === 'email'}
+                      onChange={() => setResetMethod('email')}
+                    />
+                    Email
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      value="phone"
+                      checked={resetMethod === 'phone'}
+                      onChange={() => setResetMethod('phone')}
+                    />
+                    Phone
+                  </label>
+                </div>
+
+                {/* Input fields */}
+                {resetMethod === 'email' ? (
+                  <input
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="w-full pl-4 pr-4 py-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 mb-2"
+                  />
+                ) : (
+                  <div className="flex gap-2">
+                    <select
+                      value={resetCountry.code}
+                      onChange={(e) => {
+                        const country = countryCodes.find(c => c.code === e.target.value);
+                        if (country) setResetCountry(country);
+                      }}
+                      className="p-4 rounded-xl neomorphism-inset focus:ring-2 focus:ring-luxury-gold/50 flex-shrink-0 w-32"
+                    >
+                      {countryCodes.map(c => (
+                        <option key={c.code} value={c.code}>
+                          {c.name} ({c.code})
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="tel"
+                      value={resetPhone}
+                      onChange={(e) => setResetPhone(e.target.value)}
+                      placeholder="Phone number"
+                      className="w-full sm:flex-1 p-4 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50"
+                    />
+                  </div>
+                )}
+
+                <button
+                  onClick={handleResetPassword}
+                  disabled={resetLoading}
+                  className="mt-4 w-full btn-premium text-white py-4 rounded-full font-semibold text-lg flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {resetLoading ? (
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    'Send Reset Email'
+                  )}
+                </button>
+
+                {errorMsg && <p className="text-red-500 mt-2">{errorMsg}</p>}
+                {successMsg && <p className="text-green-600 mt-2">{successMsg}</p>}
+              </div>
+            )}
+
+
+            {/* OAuth Buttons */}
+            <div className="grid grid-cols-3 sm:grid-cols-3 gap-3 mt-4">
+              <button
+                type="button"
+                onClick={() => handleOAuthSignIn('google')}
+                className="btn-social-google flex items-center justify-center gap-2"
+              >
+                <img src= {googleimg} alt="Google" className="w-6 h-6" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleOAuthSignIn('facebook')}
+                className="btn-social-facebook flex items-center justify-center gap-2"
+              >
+                <img src= {facebookimg} alt="Facebook" className="w-6 h-6" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleOAuthSignIn('apple')}
+                className="btn-social-apple flex items-center justify-center gap-2"
+              >
+                <img src= {appleimg} alt="Apple" className="w-6 h-6" />
+              </button>
+            </div>
+
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full btn-premium text-white py-4 rounded-full font-semibold text-lg flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+                  <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 active:translate-x-1 transition-transform duration-300" />
+                </>
+              )}
+            </button>
+
+            {errorMsg && <div className="text-red-500 text-center mt-4">{errorMsg}</div>}
+            {successMsg && <div className="text-green-600 text-center mt-4">{successMsg}</div>}
+            {infoMsg && <div className="text-yellow-600 text-center mt-4">{infoMsg}</div>}
+          </form>
+        </div>
+
+        <div className="text-center mt-8">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-neutral-500">
+            <span>🔒 Secure & Encrypted</span>
+            <span>⚡ Instant Access</span>
+            <span>🎁 Welcome Bonus</span>
+          </div>
         </div>
       </div>
     </div>

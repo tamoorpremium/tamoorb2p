@@ -226,234 +226,220 @@ const OrderTracking: React.FC = () => {
   if (!order) return <p className="text-center">Order not found</p>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-32">
-      <ToastContainer position="top-right" autoClose={3000} />
-      <div className="container mx-auto px-4 pb-20">
-        <div className="luxury-card glass rounded-3xl p-10 sm:p-6">
-          <h1 className="text-3xl sm:text-5xl font-display font-bold mb-8 text-neutral-800">
-            Order <span className="tamoor-gradient">#{order.id}</span>
-          </h1>
-          <p className="text-lg text-neutral-600 mb-8 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-luxury-gold" />
-            Placed on {new Date(order.placed_at).toLocaleString()}
-          </p>
+  <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-24 sm:pt-32">
+    <ToastContainer position="top-right" autoClose={3000} />
+    <div className="container mx-auto px-4 pb-20">
+      {/* Main card with responsive padding */}
+      <div className="luxury-card glass rounded-3xl p-6 md:p-10">
+        {/* Responsive heading */}
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold mb-8 text-neutral-800">
+          Order <span className="tamoor-gradient">#{order.id}</span>
+        </h1>
+        {/* Responsive text */}
+        <p className="text-base sm:text-lg text-neutral-600 mb-8 flex items-center gap-2">
+          <Clock className="w-5 h-5 text-luxury-gold" />
+          Placed on {new Date(order.placed_at).toLocaleString()}
+        </p>
 
-          {/* Shipment Timeline */}
-          <div className="mb-12">
-            <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
-              <Truck className="w-6 h-6 mr-2 text-luxury-gold" /> Tracking
-              Progress
-            </h2>
-            <div className="relative pl-6 sm:pl-8">
-              <div className="absolute top-0 left-2 w-1 h-full bg-gradient-to-b from-luxury-gold/80 to-neutral-200 rounded-full"></div>
-              <div className="space-y-6">
-                {SHIPMENT_STEPS.map((step) => {
-                  const isActive = order.shipment?.tracking_status === step;
-                  const isCompleted =
-                    SHIPMENT_STEPS.indexOf(step) <=
-                    SHIPMENT_STEPS.indexOf(order.shipment?.tracking_status || "");
-                  return (
-                    <div key={step} className="relative flex items-center">
-                      <div
-                        className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
-                          isActive
-                            ? "bg-luxury-gold border-luxury-gold shadow-lg"
-                            : isCompleted
-                            ? `${SHIPMENT_COLORS[step]} border-transparent`
-                            : "bg-white border-neutral-400"
-                        }`}
-                      ></div>
-                      <span
-                        className={`ml-4 font-medium ${
-                          isActive
-                            ? "text-luxury-gold"
-                            : isCompleted
-                            ? "text-neutral-800"
-                            : "text-neutral-400"
-                        }`}
-                      >
-                        {step}
+        {/* Shipment Timeline - with responsive spacing */}
+        <div className="mb-8 md:mb-12">
+          <h2 className="text-xl sm:text-2xl font-display font-bold mb-6 flex items-center">
+            <Truck className="w-6 h-6 mr-2 text-luxury-gold" />
+            Tracking Progress
+          </h2>
+          <div className="relative pl-6 sm:pl-8">
+            <div className="absolute top-0 left-2 w-1 h-full bg-gradient-to-b from-luxury-gold/80 to-neutral-200 rounded-full"></div>
+            <div className="space-y-6">
+              {SHIPMENT_STEPS.map((step) => {
+                const isActive = order.shipment?.tracking_status === step;
+                const isCompleted =
+                  SHIPMENT_STEPS.indexOf(step) <=
+                  SHIPMENT_STEPS.indexOf(order.shipment?.tracking_status || "");
+                return (
+                  <div key={step} className="relative flex items-center">
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
+                        isActive
+                          ? "bg-luxury-gold border-luxury-gold shadow-lg"
+                          : isCompleted
+                          ? `${SHIPMENT_COLORS[step]} border-transparent`
+                          : "bg-white border-neutral-400"
+                      }`}
+                    ></div>
+                    <span
+                      className={`ml-4 font-medium text-sm sm:text-base ${
+                        isActive
+                          ? "text-luxury-gold"
+                          : isCompleted
+                          ? "text-neutral-800"
+                          : "text-neutral-400"
+                      }`}
+                    >
+                      {step}
+                    </span>
+                    {isActive && (
+                      <span className="ml-2 text-xs font-semibold text-luxury-gold">
+                        Current
                       </span>
-                      {isActive && (
-                        <span className="ml-2 text-xs font-semibold text-luxury-gold">
-                          Current
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
+        </div>
 
-          {/* CANCEL BUTTON / CANCELLATION STATUS */}
-          {order.status !== "delivered" && (
-            <div className="mb-6">
-              {order.status === "cancelled" ? (
-                <span className="text-red-600 font-semibold">
-                  Order Cancelled
-                </span>
-              ) : order.cancel_request_status === "pending" ? (
-                <span className="text-orange-600 font-semibold">
-                  Cancellation Request Pending
-                </span>
-              ) : order.cancel_request_status === "approved" ? (
-                <span className="text-green-600 font-semibold">
-                  Cancellation Approved
-                </span>
-              ) : (
-                <button
-                  onClick={handleCancelOrder}
-                  disabled={canceling}
-                  className="btn-premium flex items-center gap-2"
-                >
-                  <X className="w-5 h-5" />
-                  {canceling ? "Cancelling..." : "Cancel Order"}
-                </button>
-              )}
-            </div>
-          )}
+        {/* CANCEL BUTTON / CANCELLATION STATUS */}
+        {order.status !== "delivered" && (
+          <div className="mb-8">
+            {order.status === "cancelled" ? (
+              <span className="text-red-600 font-semibold">Order Cancelled</span>
+            ) : order.cancel_request_status === "pending" ? (
+              <span className="text-orange-600 font-semibold">Cancellation Request Pending</span>
+            ) : order.cancel_request_status === "approved" ? (
+              <span className="text-green-600 font-semibold">Cancellation Approved</span>
+            ) : (
+              <button
+                onClick={handleCancelOrder}
+                disabled={canceling}
+                className="btn-premium flex items-center gap-2"
+              >
+                <X className="w-5 h-5" />
+                {canceling ? "Cancelling..." : "Cancel Order"}
+              </button>
+            )}
+          </div>
+        )}
 
+        {/* Sub-cards with responsive padding */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
           {/* Shipment Details */}
           {order.shipment && (
-            <div className="luxury-card glass rounded-2xl p-6 mb-8">
-              <h2 className="text-2xl font-display font-bold mb-4 text-luxury-gold">
+            <div className="luxury-card glass rounded-2xl p-4 sm:p-6">
+              <h2 className="text-xl sm:text-2xl font-display font-bold mb-4 text-luxury-gold">
                 Shipment Details
               </h2>
-              <p>
-                <strong>Shipment ID:</strong>{" "}
-                {order.shipment.shipment_id || "N/A"}
-              </p>
-              <p>
-                <strong>Tracking ID:</strong>{" "}
-                {order.shipment.tracking_id || "N/A"}
-              </p>
-              <p className="break-words">
-                <strong>Courier Company:</strong>{" "}
-                {order.shipment.courier_company || "N/A"}
-              </p>
-              <p>
-                <strong>AWB No:</strong> {order.shipment.awb_no || "N/A"}
-              </p>
-              <p>
-                <strong>Status:</strong>{" "}
-                {order.shipment.tracking_status || "N/A"}
-              </p>
-              {order.shipment.last_tracking_update && (
-                <p>
-                  <strong>Last Update:</strong>{" "}
-                  {new Date(
-                    order.shipment.last_tracking_update
-                  ).toLocaleString()}
-                </p>
-              )}
+              <div className="space-y-2 text-sm sm:text-base">
+                <p><strong className="font-semibold">Shipment ID:</strong> {order.shipment.shipment_id || "N/A"}</p>
+                <p><strong className="font-semibold">Tracking ID:</strong> {order.shipment.tracking_id || "N/A"}</p>
+                <p className="break-words"><strong className="font-semibold">Courier:</strong> {order.shipment.courier_company || "N/A"}</p>
+                <p><strong className="font-semibold">AWB No:</strong> {order.shipment.awb_no || "N/A"}</p>
+                <p><strong className="font-semibold">Status:</strong> {order.shipment.tracking_status || "N/A"}</p>
+                {order.shipment.last_tracking_update && (
+                  <p><strong className="font-semibold">Last Update:</strong> {new Date(order.shipment.last_tracking_update).toLocaleString()}</p>
+                )}
+              </div>
             </div>
           )}
 
           {/* Address */}
-          <div className="luxury-card glass rounded-2xl p-6 mb-8">
-            <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
-              <MapPin className="w-6 h-6 mr-2 text-luxury-gold" /> Customer
-              Details
+          <div className="luxury-card glass rounded-2xl p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-display font-bold mb-4 flex items-center">
+              <MapPin className="w-6 h-6 mr-2 text-luxury-gold" /> Customer Details
             </h2>
-            <p>
-              <strong>{order.address?.full_name}</strong>
-            </p>
-            <p>{order.address?.phone}</p>
-            <p className="whitespace-pre-line text-neutral-600 mt-2">
-              {[
-                order.address?.address,
-                order.address?.city,
-                order.address?.state,
-                order.address?.pincode,
-              ]
-                .filter(Boolean)
-                .join("\n")}
-            </p>
-          </div>
-
-          {/* Items */}
-          <div className="luxury-card glass rounded-2xl p-6 mb-8 overflow-x-auto">
-            <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
-              <Package className="w-6 h-6 mr-2 text-luxury-gold" /> Items
-            </h2>
-            <div className="overflow-x-auto rounded-2xl border border-neutral-200">
-              <table className="w-full min-w-[500px]">
-                <thead className="bg-luxury-gold/90 text-white">
-                  <tr>
-                    <th className="p-4 text-left">Product</th>
-                    <th className="p-4 text-right">Qty</th>
-                    <th className="p-4 text-right">Price (₹)</th>
-                    <th className="p-4 text-right">Weight</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {order.items.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="border-t border-neutral-200 text-sm sm:text-base"
-                    >
-                      <td className="p-4">
-                        {item.products?.name || "Unknown Product"}
-                      </td>
-                      <td className="p-4 text-right">{item.quantity}</td>
-                      <td className="p-4 text-right">
-                        {item.price.toFixed(2)}
-                      </td>
-                      <td className="p-4 text-right">{item.weight} grams</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="space-y-1 text-sm sm:text-base">
+              <p className="font-bold text-neutral-800">{order.address?.full_name}</p>
+              <p>{order.address?.phone}</p>
+              <p className="whitespace-pre-line text-neutral-600 mt-2">
+                {[order.address?.address, order.address?.city, order.address?.state, order.address?.pincode].filter(Boolean).join("\n")}
+              </p>
             </div>
           </div>
 
           {/* Payment */}
           {order.payment && (
-            <div className="luxury-card glass rounded-2xl p-6 mb-8">
-              <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
+            <div className="luxury-card glass rounded-2xl p-4 sm:p-6">
+              <h2 className="text-xl sm:text-2xl font-display font-bold mb-4 flex items-center">
                 <CreditCard className="w-6 h-6 mr-2 text-luxury-gold" /> Payment
               </h2>
-              <p>
-                <strong>Method:</strong> {order.payment.payment_method}
-              </p>
-              <p>
-                <strong>Status:</strong> {order.payment.payment_status}
-              </p>
-              <p>
-                <strong>Txn ID:</strong> {order.payment.transaction_id}
-              </p>
-              <p>
-                <strong>Amount:</strong> ₹{order.payment.amount.toFixed(2)}
-              </p>
+              <div className="space-y-2 text-sm sm:text-base">
+                <p><strong className="font-semibold">Method:</strong> {order.payment.payment_method}</p>
+                <p><strong className="font-semibold">Status:</strong> {order.payment.payment_status}</p>
+                <p><strong className="font-semibold">Txn ID:</strong> {order.payment.transaction_id}</p>
+                <p><strong className="font-semibold">Amount:</strong> ₹{order.payment.amount.toFixed(2)}</p>
+              </div>
             </div>
           )}
 
           {/* Invoice */}
-          <div className="luxury-card glass rounded-2xl p-6">
-            <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
+          <div className="luxury-card glass rounded-2xl p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-display font-bold mb-4 flex items-center">
               <FileText className="w-6 h-6 mr-2 text-luxury-gold" /> Invoice
             </h2>
             <button onClick={downloadInvoice} className="btn-premium mt-3">
               Download Invoice
             </button>
           </div>
+        </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-10 gap-4">
-            <p className="text-2xl font-display font-bold tamoor-gradient">
-              Total: ₹{order.total.toFixed(2)}
-            </p>
-            <button
-              onClick={() => navigate("/profile")}
-              className="btn-premium px-6 sm:px-8 py-3 rounded-full"
-            >
-              Back to Orders
-            </button>
+        {/* Items - NOW FULLY RESPONSIVE */}
+        <div className="luxury-card glass rounded-2xl p-4 sm:p-6 mt-8">
+          <h2 className="text-xl sm:text-2xl font-display font-bold mb-4 flex items-center">
+            <Package className="w-6 h-6 mr-2 text-luxury-gold" /> Items
+          </h2>
+
+          {/* Table for Medium screens and up (md:) */}
+          <div className="hidden md:block overflow-x-auto rounded-2xl border border-neutral-200">
+            <table className="w-full">
+              <thead className="bg-luxury-gold/90 text-white">
+                <tr>
+                  <th className="p-4 text-left font-semibold">Product</th>
+                  <th className="p-4 text-right font-semibold">Qty</th>
+                  <th className="p-4 text-right font-semibold">Price (₹)</th>
+                  <th className="p-4 text-right font-semibold">Weight</th>
+                </tr>
+              </thead>
+              <tbody>
+                {order.items.map((item) => (
+                  <tr key={item.id} className="border-t border-neutral-200">
+                    <td className="p-4">{item.products?.name || "Unknown Product"}</td>
+                    <td className="p-4 text-right">{item.quantity}</td>
+                    <td className="p-4 text-right">{item.price.toFixed(2)}</td>
+                    <td className="p-4 text-right">{item.weight} grams</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+
+          {/* Card list for small screens (block, but hidden on md:) */}
+          <div className="block md:hidden space-y-4">
+            {order.items.map((item) => (
+              <div key={item.id} className="border border-neutral-200 rounded-lg p-4 space-y-2 text-sm">
+                <p className="font-bold text-base text-neutral-800">{item.products?.name || "Unknown Product"}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-neutral-500">Price</span>
+                  <span className="font-medium">₹{item.price.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-neutral-500">Quantity</span>
+                  <span className="font-medium">{item.quantity}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-neutral-500">Weight</span>
+                  <span className="font-medium">{item.weight} grams</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer actions - already responsive, slightly adjusted for consistency */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mt-10 gap-4">
+          <p className="text-2xl lg:text-3xl font-display font-bold tamoor-gradient text-center sm:text-left">
+            Total: ₹{order.total.toFixed(2)}
+          </p>
+          <button
+            onClick={() => navigate("/profile")}
+            className="btn-premium w-full sm:w-auto px-8 py-3 rounded-full"
+          >
+            Back to Orders
+          </button>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default OrderTracking;

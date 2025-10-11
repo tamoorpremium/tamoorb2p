@@ -743,7 +743,7 @@ const handleSaveNewAddress = async () => {
     return <div className="min-h-screen flex items-center justify-center text-red-600 font-semibold">{errorMsg}</div>;
   }
 
- return (
+  return (
     <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-24 sm:pt-32">
       <div className="container mx-auto px-4 pb-16 sm:pb-20">
         {/* Header */}
@@ -758,41 +758,83 @@ const handleSaveNewAddress = async () => {
 
         {/* Progress Bar */}
         <div className="luxury-card glass rounded-3xl p-6 sm:p-8 mb-8 sm:mb-12">
-          <div className="flex flex-wrap items-center justify-center sm:justify-between gap-3 sm:gap-6">
-            {[{ id: 1, name: 'Address', icon: MapPin }, { id: 2, name: 'Delivery', icon: Truck }, { id: 3, name: 'Review', icon: Check }, { id: 4, name: 'Payment', icon: CreditCard }].map((step, i, arr) => (
-              <div key={step.id} className="flex items-center flex-1 min-w-[90px] sm:min-w-[120px]">
-                <div className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full transition-all duration-300 ${currentStep >= step.id ? 'bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white shadow-lg' : 'bg-neutral-200 text-neutral-500'}`}>
-                  <step.icon className="w-5 h-5 sm:w-6 sm:h-6" />
-                </div>
-                <div className="ml-3 sm:ml-4 text-sm sm:text-base">
-                  <div className={`font-display font-semibold ${currentStep >= step.id ? 'text-luxury-gold' : 'text-neutral-500'}`}>
-                    {step.name}
+          <div className="overflow-x-auto pb-2 -mb-2">
+            <div className="flex items-center justify-between min-w-max gap-3 sm:gap-6">
+              {[{ id: 1, name: 'Address', icon: MapPin }, { id: 2, name: 'Delivery', icon: Truck }, { id: 3, name: 'Review', icon: Check }, { id: 4, name: 'Payment', icon: CreditCard }].map((step, i, arr) => (
+                <div key={step.id} className="flex items-center">
+                  <div className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full transition-all duration-300 ${currentStep >= step.id ? 'bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white shadow-lg' : 'bg-neutral-200 text-neutral-500'}`}>
+                    <step.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
+                  <div className="ml-3 sm:ml-4 text-sm sm:text-base">
+                    <div className={`font-display font-semibold ${currentStep >= step.id ? 'text-luxury-gold' : 'text-neutral-500'}`}>
+                      {step.name}
+                    </div>
+                  </div>
+                  {i < arr.length - 1 && <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-300 mx-2 sm:mx-4 flex-shrink-0" />}
                 </div>
-                {i < arr.length - 1 && <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6 text-neutral-300 mx-2 sm:mx-4" />}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Main Grid - UPDATED Gutter for mobile */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
-          {/* Main Form */}
-          <div className="lg:col-span-2">
-            <div className="luxury-card glass rounded-3xl p-4 sm:p-8 space-y-6">
+        {/* Main Layout using Flexbox */}
+        <div className="flex flex-col lg:flex-row lg:gap-8">
+          
+          {/* Order Summary (First in DOM for mobile, moved right on desktop) */}
+          <div className="lg:w-1/3 lg:order-last">
+            <div className="lg:sticky top-28">
+              <div className="luxury-card glass rounded-3xl p-6 sm:p-8 space-y-4 mb-8 lg:mb-0">
+                <h3 className="font-display font-semibold text-lg sm:text-xl mb-4">Order Summary</h3>
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex justify-between text-sm sm:text-base font-medium text-neutral-600">
+                    <span>Subtotal</span>
+                    <span className="font-semibold">₹{subtotalFromCart.toFixed(2)}</span>
+                  </div>
+                  {discountFromCart > 0 && (
+                    <div className="flex justify-between text-green-600 font-medium text-sm sm:text-base">
+                      <span>Discount {promoCodeFromCart ? `(${promoCodeFromCart.code})` : ""}</span>
+                      <span>-₹{discountFromCart.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm sm:text-base font-medium text-neutral-600">
+                    <span>Delivery</span>
+                    <span className="font-semibold">
+                      {deliveryOptions.find(opt => opt.id === formData.deliveryOption)?.price === 0 ? "FREE" : `₹${deliveryPrice}`}
+                    </span>
+                  </div>
+                </div>
+                <div className="border-t border-white/20 pt-3 sm:pt-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg sm:text-xl font-display font-semibold">Total</span>
+                    <span className="text-xl sm:text-2xl font-display font-bold tamoor-gradient">
+                      ₹{displayTotal.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-center text-xs sm:text-sm text-neutral-500 pt-4 space-y-3">
+                  <div className="flex items-center justify-center gap-4">
+                    <span>🔒 Secure Payment</span>
+                    <span>📦 Fast Delivery</span>
+                  </div>
+                  <p>Your payment information is encrypted and secure.</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
+          {/* Main Form */}
+          <div className="lg:w-2/3">
+            <div className="luxury-card glass rounded-3xl p-6 sm:p-8 space-y-6">
+              
               {/* Step 1: Address */}
               {currentStep === 1 && (
                 <div className="animate-slide-up space-y-4">
                   <h2 className="text-xl sm:text-2xl font-display font-bold text-neutral-800 mb-4 sm:mb-6">Delivery Address</h2>
-
                   {savedAddresses.length === 0 && <p className="text-neutral-500">No saved addresses found.</p>}
-                  
-                  {/* UPDATED: Responsive max-height */}
-                  <div className="max-h-48 sm:max-h-60 overflow-y-auto space-y-3 sm:space-y-4 pr-2">
+                  <div className="max-h-60 overflow-y-auto space-y-3 sm:space-y-4 pr-2">
                     {savedAddresses.map(addr => (
                       <div key={addr.id} className="border border-white/20 p-3 rounded-lg">
-                         {editingAddressId === addr.id ? (
+                        {editingAddressId === addr.id ? (
                           <div className="space-y-3">
                             <input name="full_name" value={editAddressData.full_name} onChange={handleEditAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" placeholder="Full Name" />
                             <input name="email" value={editAddressData.email} onChange={handleEditAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" placeholder="Email" />
@@ -834,11 +876,9 @@ const handleSaveNewAddress = async () => {
                       </div>
                     ))}
                   </div>
-
                   <button type="button" className="btn-premium text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold" onClick={() => setAddingNewAddress(!addingNewAddress)}>
                     {addingNewAddress ? 'Cancel New Address' : 'Add New Address'}
                   </button>
-                  
                   {addingNewAddress && (
                     <div className="border border-white/20 p-4 sm:p-6 rounded-xl shadow-lg space-y-3">
                       <input name="full_name" placeholder="Full Name" value={newAddress.full_name} onChange={handleNewAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" />
@@ -859,8 +899,7 @@ const handleSaveNewAddress = async () => {
                       <button type="button" className="btn-premium text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold w-full" onClick={handleSaveNewAddress}>Save Address</button>
                     </div>
                   )}
-                   {/* ADDED: Address validation error message */}
-                   {addressError && <p className="text-red-500 text-center text-sm font-semibold pt-2">{addressError}</p>}
+                  {addressError && <p className="text-red-500 text-center text-sm font-semibold pt-2">{addressError}</p>}
                 </div>
               )}
 
@@ -868,7 +907,6 @@ const handleSaveNewAddress = async () => {
               {currentStep === 2 && (
                 <div className="animate-slide-up space-y-4 sm:space-y-6">
                   <h2 className="text-2xl sm:text-3xl font-display font-bold text-neutral-800 mb-6 sm:mb-8">Delivery Options</h2>
-                  {/* UPDATED: Responsive max-height */}
                   <div className="space-y-4 max-h-72 sm:max-h-96 overflow-y-auto pr-2">
                     {deliveryOptions.map(option => (
                       <div key={option.id} className={`neomorphism rounded-2xl p-4 sm:p-6 cursor-pointer transition-all duration-300 ${formData.deliveryOption === option.id ? 'ring-2 ring-luxury-gold bg-luxury-gold/5' : 'hover:shadow-lg'} ${!option.enabled ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={() => option.enabled && setFormData(prev => ({ ...prev, deliveryOption: option.id }))}>
@@ -900,7 +938,6 @@ const handleSaveNewAddress = async () => {
                   <div className="space-y-4 sm:space-y-6">
                     <div className="neomorphism rounded-2xl p-4 sm:p-6 space-y-4">
                       <h3 className="font-display font-semibold text-lg mb-2 sm:mb-4">Order Items</h3>
-                      {/* UPDATED: Responsive max-height */}
                       <div className="max-h-60 sm:max-h-72 overflow-y-auto space-y-3 sm:space-y-4 pr-2">
                         {cartItems.map((item) => (
                           <div key={`${item.id}-${item.weight}`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
@@ -934,12 +971,12 @@ const handleSaveNewAddress = async () => {
               {/* Step 4: Payment */}
               {currentStep === 4 && (
                 <div className="animate-slide-up space-y-4 sm:space-y-6">
-                  <h2 className="text-2xl sm:text-3xl font-display font-bold text-neutral-800 mb-6 sm:mb-8">Payment Method</h2>
+                  <h2 className="text-2xl sm:text-3xl font-display font-bold text-neutral-800">Payment Method</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                     {[{ id: 'card', name: 'Credit/Debit Card', icon: '💳' }, { id: 'upi', name: 'UPI Payment', icon: '📱' }, { id: 'cod', name: 'Cash on Delivery', icon: '💰' }].map((method) => (
-                      <button key={method.id} type="button" onClick={() => setFormData(prev => ({ ...prev, paymentMethod: method.id }))} className={`glass rounded-2xl p-4 sm:p-6 w-full max-w-xs mx-auto sm:max-w-none cursor-pointer text-center transition-all duration-300 outline-none focus:outline-none ${formData.paymentMethod === method.id ? 'ring-2 ring-red-600 bg-red-700 text-luxury-gold shadow-rose-600' : 'hover:shadow-2xl bg-white/10 text-green-900'}`}>
+                      <button key={method.id} type="button" onClick={() => setFormData(prev => ({ ...prev, paymentMethod: method.id }))} className={`glass rounded-2xl p-4 sm:p-6 w-full cursor-pointer text-center transition-all duration-300 outline-none focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 ${formData.paymentMethod === method.id ? 'ring-2 ring-luxury-gold bg-luxury-gold/10 shadow-lg' : 'hover:shadow-md bg-white/10'}`}>
                         <div className="text-3xl sm:text-4xl mb-2 sm:mb-3 select-none">{method.icon}</div>
-                        <div className="font-display font-semibold select-none text-sm sm:text-base">{method.name}</div>
+                        <div className={`font-display font-semibold select-none text-sm sm:text-base ${formData.paymentMethod === method.id ? 'text-luxury-gold' : 'text-neutral-700'}`}>{method.name}</div>
                       </button>
                     ))}
                   </div>
@@ -961,48 +998,9 @@ const handleSaveNewAddress = async () => {
                   </button>
                 )}
               </div>
+
             </div>
           </div>
-
- {/* Order Summary */}
-<div className="lg:col-span-1 mb-6">
-  <div className="luxury-card glass rounded-3xl p-4 sm:p-8 lg:sticky top-24 space-y-4">
-    <h3 className="font-display font-semibold text-lg sm:text-xl mb-4">Order Summary</h3>
-    <div className="space-y-2 sm:space-y-4">
-      <div className="flex justify-between text-sm sm:text-base font-medium text-neutral-600">
-        <span>Subtotal</span>
-        <span className="font-semibold">₹{subtotalFromCart.toFixed(2)}</span>
-      </div>
-      {discountFromCart > 0 && (
-        <div className="flex justify-between text-green-600 font-medium text-sm sm:text-base">
-          <span>Discount {promoCodeFromCart ? `(${promoCodeFromCart.code})` : ""}</span>
-          <span>-₹{discountFromCart.toFixed(2)}</span>
-        </div>
-      )}
-      <div className="flex justify-between text-sm sm:text-base font-medium text-neutral-600">
-        <span>Delivery</span>
-        <span className="font-semibold">
-          {deliveryOptions.find(opt => opt.id === formData.deliveryOption)?.price === 0 ? "FREE" : `₹${deliveryPrice}`}
-        </span>
-      </div>
-    </div>
-    <div className="border-t border-white/20 pt-2 sm:pt-4">
-      <div className="flex justify-between items-center text-sm sm:text-base">
-        <span className="text-lg sm:text-xl font-display font-semibold">Total</span>
-        <span className="text-xl sm:text-2xl font-display font-bold tamoor-gradient">
-          ₹{displayTotal.toFixed(2)}
-        </span>
-      </div>
-    </div>
-    <div className="text-center text-xs sm:text-sm text-neutral-500 mt-1">
-      <div className="flex flex-col sm:flex-row justify-center gap-1 sm:gap-4 mb-8">
-        <span>🔒 Secure Payment</span>
-        <span>📦 Fast Delivery</span>
-      </div>
-      Your payment information is encrypted and secure
-    </div>
-  </div>
-</div>
         </div>
       </div>
     </div>

@@ -994,8 +994,8 @@ const handleSaveNewAddress = async () => {
         </span>
       </div>
     </div>
-    <div className="text-center text-xs sm:text-sm text-neutral-500 mt-2">
-      <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mb-2">
+    <div className="text-center text-xs sm:text-sm text-neutral-500 mt-1">
+      <div className="flex flex-col sm:flex-row justify-center gap-1 sm:gap-4 mb-8">
         <span>🔒 Secure Payment</span>
         <span>📦 Fast Delivery</span>
       </div>

@@ -300,6 +300,7 @@ const shiptotal = finalTotal + shipping; // ✅ also an integer now
 };
 
 
+   // Empty Cart View
   if (cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-24 sm:pt-32">
@@ -440,37 +441,37 @@ const shiptotal = finalTotal + shipping; // ✅ also an integer now
                 key={`${item.id}-${item.weight}`}
                 className={`luxury-card glass rounded-3xl p-4 sm:p-6 transition-all duration-300 ${removingItem === item.id ? 'opacity-50 scale-95' : ''}`}
               >
-                <div className="flex items-center space-x-4 sm:space-x-6">
-                  {/* Item Image */}
-                  <img src={item.image} alt={item.name} className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-2xl flex-shrink-0" />
-                  
-                  {/* Details & Actions Wrapper */}
-                  <div className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                    {/* Item Details */}
+                {/* FIXED: Simplified and more robust flex layout for each item */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  {/* Image & Details Container */}
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <img src={item.image} alt={item.name} className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-2xl flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-display font-semibold text-base sm:text-lg text-neutral-800 mb-1 truncate">{item.name}</h3>
                       <p className="text-neutral-600 text-sm mb-2">Weight: {displayWeight(item.weight, item.measurement_unit)}</p>
                       <div className="text-xl sm:text-2xl font-display font-bold tamoor-gradient">₹{getCartItemPrice(item)}</div>
                     </div>
+                  </div>
 
-                    {/* Quantity & Remove */}
-                    <div className="flex items-center justify-between sm:justify-end sm:space-x-4">
-                      <div className="flex items-center space-x-1 neomorphism rounded-full p-1">
-                        <button onClick={() => handleDecreaseQuantity(item)} className="p-2 hover:bg-white/20 rounded-full transition">
-                          <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
-                        </button>
-                        <span className="min-w-[2rem] sm:min-w-[2.5rem] text-center font-semibold text-base sm:text-lg">{item.quantity}</span>
-                        <button onClick={() => handleIncreaseQuantity(item)} className="p-2 hover:bg-white/20 rounded-full transition">
-                          <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-                        </button>
-                      </div>
-                      <button
-                        onClick={() => handleRemoveItem(item.id, normalizeWeight(item.weight, item.measurement_unit), item.measurement_unit)}
-                        className="p-3 text-red-500 rounded-full transition-colors hover:bg-red-50"
-                      >
-                        <Trash2 className="w-5 h-5" />
+                  {/* Actions Container */}
+                  <div className="flex items-center self-end sm:self-center space-x-4 flex-shrink-0">
+                    {/* Quantity Controls */}
+                    <div className="flex items-center space-x-1 neomorphism rounded-full p-1">
+                      <button onClick={() => handleDecreaseQuantity(item)} className="p-2 hover:bg-white/20 rounded-full transition">
+                        <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                      <span className="min-w-[2rem] sm:min-w-[2.5rem] text-center font-semibold text-base sm:text-lg">{item.quantity}</span>
+                      <button onClick={() => handleIncreaseQuantity(item)} className="p-2 hover:bg-white/20 rounded-full transition">
+                        <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                     </div>
+                    {/* Remove Button */}
+                    <button
+                      onClick={() => handleRemoveItem(item.id, normalizeWeight(item.weight, item.measurement_unit), item.measurement_unit)}
+                      className="p-3 text-red-500 rounded-full transition-colors hover:bg-red-50"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
                   </div>
                 </div>
               </div>

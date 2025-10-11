@@ -111,6 +111,15 @@ export default {
         neomorphism: '20px 20px 60px #d1d1d4, -20px -20px 60px #ffffff',
         'neomorphism-inset': 'inset 20px 20px 60px #d1d1d4, inset -20px -20px 60px #ffffff',
       },
+      keyframes: {
+          'fade-in': {
+            '0%': { opacity: '0', transform: 'translateY(10px)' },
+            '100%': { opacity: '1', transform: 'translateY(0)' },
+          },
+        },
+        animation: {
+          'fade-in': 'fade-in 0.5s ease-out forwards',
+        },
     },
   },
   plugins: [],

@@ -330,3 +330,17 @@ html {
   /* Optional: add subtle glow */
   box-shadow: inset 0 0 100px 20px rgba(139, 39, 159, 0.6);
 }
+
+
+ @layer utilities {
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none; 
+    }
+    .text-shadow-md {
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+  }

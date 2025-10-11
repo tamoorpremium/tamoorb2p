@@ -302,21 +302,20 @@ const shiptotal = finalTotal + shipping; // ✅ also an integer now
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-24 sm:pt-32">
+      <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-32">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center">
-            {/* Responsive padding for the card */}
-            <div className="luxury-card glass rounded-3xl p-8 sm:p-12 lg:p-16">
-              <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-8 rounded-full bg-gradient-to-br from-luxury-gold/20 to-luxury-sage/20 flex items-center justify-center">
-                <ShoppingBag className="w-12 h-12 sm:w-16 sm:h-16 text-luxury-gold" />
+            <div className="luxury-card glass rounded-3xl p-16">
+              <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-gradient-to-br from-luxury-gold/20 to-luxury-sage/20 flex items-center justify-center">
+                <ShoppingBag className="w-16 h-16 text-luxury-gold" />
               </div>
-              <h1 className="text-3xl sm:text-4xl font-display font-bold text-neutral-800 mb-6">
+              <h1 className="text-4xl font-display font-bold text-neutral-800 mb-6">
                 Your Cart is Empty
               </h1>
-              <p className="text-base sm:text-xl text-neutral-600 mb-8 font-medium">
+              <p className="text-xl text-neutral-600 mb-8 font-medium">
                 Discover our premium collection of luxury dry fruits and nuts
               </p>
-              <button className="btn-premium text-white px-8 sm:px-10 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg">
+              <button className="btn-premium text-white px-10 py-4 rounded-full font-semibold text-lg">
                 Start Shopping
               </button>
             </div>
@@ -326,161 +325,161 @@ const shiptotal = finalTotal + shipping; // ✅ also an integer now
     );
   }
 
-  // Cart View with Items
   return (
-    <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-24 sm:pt-32">
-      <div className="container mx-auto px-4 pb-20">
-        {/* Header */}
-        <div className="mb-8 sm:mb-12 text-center sm:text-left">
-          <h1 className="text-3xl sm:text-5xl font-display font-bold text-neutral-800 mb-4">
-            Shopping <span className="tamoor-gradient">Cart</span>
-          </h1>
-          <p className="text-lg sm:text-xl text-neutral-600 font-medium">
-            {cartCount} {cartCount === 1 ? 'item' : 'items'} in your cart
-          </p>
-        </div>
+  <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-32">
+    <div className="container mx-auto px-4 pb-20">
+      {/* Header */}
+      <div className="mb-12">
+        <h1 className="text-3xl sm:text-5xl font-display font-bold text-neutral-800 mb-4">
+          Shopping <span className="tamoor-gradient">Cart</span>
+        </h1>
+        <p className="text-xl text-neutral-600 font-medium">
+          {cartCount} {cartCount === 1 ? 'item' : 'items'} in your cart
+        </p>
+      </div>
 
-        {/* Main Layout using Flexbox for Mobile-First approach */}
-        <div className="flex flex-col lg:flex-row lg:gap-12">
-          
-          {/* Order Summary & Promo (First in code for mobile, moved right on desktop via lg:order-last) */}
-          <div className="lg:w-1/3 lg:order-last">
-            <div className="lg:sticky top-28 space-y-6">
-              {/* Promo Code */}
-              <div className="luxury-card glass rounded-3xl p-6 sm:p-8">
-                <h3 className="font-display font-semibold text-xl mb-4">Promo Code</h3>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="text"
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value)}
-                    placeholder="Enter promo code"
-                    className="flex-1 p-3 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                  />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-1 lg:gap-12">
+        {/* Cart Items */}
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+          {cartItems.map((item) => (
+            <div
+              key={`${item.id}-${item.weight}`}
+              className={`luxury-card glass rounded-3xl p-4 sm:p-6 transition-all duration-300 ${removingItem === item.id ? 'opacity-50 scale-95' : ''}`}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-4 sm:space-y-0">
+                {/* Item Image */}
+                <div className="relative overflow-hidden rounded-2xl w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0">
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                </div>
+
+                {/* Item Details */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-display font-semibold text-sm sm:text-lg truncate text-neutral-800 mb-1 sm:mb-2">{item.name}</h3>
+                  <p className="text-neutral-600 text-xs sm:text-sm mb-2">Weight: {displayWeight(item.weight, item.measurement_unit)}</p>
+                  <div className="text-lg sm:text-xl font-display font-bold tamoor-gradient">₹{getCartItemPrice(item)}</div>
+                </div>
+
+                {/* Quantity & Remove */}
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="flex items-center space-x-2 neomorphism rounded-full p-1 sm:p-2">
+                    <button
+                      onClick={() => handleDecreaseQuantity(item)}
+                      className="p-2 hover:bg-white/20 rounded-full transition-all duration-300"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <span className="min-w-[2.5rem] text-center font-semibold text-sm sm:text-lg">{item.quantity}</span>
+                    <button
+                      onClick={() => handleIncreaseQuantity(item)}
+                      className="p-2 hover:bg-white/20 rounded-full transition-all duration-300"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
                   <button
-                    onClick={handleApplyPromo}
-                    className="btn-premium text-white px-6 py-3 rounded-xl font-semibold"
+                    onClick={() => handleRemoveItem(item.id, normalizeWeight(item.weight, item.measurement_unit), item.measurement_unit)}
+                    className="p-3 hover:bg-red-50 text-red-500 rounded-full transition-all duration-300 hover:scale-110"
                   >
-                    Apply
+                    <Trash2 className="w-5 h-5" />
                   </button>
-                </div>
-                {promo && (
-                  <div className="flex justify-between items-center text-green-700 mt-3 text-sm">
-                    <span className="font-medium">Discount ({promo.code})</span>
-                    <div className="flex items-center space-x-2">
-                      <span className="font-semibold">-₹{discount}</span>
-                      <button
-                        onClick={() => {
-                          setPromo(null);
-                          toast.info("Promo code removed", { autoClose: 2000 });
-                        }}
-                        className="text-red-500 font-medium px-2 py-1 rounded hover:bg-red-50 transition"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Order Summary */}
-              <div className="luxury-card glass rounded-3xl p-6 sm:p-8">
-                <h3 className="font-display font-semibold text-xl mb-6">Order Summary</h3>
-                <div className="space-y-4 mb-6 text-base">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 font-medium">Subtotal</span>
-                    <span className="font-semibold">₹{roundedSubtotal}</span>
-                  </div>
-                  {promo && (
-                    <div className="flex justify-between text-green-700 font-medium">
-                      <span>Discount ({promo.code})</span>
-                      <span>-₹{discount}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between items-center">
-                    <span className="text-neutral-600 font-medium flex items-center">
-                      <Truck className="w-4 h-4 mr-2" /> Shipping
-                    </span>
-                    <span className="font-semibold">{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
-                  </div>
-                  {shipping === 0 && (
-                    <div className="text-sm text-green-700 font-medium flex items-center gap-2">
-                      <Gift className="w-4 h-4" /> Free shipping on orders above ₹999
-                    </div>
-                  )}
-                </div>
-
-                <div className="border-t border-white/20 pt-4 mb-6 flex justify-between items-center">
-                  <span className="text-xl font-display font-semibold">Total</span>
-                  <span className="text-3xl font-display font-bold tamoor-gradient">₹{shiptotal}</span>
-                </div>
-
-                <button
-                  onClick={handleProceedToCheckout}
-                  className="w-full btn-premium text-white py-4 rounded-full font-semibold text-lg flex items-center justify-center"
-                >
-                  Proceed to Checkout
-                </button>
-
-                <div className="mt-6 text-center">
-                  <div className="flex flex-col sm:flex-row justify-center sm:space-x-4 space-y-1 sm:space-y-0 text-sm text-neutral-500">
-                    <span>🔒 Secure Checkout</span>
-                    <span>📦 Fast Delivery</span>
-                    <span>↩️ Easy Returns</span>
-                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ))}
+        </div>
 
-          {/* Cart Items (Second in code, appears below summary on mobile) */}
-          <div className="lg:w-2/3 space-y-6 mt-8 lg:mt-0">
-            {cartItems.map((item) => (
-              <div
-                key={`${item.id}-${item.weight}`}
-                className={`luxury-card glass rounded-3xl p-4 sm:p-6 transition-all duration-300 ${removingItem === item.id ? 'opacity-50 scale-95' : ''}`}
+        {/* Order Summary & Promo */}
+        <div className="space-y-6">
+          {/* Promo Code */}
+          <div className="luxury-card glass rounded-3xl p-4 sm:p-6">
+            <h3 className="font-display font-semibold text-lg sm:text-xl mb-4 sm:mb-6">Promo Code</h3>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <input
+                type="text"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                placeholder="Enter promo code"
+                className="flex-1 p-3 sm:p-4 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50"
+              />
+              <button
+                onClick={handleApplyPromo}
+                className="btn-premium text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl font-semibold"
               >
-                <div className="flex items-center space-x-4 sm:space-x-6">
-                  {/* Item Image */}
-                  <img src={item.image} alt={item.name} className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-2xl flex-shrink-0" />
-                  
-                  {/* Details & Actions Wrapper */}
-                  <div className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                    {/* Item Details */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-display font-semibold text-base sm:text-lg text-neutral-800 mb-1 truncate">{item.name}</h3>
-                      <p className="text-neutral-600 text-sm mb-2">Weight: {displayWeight(item.weight, item.measurement_unit)}</p>
-                      <div className="text-xl sm:text-2xl font-display font-bold tamoor-gradient">₹{getCartItemPrice(item)}</div>
-                    </div>
-
-                    {/* Quantity & Remove */}
-                    <div className="flex items-center justify-between sm:justify-end sm:space-x-4">
-                      <div className="flex items-center space-x-1 neomorphism rounded-full p-1">
-                        <button onClick={() => handleDecreaseQuantity(item)} className="p-2 hover:bg-white/20 rounded-full transition">
-                          <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
-                        </button>
-                        <span className="min-w-[2rem] sm:min-w-[2.5rem] text-center font-semibold text-base sm:text-lg">{item.quantity}</span>
-                        <button onClick={() => handleIncreaseQuantity(item)} className="p-2 hover:bg-white/20 rounded-full transition">
-                          <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-                        </button>
-                      </div>
-                      <button
-                        onClick={() => handleRemoveItem(item.id, normalizeWeight(item.weight, item.measurement_unit), item.measurement_unit)}
-                        className="p-3 text-red-500 rounded-full transition-colors hover:bg-red-50"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
+                Apply
+              </button>
+            </div>
+            {promo && (
+              <div className="flex justify-between items-center text-luxury-sage mt-2 sm:mt-3 text-sm sm:text-base">
+                <span className="font-medium">Discount ({promo.code})</span>
+                <div className="flex items-center space-x-2">
+                  <span className="font-semibold">-₹{discount}</span>
+                  <button
+                    onClick={() => {
+                      setPromo(null);
+                      toast.info("Promo code removed", { autoClose: 2000 });
+                    }}
+                    className="text-red-500 font-medium px-2 py-1 rounded hover:bg-red-50 transition"
+                  >
+                    Remove
+                  </button>
                 </div>
               </div>
-            ))}
+            )}
           </div>
 
+ {/* Order Summary */}
+      <div className="luxury-card glass rounded-3xl p-4 sm:p-6 lg:sticky top-32 mb-6">
+        <h3 className="font-display font-semibold text-lg sm:text-xl mb-4 sm:mb-6">Order Summary</h3>
+        <div className="space-y-2 sm:space-y-4 mb-4 sm:mb-6 text-sm sm:text-base">
+          <div className="flex justify-between">
+            <span className="text-neutral-600 font-medium">Subtotal</span>
+            <span className="font-semibold">₹{roundedSubtotal}</span>
+          </div>
+          {promo && (
+            <div className="flex justify-between text-luxury-sage font-medium">
+              <span>Discount ({promo.code})</span>
+              <span>-₹{discount}</span>
+            </div>
+          )}
+          <div className="flex justify-between items-center">
+            <span className="text-neutral-600 font-medium flex items-center">
+              <Truck className="w-4 h-4 mr-1 sm:mr-2" /> Shipping
+            </span>
+            <span className="font-semibold">{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
+          </div>
+          {shipping === 0 && (
+            <div className="text-sm text-luxury-sage font-medium flex items-center gap-1 sm:gap-2">
+              <Gift className="w-4 h-4" /> Free shipping on orders above ₹999
+            </div>
+          )}
+        </div>
+
+        {/* Total */}
+        <div className="border-t border-white/20 pt-4 mb-6 flex justify-between items-center">
+          <span className="text-xl font-display font-semibold">Total</span>
+          <span className="text-2xl sm:text-3xl font-display font-bold tamoor-gradient">₹{shiptotal}</span>
+        </div>
+
+        <button
+          onClick={handleProceedToCheckout}
+          className="w-full btn-premium text-white py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg flex items-center justify-center"
+        >
+          Proceed to Checkout
+        </button>
+
+        <div className="mt-4 sm:mt-6 text-center">
+          <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-1 sm:space-y-0 text-sm sm:text-base text-neutral-500">
+            <span>🔒 Secure Checkout</span>
+            <span>📦 Fast Delivery</span>
+            <span>↩️ Easy Returns</span>
+          </div>
+        </div>
+      </div>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default Cart;

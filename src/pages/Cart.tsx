@@ -338,7 +338,7 @@ const shiptotal = finalTotal + shipping; // ✅ also an integer now
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-1 lg:gap-12">
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {cartItems.map((item) => (
@@ -427,54 +427,54 @@ const shiptotal = finalTotal + shipping; // ✅ also an integer now
             )}
           </div>
 
-          {/* Order Summary */}
-          <div className="luxury-card glass rounded-3xl p-4 sm:p-6 lg:sticky top-32">
-            <h3 className="font-display font-semibold text-lg sm:text-xl mb-4 sm:mb-6">Order Summary</h3>
-            <div className="space-y-2 sm:space-y-4 mb-4 sm:mb-6 text-sm sm:text-base">
-              <div className="flex justify-between">
-                <span className="text-neutral-600 font-medium">Subtotal</span>
-                <span className="font-semibold">₹{roundedSubtotal}</span>
-              </div>
-              {promo && (
-                <div className="flex justify-between text-luxury-sage font-medium">
-                  <span>Discount ({promo.code})</span>
-                  <span>-₹{discount}</span>
-                </div>
-              )}
-              <div className="flex justify-between items-center">
-                <span className="text-neutral-600 font-medium flex items-center">
-                  <Truck className="w-4 h-4 mr-1 sm:mr-2" /> Shipping
-                </span>
-                <span className="font-semibold">{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
-              </div>
-              {shipping === 0 && (
-                <div className="text-sm text-luxury-sage font-medium flex items-center gap-1 sm:gap-2">
-                  <Gift className="w-4 h-4" /> Free shipping on orders above ₹999
-                </div>
-              )}
-            </div>
-
-            {/* Total */}
-            <div className="border-t border-white/20 pt-4 mb-6 flex justify-between items-center">
-              <span className="text-xl font-display font-semibold">Total</span>
-              <span className="text-2xl sm:text-3xl font-display font-bold tamoor-gradient">₹{shiptotal}</span>
-            </div>
-
-            <button
-              onClick={handleProceedToCheckout}
-              className="w-full btn-premium text-white py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg flex items-center justify-center"
-            >
-              Proceed to Checkout
-            </button>
-
-            <div className="mt-4 sm:mt-6 text-center">
-              <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-1 sm:space-y-0 text-sm sm:text-base text-neutral-500">
-                <span>🔒 Secure Checkout</span>
-                <span>📦 Fast Delivery</span>
-                <span>↩️ Easy Returns</span>
-              </div>
-            </div>
+ {/* Order Summary */}
+      <div className="luxury-card glass rounded-3xl p-4 sm:p-6 lg:sticky top-32 mb-6">
+        <h3 className="font-display font-semibold text-lg sm:text-xl mb-4 sm:mb-6">Order Summary</h3>
+        <div className="space-y-2 sm:space-y-4 mb-4 sm:mb-6 text-sm sm:text-base">
+          <div className="flex justify-between">
+            <span className="text-neutral-600 font-medium">Subtotal</span>
+            <span className="font-semibold">₹{roundedSubtotal}</span>
           </div>
+          {promo && (
+            <div className="flex justify-between text-luxury-sage font-medium">
+              <span>Discount ({promo.code})</span>
+              <span>-₹{discount}</span>
+            </div>
+          )}
+          <div className="flex justify-between items-center">
+            <span className="text-neutral-600 font-medium flex items-center">
+              <Truck className="w-4 h-4 mr-1 sm:mr-2" /> Shipping
+            </span>
+            <span className="font-semibold">{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
+          </div>
+          {shipping === 0 && (
+            <div className="text-sm text-luxury-sage font-medium flex items-center gap-1 sm:gap-2">
+              <Gift className="w-4 h-4" /> Free shipping on orders above ₹999
+            </div>
+          )}
+        </div>
+
+        {/* Total */}
+        <div className="border-t border-white/20 pt-4 mb-6 flex justify-between items-center">
+          <span className="text-xl font-display font-semibold">Total</span>
+          <span className="text-2xl sm:text-3xl font-display font-bold tamoor-gradient">₹{shiptotal}</span>
+        </div>
+
+        <button
+          onClick={handleProceedToCheckout}
+          className="w-full btn-premium text-white py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg flex items-center justify-center"
+        >
+          Proceed to Checkout
+        </button>
+
+        <div className="mt-4 sm:mt-6 text-center">
+          <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-1 sm:space-y-0 text-sm sm:text-base text-neutral-500">
+            <span>🔒 Secure Checkout</span>
+            <span>📦 Fast Delivery</span>
+            <span>↩️ Easy Returns</span>
+          </div>
+        </div>
+      </div>
         </div>
       </div>
     </div>

@@ -1,28 +1,28 @@
 import React, { useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-// NEW: Import your SVG as a React component. This is the modern syntax for Vite.
-// If you are using an older Create React App, you might need:
-// import { ReactComponent as MyLogo } from '../assets/MyLogo.svg';
-import MyLogo from '../assets/MyLogo.svg?react';
+import { motion, AnimatePresence, Variants, useAnimation } from 'framer-motion';
 
 interface EntryAnimationProps {
   onAnimationComplete: () => void;
 }
 
 const EntryAnimation: React.FC<EntryAnimationProps> = ({ onAnimationComplete }) => {
+  const word = "TAMOOR";
+  const letters = word.split("");
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const scanControls = useAnimation(); // Animation controls for the scan line
 
-  // Set a timeout to trigger the exit animation
-  useEffect(() => {
-    const timer = setTimeout(() => {
+  const handleWordAnimationComplete = async () => {
+    // 1. Once the word is formed, trigger the scan line animation
+    await scanControls.start("scan");
+    
+    // 2. After the scan, hold for a moment
+    const holdDuration = 1500; // Hold for 1.5 seconds after the scan
+    setTimeout(() => {
       onAnimationComplete();
-    }, 2500); // Animation will last 2.5 seconds before fading out
+    }, holdDuration);
+  };
 
-    return () => clearTimeout(timer);
-  }, [onAnimationComplete]);
-  
-  // This useEffect handles the particle burst animation on the canvas
+  // This useEffect handles the "Plexus" background animation
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
@@ -33,95 +33,118 @@ const EntryAnimation: React.FC<EntryAnimationProps> = ({ onAnimationComplete }) 
     canvas.width = cw;
     canvas.height = ch;
 
-    const particleCount = 400;
+    const particleCount = 150; 
     const particles: Particle[] = [];
-    const colors = ['#FFFFFF', '#00FFFF', '#7DF9FF', '#FFFFFF']; // Futuristic colors
-
-    function random(min: number, max: number): number {
-      return Math.random() * (max - min) + min;
-    }
+    const colors = ['#DAA520', '#FFD700', '#B8860B'];
+    const maxDistance = 100;
+    let animationFrameId: number;
 
     class Particle {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      radius: number;
-      color: string;
-      alpha: number;
-
-      constructor() {
-        this.x = cw / 2; // Start in the center
-        this.y = ch / 2;
-        const angle = random(0, Math.PI * 2);
-        const speed = random(1, 12);
-        this.vx = Math.cos(angle) * speed;
-        this.vy = Math.sin(angle) * speed;
-        this.radius = random(1, 3);
-        this.color = colors[Math.floor(random(0, colors.length))];
-        this.alpha = 1;
-      }
-
-      update(): boolean {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vy += 0.05; // A little gravity
-        this.alpha -= 0.02;
-        return this.alpha > 0;
-      }
-
-      draw(context: CanvasRenderingContext2D): void {
-        context.globalAlpha = this.alpha;
-        context.beginPath();
-        context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        context.fillStyle = this.color;
-        context.fill();
-      }
+      x: number; y: number; vx: number; vy: number; radius: number;
+      constructor() { this.x = Math.random() * cw; this.y = Math.random() * ch; this.vx = Math.random() * 0.4 - 0.2; this.vy = Math.random() * 0.4 - 0.2; this.radius = Math.random() * 1.5 + 0.5; }
+      update(): void { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > cw) this.vx *= -1; if (this.y < 0 || this.y > ch) this.vy *= -1; }
+      draw(context: CanvasRenderingContext2D): void { context.beginPath(); context.arc(this.x, this.y, this.radius, 0, Math.PI * 2); context.fillStyle = colors[1]; context.fill(); context.closePath(); }
     }
 
     for (let i = 0; i < particleCount; i++) {
       particles.push(new Particle());
     }
 
-    let animationFrameId: number;
     function loop() {
       if (!ctx) return;
-      animationFrameId = requestAnimationFrame(loop);
       ctx.clearRect(0, 0, cw, ch);
-      
-      let i = particles.length;
-      while (i--) {
-        if (!particles[i].update()) {
-          particles.splice(i, 1);
-        } else {
-          particles[i].draw(ctx);
+      particles.forEach(p => p.update());
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i; j < particles.length; j++) {
+          const dist = Math.hypot(particles[i].x - particles[j].x, particles[i].y - particles[j].y);
+          if (dist < maxDistance) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = colors[0];
+            ctx.lineWidth = 0.3;
+            ctx.globalAlpha = 1 - (dist / maxDistance);
+            ctx.stroke();
+            ctx.closePath();
+          }
         }
       }
+      ctx.globalAlpha = 1;
+      particles.forEach(p => p.draw(ctx));
+      animationFrameId = requestAnimationFrame(loop);
     }
     loop();
 
     return () => cancelAnimationFrame(animationFrameId);
   }, []);
 
+  const containerVariants: Variants = {
+    hidden: { opacity: 1 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.3 }},
+  };
+
+  const letterVariants: Variants = {
+    hidden: { opacity: 0, y: 20, rotateX: -90 },
+    visible: { opacity: 1, y: 0, rotateX: 0, transition: { type: 'spring', damping: 12, stiffness: 200 }},
+  };
+
+  const scanLineVariants: Variants = {
+    initial: {
+      left: '-10%',
+      opacity: 0,
+    },
+    scan: {
+      left: '100%',
+      opacity: [0, 1, 1, 0],
+      transition: { duration: 0.7, ease: 'easeInOut', times: [0, 0.1, 0.9, 1] },
+    },
+  };
+
   return (
-    <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 bg-neutral-900 flex items-center justify-center z-[99999]"
-        exit={{ opacity: 0, transition: { duration: 0.5 } }}
+    <motion.div
+      className="fixed inset-0 bg-black flex items-center justify-center z-[99999] overflow-hidden"
+      style={{ perspective: '800px' }}
+      exit={{ opacity: 0, transition: { duration: 0.5 } }}
+    >
+      <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full z-[99990]" />
+
+      <motion.h3
+        // ✅ ADDED font-serif and font-bold here
+        className="text-7xl sm:text-8xl md:text-9xl font-serif font-bold flex relative overflow-hidden z-[99991]"
+        style={{
+          background: 'linear-gradient(135deg, #DAA520, #FFD700, #B8860B)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+        }}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
       >
-        {/* Canvas for the background particle burst */}
-        <canvas ref={canvasRef} className="absolute inset-0" />
-        
-        {/* Your logo fading and scaling in on top */}
+        {letters.map((letter, index) => (
+          <motion.span 
+            key={index} 
+            variants={letterVariants}
+            onAnimationComplete={index === letters.length - 1 ? handleWordAnimationComplete : undefined}
+          >
+            {letter}
+          </motion.span>
+        ))}
+
         <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1, transition: { duration: 1, ease: 'easeOut' } }}
-          className="relative z-10"
-        >
-          <MyLogo width={150} height={150} />
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+          className="absolute top-[-10%] h-[120%]"
+          style={{
+            background: 'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.8), transparent)',
+            width: '50px',
+            boxShadow: '0 0 20px 10px rgba(255, 215, 0, 0.5)',
+            skewX: -15,
+          }}
+          variants={scanLineVariants}
+          initial="initial"
+          animate={scanControls}
+        />
+      </motion.h3>
+    </motion.div>
   );
 };
 

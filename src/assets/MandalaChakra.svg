@@ -1,0 +1,31 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#DAA520;stop-opacity:1" />
+        <stop offset="50%" style="stop-color:#FFD700;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#B8860B;stop-opacity:1" />
+    </linearGradient>
+</defs>
+<circle cx="200" cy="200" r="150" stroke="url(#goldGradient)" strokeWidth="2" opacity="0.8"/>
+<path d="M200 50C277.32 50 340 112.68 340 190C340 267.32 277.32 330 200 330C122.68 330 60 267.32 60 190C60 112.68 122.68 50 200 50Z" stroke="url(#goldGradient)" strokeWidth="2" opacity="0.8"/>
+<path d="M200 70C266.273 70 320 123.727 320 190C320 256.273 266.273 310 200 310C133.727 310 80 256.273 80 190C80 123.727 133.727 70 200 70Z" stroke="url(#goldGradient)" strokeWidth="2" opacity="0.8"/>
+<path d="M200 90C255.228 90 300 134.772 300 190C300 245.228 255.228 290 200 290C144.772 290 100 245.228 100 190C100 134.772 144.772 90 200 90Z" stroke="url(#goldGradient)" strokeWidth="2" opacity="0.8"/>
+<path d="M200 110C244.112 110 280 145.888 280 190C280 234.112 244.112 270 200 270C155.888 270 120 234.112 120 190C120 145.888 155.888 110 200 110Z" stroke="url(#goldGradient)" strokeWidth="2" opacity="0.8"/>
+
+<path d="M200 140L235.355 175.355L200 210.71L164.645 175.355L200 140Z" stroke="url(#goldGradient)" strokeWidth="2" opacity="0.8"/>
+<path d="M200 160L221.213 181.213L200 202.426L178.787 181.213L200 160Z" stroke="url(#goldGradient)" strokeWidth="2" opacity="0.8"/>
+
+<path d="M200 190C208.284 190 215 183.284 215 175C215 166.716 208.284 160 200 160C191.716 160 185 166.716 185 175C185 183.284 191.716 190 200 190Z" fill="url(#goldGradient)"/>
+
+<path d="M200 240L200 260" stroke="url(#goldGradient)" strokeWidth="2" opacity="0.8"/>
+<path d="M200 120L200 140" stroke="url(#goldGradient)" strokeWidth="2" opacity="0.8"/>
+<path d="M260 200L240 200" stroke="url(#goldGradient)" strokeWidth="2" opacity="0.8"/>
+<path d="M140 200L160 200" stroke="url(#goldGradient)" strokeWidth="2" opacity="0.8"/>
+
+<circle cx="200" cy="100" r="5" fill="url(#goldGradient)"/>
+<circle cx="200" cy="280" r="5" fill="url(#goldGradient)"/>
+<circle cx="100" cy="200" r="5" fill="url(#goldGradient)"/>
+<circle cx="280" cy="200" r="5" fill="url(#goldGradient)"/>
+
+<path d="M200 190C205.523 190 210 194.477 210 200C210 205.523 205.523 210 200 210C194.477 210 190 205.523 190 200C190 194.477 194.477 190 200 190Z" fill="url(#goldGradient)"/>
+</svg>

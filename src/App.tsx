@@ -1,5 +1,9 @@
 // src/App.tsx
 import React, { useEffect, useState } from 'react';
+// NEW: Import AnimatePresence and your EntryAnimation component
+import { AnimatePresence } from 'framer-motion';
+import EntryAnimation from './components/EntryAnimation';
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { supabase } from './utils/supabaseClient';
@@ -52,39 +56,30 @@ import ExcelProductImport from "./pages/admin/ExcelProductImport";
 
 function App() {
   const [loading, setLoading] = useState(true);
+  // NEW: State to control the visibility of the entry animation
+  const [showAnimation, setShowAnimation] = useState(true);
 
   useEffect(() => {
     const initializeAuth = async () => {
-      setLoading(true);
-
+      // setLoading(true) is not needed here as the animation will cover the initial load
       try {
-        // ✅ Check existing session
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
+        const { data: { session } } = await supabase.auth.getSession();
         console.log('🔄 Existing session:', session);
-
         if (session?.user) {
           const user: User = session.user;
           const role = (user.user_metadata as any)?.role ?? null;
           console.log('🔎 Role from user_metadata:', role);
-
           if (role) {
             localStorage.setItem('userRole', role);
             localStorage.setItem('token', session.access_token);
           }
         }
-
-        // ✅ Listen for auth state changes
         const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
           console.log('🔄 Auth state changed:', _event, session);
-
           if (session?.user) {
             const user: User = session.user;
             const role = (user.user_metadata as any)?.role ?? null;
             console.log('🔎 Updated role from user_metadata:', role);
-
             if (role) {
               localStorage.setItem('userRole', role);
               localStorage.setItem('token', session.access_token);
@@ -94,106 +89,119 @@ function App() {
             localStorage.removeItem('token');
           }
         });
-
         return () => listener.subscription.unsubscribe();
       } finally {
+        // This will happen in the background while the animation plays
         setLoading(false);
       }
     };
-
     initializeAuth();
   }, []);
 
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
-  }
+  // NEW: Callback function to hide the animation once it's complete
+  const handleAnimationComplete = () => {
+    setShowAnimation(false);
+  };
+
+  // The 'if (loading)' check is removed here, as the animation serves as the initial loading screen.
+  // By the time the animation finishes, the auth check will also be complete.
 
   return (
-    <CartProvider>
-      <Router>
-        <ToastContainer
-            position="top-center"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            draggable
-            pauseOnHover
-            theme="colored"
-          />
-          
-        <FancyPageTransition>
-        <div className="min-h-screen">
-          <Header />
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/product/:id" element={<ProductDetails />} />
-            <Route path="/categories" element={<Categories />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/order-tracking/:id" element={<OrderTracking />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/unauthorized" element={<UnauthorizedPage />} />
-            <Route path="/profile-completion" element={<ProfileCompletion />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/returns-policy" element={<ReturnsRefundPolicy />} />
-            <Route path="/shipping-policy" element={<Shipping />} />
-            <Route path="/size-quality" element={<SizeQualityGuide />} />
-            <Route path="/faq" element={<FaqSupport />} />
-            <Route path="/blog" element={<BlogRecipesExpanded />} />
+    <>
+      <AnimatePresence>
+        {/* The animation will show initially based on the state */}
+        {showAnimation && <EntryAnimation onAnimationComplete={handleAnimationComplete} />}
+      </AnimatePresence>
 
-            {/* Protected user routes */}
-            <Route
-              path="/profile"
-              element={
-                <AuthProtectedRoute>
-                  <Profile />
-                </AuthProtectedRoute>
-              }
+      {/* The rest of your app will only render after the animation is complete */}
+      {!showAnimation && !loading && (
+        <CartProvider>
+          <Router>
+            <ToastContainer
+              position="top-center"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop
+              closeOnClick
+              draggable
+              pauseOnHover
+              theme="colored"
             />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/order-confirmation" element={<OrderConfirmation />} />
+            
+            <FancyPageTransition>
+              <div className="min-h-screen">
+                <Header />
+                <Routes>
+                  {/* Your routes are preserved exactly as they were */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/product/:id" element={<ProductDetails />} />
+                  <Route path="/categories" element={<Categories />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/wishlist" element={<Wishlist />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/order-tracking/:id" element={<OrderTracking />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/unauthorized" element={<UnauthorizedPage />} />
+                  <Route path="/profile-completion" element={<ProfileCompletion />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/returns-policy" element={<ReturnsRefundPolicy />} />
+                  <Route path="/shipping-policy" element={<Shipping />} />
+                  <Route path="/size-quality" element={<SizeQualityGuide />} />
+                  <Route path="/faq" element={<FaqSupport />} />
+                  <Route path="/blog" element={<BlogRecipesExpanded />} />
 
-            {/* Admin routes with role-based protection */}
-            <Route
-              path="/admin/*"
-              element={
-                <RoleProtectedRoute requiredRoles={['superadmin', 'productmanager', 'ordermanager']}>
-                  <AdminLayout />
-                </RoleProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="dashboard" replace />} />
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="products" element={<AdminProducts />} />
-              <Route path="products/new" element={<ProductEdit />} />
-              <Route path="products/:id" element={<ProductEdit />} />
-              <Route path="orders" element={<AdminOrders />} />
-              <Route path="orders/:id" element={<AdminOrderDetails />} />
-              <Route path="categories" element={<AdminCategoriesList />} />
-              <Route path="categories/new" element={<AdminCategoryAdd />} />
-              <Route path="categories/:id" element={<AdminCategoryEdit />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="settings" element={<SettingsPage />} />
-              <Route path="requests" element={<AdminRequests />} />
-              <Route path="excel-import" element={<ExcelProductImport />} />
-            </Route>
+                  {/* Protected user routes */}
+                  <Route
+                    path="/profile"
+                    element={
+                      <AuthProtectedRoute>
+                        <Profile />
+                      </AuthProtectedRoute>
+                    }
+                  />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/order-confirmation" element={<OrderConfirmation />} />
 
-            {/* Catch-all fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-          <Footer />
-        </div>
-        </FancyPageTransition>
-      </Router>
-    </CartProvider>
+                  {/* Admin routes with role-based protection */}
+                  <Route
+                    path="/admin/*"
+                    element={
+                      <RoleProtectedRoute requiredRoles={['superadmin', 'productmanager', 'ordermanager']}>
+                        <AdminLayout />
+                      </RoleProtectedRoute>
+                    }
+                  >
+                    <Route index element={<Navigate to="dashboard" replace />} />
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="products" element={<AdminProducts />} />
+                    <Route path="products/new" element={<ProductEdit />} />
+                    <Route path="products/:id" element={<ProductEdit />} />
+                    <Route path="orders" element={<AdminOrders />} />
+                    <Route path="orders/:id" element={<AdminOrderDetails />} />
+                    <Route path="categories" element={<AdminCategoriesList />} />
+                    <Route path="categories/new" element={<AdminCategoryAdd />} />
+                    <Route path="categories/:id" element={<AdminCategoryEdit />} />
+                    <Route path="users" element={<AdminUsers />} />
+                    <Route path="settings" element={<SettingsPage />} />
+                    <Route path="requests" element={<AdminRequests />} />
+                    <Route path="excel-import" element={<ExcelProductImport />} />
+                  </Route>
+
+                  {/* Catch-all fallback */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+                <Footer />
+              </div>
+            </FancyPageTransition>
+          </Router>
+        </CartProvider>
+      )}
+    </>
   );
 }
 

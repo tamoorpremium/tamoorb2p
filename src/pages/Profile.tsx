@@ -330,6 +330,7 @@ const handleLogout = async () => {
   await logout(navigate); // SPA redirect using navigate
 };
 
+  // Helper function to render the content of the active tab
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
@@ -392,21 +393,23 @@ const handleLogout = async () => {
               <div className="space-y-6">
                 {orders.map((order) => (
                   <div key={order.id} onClick={() => navigate(`/order-tracking/${order.id}`)} className="neomorphism rounded-2xl p-4 sm:p-6 cursor-pointer hover:shadow-xl transition-shadow duration-300">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-                      <div>
-                        <h3 className="font-display font-semibold text-lg text-neutral-800">Order #{order.id}</h3>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div className="w-full sm:w-auto">
+                        <h3 className="font-display font-semibold text-base sm:text-lg text-neutral-800">Order #{order.id}</h3>
                         <p className="text-neutral-600 font-medium text-sm">Placed on {order.date}</p>
                       </div>
-                      <div className="w-full sm:w-auto text-left sm:text-right">
-                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${order.statusColor}`}>
-                          <Truck className="w-4 h-4 mr-2" />{order.status}
+                      <div className="w-full sm:w-auto flex sm:flex-col items-center justify-between">
+                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${order.statusColor}`}>
+                          <Truck className="w-4 h-4 mr-2" />
+                          {order.status}
                         </div>
-                        <div className="text-2xl font-display font-bold tamoor-gradient mt-2">₹{order.total}</div>
+                        <div className="text-xl sm:text-2xl font-display font-bold tamoor-gradient sm:mt-2">
+                          ₹{order.total}
+                        </div>
                       </div>
                     </div>
                     {order.items && order.items.length > 0 && (
-                      <div className="border-t border-neutral-200 pt-4">
-                        <p className="text-neutral-600 font-medium mb-2 text-sm">Items:</p>
+                      <div className="border-t border-neutral-200 pt-4 mt-4">
                         <div className="flex flex-wrap gap-2">
                           {order.items.map((item, idx) => (
                             <span key={idx} className="bg-luxury-gold/10 text-luxury-gold px-3 py-1 rounded-full text-xs sm:text-sm font-medium">{item.name} × {item.quantity}</span>
@@ -560,6 +563,9 @@ const handleLogout = async () => {
       </div>
     </div>
   );
+
+
+
 
 
 

@@ -457,9 +457,9 @@ useEffect(() => {
             <div className="flex-1 overflow-y-auto pr-2">
                 <div className="mb-4">
                     <img src={selectedImage || product.image} alt={product.name} className="w-full h-32 sm:h-40 object-cover rounded-2xl mb-4" />
-                    <h4 className="font-semibold text-lg">{product.name}</h4>
+                    <h4 className="font-semibold text-lg text-luxury-gold-light">{product.name}</h4>
                     {/* CHANGED: Made description smaller to prevent overflow */}
-                    <p className="text-sm text-neutral-600">{product.description}</p>
+                    <p className="text-sm text-lime-400">{product.description}</p>
                 </div>
 
                 {/* Weight Options */}

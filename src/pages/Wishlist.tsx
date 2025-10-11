@@ -394,7 +394,7 @@ useEffect(() => {
                 <div className="flex space-x-3">
                   <button onClick={(e) => { e.preventDefault(); handleWishlistAddToCart(product)}} className="flex-1 btn-premium text-white py-3 rounded-full font-semibold text-sm flex items-center justify-center group/btn">
                     <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:rotate-12 transition-transform duration-300" />
-                    Add to Cart
+                    Move to Cart
                   </button>
                   <button onClick={(e) => { e.preventDefault(); toggleWishlist(product.id)}} className="p-3 hover:bg-red-50 text-red-500 rounded-full transition-all duration-300 hover:scale-110">
                     <Trash2 className="w-5 h-5" />
@@ -433,12 +433,12 @@ useEffect(() => {
                 <div className="flex-1 overflow-y-auto pr-2">
                   <div className="mb-6">
                     <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-32 object-cover rounded-2xl mb-4" />
-                    <h4 className="font-display font-semibold text-lg">{selectedProduct.name}</h4>
-                    <p className="text-sm text-neutral-600">{selectedProduct.description}</p>
+                    <h4 className="font-display font-semibold text-lg text-luxury-gold-light">{selectedProduct.name}</h4>
+                    <p className="text-sm text-lime-400">{selectedProduct.description}</p>
                   </div>
                   <div className="space-y-6">
                     <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-3">Weight Options</label>
+                      <label className="block text-sm font-medium text-amber-500 mb-3">Weight Options</label>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {[200, 250, 500, 1000].map((value) => (
                           <button

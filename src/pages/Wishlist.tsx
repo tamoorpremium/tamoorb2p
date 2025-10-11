@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Heart, ShoppingCart, Star, Trash2 } from 'lucide-react';
+import { Heart, ShoppingCart, Star, Trash2, X } from 'lucide-react';
 import { supabase } from '../utils/supabaseClient';
 import { useCart } from '../context/CartContext';
 import { useNavigate , Link } from "react-router-dom";
+import { createPortal } from 'react-dom';
 
 const Wishlist = () => {
   const { setCartItems, cartItems } = useCart();
@@ -308,6 +309,24 @@ const Wishlist = () => {
   setCustomWeight(50);
 };
 
+useEffect(() => {
+    // Check if either the modal or the popup is currently visible
+    const isModalOpen = showQuantityModal || popup;
+
+    if (isModalOpen) {
+        // If one is open, disable scrolling on the page
+        document.body.style.overflow = 'hidden';
+    } else {
+        // If both are closed, restore scrolling
+        document.body.style.overflow = 'auto';
+    }
+
+    // Cleanup function to restore scroll if the component unmounts
+    return () => {
+        document.body.style.overflow = 'auto';
+    };
+}, [showQuantityModal, popup]); // Dependencies: This hook runs when these states change
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-32">
@@ -387,96 +406,117 @@ const Wishlist = () => {
           ))}
         </div>
       </div>
+      
+      {/* Quantity Selection Modal (Updated with Portal & Scroll) */}
+      {showQuantityModal && selectedProduct && createPortal(
+        (() => {
+          // NEW: Moved dynamic price calculation here for clarity
+          const grams = selectedWeight === 'custom' ? customWeight : (selectedWeight as number);
+          const dynamicPrice = Math.round((selectedProduct.price / 1000) * grams);
+          
+          return (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+              {/* CHANGED: Added flexbox structure and height constraints */}
+              <div className="glass rounded-3xl p-4 sm:p-8 max-w-md w-full animate-slide-up flex flex-col max-h-[90vh]">
 
-      {/* Quantity Selection Modal */}
-      {showQuantityModal && selectedProduct && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass rounded-3xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto animate-slide-up">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-display font-bold text-neutral-800">
-                Select Quantity
-              </h3>
-              <button onClick={() => setShowQuantityModal(false)} className="p-2 hover:bg-white/20 rounded-full transition-all duration-300">
-                X
-              </button>
-            </div>
-            <div className="mb-6">
-              <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-32 object-cover rounded-2xl mb-4" />
-              <h4 className="font-display font-semibold text-lg">{selectedProduct.name}</h4>
-              <p className="text-neutral-600">{selectedProduct.description}</p>
-            </div>
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-3">Weight Options</label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {[200, 250, 500, 1000].map((value) => (
-                    <button
-                      key={value}
-                      onClick={() => setSelectedWeight(value)}
-                      className={`p-3 rounded-lg border-2 transition-all duration-300 ${
-                        selectedWeight === value ? 'border-luxury-gold bg-luxury-gold/10 text-luxury-gold' : 'border-neutral-200 hover:border-luxury-gold/50'
-                      }`}
-                    >
-                      {value < 1000 ? `${value}g` : '1 kg'}
-                    </button>
-                  ))}
+                {/* NEW: Header Section (fixed) */}
+                <div className="flex-shrink-0 flex items-center justify-between mb-4 sm:mb-6">
+                  <h3 className="text-xl sm:text-2xl font-display font-bold text-neutral-800">
+                    Select Quantity
+                  </h3>
+                  <button onClick={() => setShowQuantityModal(false)} className="p-2 hover:bg-white/20 rounded-full transition-all duration-300">
+                    <X className="w-6 h-6" /> {/* Recommended to use an icon */}
+                  </button>
                 </div>
-                <button
-                  onClick={() => setSelectedWeight('custom')}
-                  className={`w-full mt-3 p-3 rounded-lg border-2 transition-all duration-300 ${
-                    selectedWeight === 'custom' ? 'border-luxury-gold bg-luxury-gold/10 text-luxury-gold' : 'border-neutral-200 hover:border-luxury-gold/50'
-                  }`}
-                >
-                  Custom Weight (Min 50g)
-                </button>
-                {selectedWeight === 'custom' && (
-                  <div className="mt-3 flex items-center space-x-3">
-                    <button
-                      onClick={() => setCustomWeight(Math.max(50, customWeight - 50))}
-                      className="p-2 glass rounded-lg hover:bg-white/20"
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      value={customWeight}
-                      onChange={(e) => setCustomWeight(Math.max(50, parseInt(e.target.value) || 50))}
-                      className="flex-1 p-2 glass rounded-lg text-center"
-                      min="50"
-                    />
-                    <span className="text-sm text-neutral-600">grams</span>
-                    <button
-                      onClick={() => setCustomWeight(customWeight + 50)}
-                      className="p-2 glass rounded-lg hover:bg-white/20"
-                    >
-                      +
-                    </button>
+
+                {/* NEW: Main Content Area (scrollable) */}
+                <div className="flex-1 overflow-y-auto pr-2">
+                  <div className="mb-6">
+                    <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-32 object-cover rounded-2xl mb-4" />
+                    <h4 className="font-display font-semibold text-lg">{selectedProduct.name}</h4>
+                    <p className="text-sm text-neutral-600">{selectedProduct.description}</p>
                   </div>
-                )}
-              </div>
-              <div className="flex flex-wrap items-center justify-between gap-2 mb-6 pt-4 border-t border-white/20">
-                <div className="text-2xl font-display font-bold tamoor-gradient">
-                  ₹{Math.round((selectedProduct.price / 1000) * (selectedWeight === 'custom' ? customWeight : selectedWeight as number))}
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 mb-3">Weight Options</label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {[200, 250, 500, 1000].map((value) => (
+                          <button
+                            key={value}
+                            onClick={() => setSelectedWeight(value)}
+                            className={`p-3 rounded-lg border-2 transition-all duration-300 ${
+                              selectedWeight === value ? 'border-luxury-gold bg-luxury-gold/10 text-luxury-gold' : 'border-neutral-200 hover:border-luxury-gold/50'
+                            }`}
+                          >
+                            {value < 1000 ? `${value}g` : '1 kg'}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => setSelectedWeight('custom')}
+                        className={`w-full mt-3 p-3 rounded-lg border-2 transition-all duration-300 ${
+                          selectedWeight === 'custom' ? 'border-luxury-gold bg-luxury-gold/10 text-luxury-gold' : 'border-neutral-200 hover:border-luxury-gold/50'
+                        }`}
+                      >
+                        Custom Weight (Min 50g)
+                      </button>
+                      {selectedWeight === 'custom' && (
+                        <div className="mt-4 flex items-center space-x-3">
+                          <button
+                            onClick={() => setCustomWeight(Math.max(50, customWeight - 50))}
+                            className="p-2 glass rounded-lg hover:bg-white/20"
+                          >
+                            -
+                          </button>
+                          <input
+                            type="number"
+                            value={customWeight}
+                            onChange={(e) => setCustomWeight(Math.max(50, parseInt(e.target.value) || 50))}
+                            className="flex-1 p-2 glass rounded-lg text-center"
+                            min="50"
+                          />
+                          <span className="text-sm text-neutral-600">grams</span>
+                          <button
+                            onClick={() => setCustomWeight(customWeight + 50)}
+                            className="p-2 glass rounded-lg hover:bg-white/20"
+                          >
+                            +
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <button
-                  onClick={handleConfirmWeightAndAddToCart}
-                  className="w-full btn-premium text-white px-8 py-3 rounded-full font-semibold text-lg flex items-center justify-center group/btn"
-                >
-                  <ShoppingCart className="w-5 h-5 mr-3 group-hover/btn:rotate-12 transition-transform duration-300" />
-                  Add to Cart
-                </button>
+
+                {/* NEW: Footer Section (fixed) */}
+                <div className="flex-shrink-0 flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-white/20 mt-4">
+                  <div className="text-2xl font-display font-bold tamoor-gradient">
+                    ₹{dynamicPrice}
+                  </div>
+                  <button
+                    onClick={handleConfirmWeightAndAddToCart}
+                    className="btn-premium text-white px-6 py-3 rounded-full font-semibold text-base sm:text-lg flex items-center justify-center group/btn"
+                  >
+                    <ShoppingCart className="w-5 h-5 mr-3 group-hover/btn:rotate-12 transition-transform duration-300" />
+                    Add to Cart
+                  </button>
+                </div>
+
               </div>
             </div>
-          </div>
-        </div>
+          )
+        })(),
+        document.getElementById('modal-root')!
       )}
 
-      {popup && (
-        <div className="fixed bottom-6 inset-x-0 flex items-center justify-center px-4 z-50">
+      {/* Popup Notification (Updated with Portal) */}
+      {popup && createPortal(
+        <div className="fixed bottom-6 inset-x-0 flex items-center justify-center px-4 z-50 pointer-events-none">
           <div className={`px-6 py-3 rounded-xl shadow-lg text-base sm:text-lg font-semibold ${popup.type === "success" ? "bg-green-500" : "bg-red-500"} text-white`}>
             {popup.text}
           </div>
-        </div>
+        </div>,
+        document.getElementById('modal-root')!
       )}
     </div>
   );

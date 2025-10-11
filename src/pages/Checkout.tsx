@@ -964,45 +964,45 @@ const handleSaveNewAddress = async () => {
             </div>
           </div>
 
-          {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <div className="luxury-card glass rounded-3xl p-4 sm:p-8 lg:sticky top-24 space-y-4">
-              <h3 className="font-display font-semibold text-lg sm:text-xl mb-4">Order Summary</h3>
-              <div className="space-y-2 sm:space-y-4">
-                <div className="flex justify-between text-sm sm:text-base font-medium text-neutral-600">
-                  <span>Subtotal</span>
-                  <span className="font-semibold">₹{subtotalFromCart.toFixed(2)}</span>
-                </div>
-                {discountFromCart > 0 && (
-                  <div className="flex justify-between text-green-600 font-medium text-sm sm:text-base">
-                    <span>Discount {promoCodeFromCart ? `(${promoCodeFromCart.code})` : ""}</span>
-                    <span>-₹{discountFromCart.toFixed(2)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-sm sm:text-base font-medium text-neutral-600">
-                  <span>Delivery</span>
-                  <span className="font-semibold">
-                    {deliveryOptions.find(opt => opt.id === formData.deliveryOption)?.price === 0 ? "FREE" : `₹${deliveryPrice}`}
-                  </span>
-                </div>
-              </div>
-              <div className="border-t border-white/20 pt-2 sm:pt-4">
-                <div className="flex justify-between items-center text-sm sm:text-base">
-                  <span className="text-lg sm:text-xl font-display font-semibold">Total</span>
-                  <span className="text-xl sm:text-2xl font-display font-bold tamoor-gradient">
-                    ₹{displayTotal.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-              <div className="text-center text-xs sm:text-sm text-neutral-500 mt-2">
-                <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mb-2">
-                  <span>🔒 Secure Payment</span>
-                  <span>📦 Fast Delivery</span>
-                </div>
-                Your payment information is encrypted and secure
-              </div>
-            </div>
-          </div>
+ {/* Order Summary */}
+<div className="lg:col-span-1 mb-6">
+  <div className="luxury-card glass rounded-3xl p-4 sm:p-8 lg:sticky top-24 space-y-4">
+    <h3 className="font-display font-semibold text-lg sm:text-xl mb-4">Order Summary</h3>
+    <div className="space-y-2 sm:space-y-4">
+      <div className="flex justify-between text-sm sm:text-base font-medium text-neutral-600">
+        <span>Subtotal</span>
+        <span className="font-semibold">₹{subtotalFromCart.toFixed(2)}</span>
+      </div>
+      {discountFromCart > 0 && (
+        <div className="flex justify-between text-green-600 font-medium text-sm sm:text-base">
+          <span>Discount {promoCodeFromCart ? `(${promoCodeFromCart.code})` : ""}</span>
+          <span>-₹{discountFromCart.toFixed(2)}</span>
+        </div>
+      )}
+      <div className="flex justify-between text-sm sm:text-base font-medium text-neutral-600">
+        <span>Delivery</span>
+        <span className="font-semibold">
+          {deliveryOptions.find(opt => opt.id === formData.deliveryOption)?.price === 0 ? "FREE" : `₹${deliveryPrice}`}
+        </span>
+      </div>
+    </div>
+    <div className="border-t border-white/20 pt-2 sm:pt-4">
+      <div className="flex justify-between items-center text-sm sm:text-base">
+        <span className="text-lg sm:text-xl font-display font-semibold">Total</span>
+        <span className="text-xl sm:text-2xl font-display font-bold tamoor-gradient">
+          ₹{displayTotal.toFixed(2)}
+        </span>
+      </div>
+    </div>
+    <div className="text-center text-xs sm:text-sm text-neutral-500 mt-2">
+      <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mb-2">
+        <span>🔒 Secure Payment</span>
+        <span>📦 Fast Delivery</span>
+      </div>
+      Your payment information is encrypted and secure
+    </div>
+  </div>
+</div>
         </div>
       </div>
     </div>

@@ -367,180 +367,230 @@ const Auth = () => {
 return (
     // The main container is now a flex-col to allow for the sticky button
     <div className="min-h-screen bg-gradient-to-br from-luxury-cream via-white to-luxury-cream-dark flex flex-col pt-12 pb-28 px-4">
-      <div className="w-full max-w-md mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl sm:text-5xl font-serif font-extrabold tamoor-gradient mb-4">TAMOOR</h1>
-          <p className="text-neutral-600 font-medium">Premium Dry Fruits & Nuts</p>
-        </div>
+        <div className="w-full max-w-md mx-auto">
+            <div className="text-center mb-8">
+                <h1 className="text-3xl sm:text-5xl font-serif font-extrabold tamoor-gradient mb-4">TAMOOR</h1>
+                <p className="text-neutral-600 font-medium">Premium Dry Fruits & Nuts</p>
+            </div>
 
-        <div className="luxury-card glass rounded-3xl p-6 sm:p-8">
-          {/* The form has padding-bottom to avoid the last element being hidden by the sticky button */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <h2 className="text-2xl font-bold text-center text-neutral-800 mb-6">{isLogin ? "Welcome Back" : "Create an Account"}</h2>
-            
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">Full Name</label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
-                  <input
-                    type="text" name="name" value={formData.name} onChange={handleInputChange}
-                    className={`w-full pl-12 pr-4 py-3 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${errors.name ? 'ring-2 ring-red-500' : ''}`}
-                    placeholder="Enter your full name"
-                  />
+            <div className="luxury-card glass rounded-3xl p-6 sm:p-8">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <h2 className="text-2xl font-bold text-center text-neutral-800 mb-6">{isLogin ? "Welcome Back" : "Create an Account"}</h2>
+
+                    {!isLogin && (
+                        <div>
+                            <label className="block text-sm font-medium text-neutral-700 mb-2">Full Name</label>
+                            <div className="relative">
+                                <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                                <input
+                                    type="text" name="name" value={formData.name} onChange={handleInputChange}
+                                    className={`w-full pl-12 pr-4 py-3 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${errors.name ? 'ring-2 ring-red-500' : ''}`}
+                                    placeholder="Enter your full name"
+                                />
+                            </div>
+                            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                        </div>
+                    )}
+
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">Email Address</label>
+                        <div className="relative">
+                            <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                            <input
+                                type="email" name="email" value={formData.email} onChange={handleInputChange}
+                                className={`w-full pl-12 pr-4 py-3 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${errors.email ? 'ring-2 ring-red-500' : ''}`}
+                                placeholder="Enter your email"
+                            />
+                        </div>
+                        {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
+                            Phone Number {isLogin ? '(optional)' : ''}
+                        </label>
+                        <div className="relative flex items-center w-full">
+                             <div className="absolute left-0 pl-3 flex items-center pointer-events-none">
+                                {/* Icon can go here if needed */}
+                             </div>
+                            <select
+                                value={formData.country.code}
+                                onChange={e => handleCountryChange(e.target.value)}
+                                className="absolute left-0 opacity-0 w-20 h-full cursor-pointer"
+                            >
+                                {countryCodes.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
+                            </select>
+                            <div className="absolute left-10 pl-2 pointer-events-none font-medium text-neutral-600">{formData.country.code}</div>
+                            <input
+                                type="tel" name="phone" value={formData.phone} onChange={handleInputChange}
+                                className={`w-full pl-24 pr-4 py-3 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 ${errors.phone ? 'ring-2 ring-red-500' : ''}`}
+                                placeholder="Phone number"
+                            />
+                        </div>
+                        {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">Password</label>
+                        <div className="relative">
+                            <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                name="password" value={formData.password} onChange={handleInputChange}
+                                className={`w-full pl-12 pr-12 py-3 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${errors.password ? 'ring-2 ring-red-500' : ''}`}
+                                placeholder="Enter your password"
+                            />
+                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-luxury-gold">
+                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                        </div>
+                        {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+                    </div>
+
+                    {!isLogin && (
+                        <div>
+                            <label className="block text-sm font-medium text-neutral-700 mb-2">Confirm Password</label>
+                            <div className="relative">
+                                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    name="confirmPassword" value={formData.confirmPassword} onChange={handleInputChange}
+                                    className={`w-full pl-12 pr-4 py-3 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${errors.confirmPassword ? 'ring-2 ring-red-500' : ''}`}
+                                    placeholder="Confirm your password"
+                                />
+                            </div>
+                            {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
+                        </div>
+                    )}
+                    
+                    {isLogin && (
+                        <p className="text-sm text-right text-luxury-gold hover:underline cursor-pointer" onClick={() => setShowReset(!showReset)}>
+                            Forgot Password?
+                        </p>
+                    )}
+
+                    {/* FIXED: Full Forgot Password functionality restored */}
+                    {showReset && (
+                        <div className="space-y-4 pt-2">
+                             <p className="font-medium text-neutral-700">Reset Password Via:</p>
+                             <div className="flex gap-4">
+                                 <label className="flex items-center gap-2 cursor-pointer">
+                                     <input type="radio" value="email" checked={resetMethod === 'email'} onChange={() => setResetMethod('email')} />
+                                     Email
+                                 </label>
+                                 <label className="flex items-center gap-2 cursor-pointer">
+                                     <input type="radio" value="phone" checked={resetMethod === 'phone'} onChange={() => setResetMethod('phone')} />
+                                     Phone
+                                 </label>
+                             </div>
+
+                             {resetMethod === 'email' ? (
+                                 <input
+                                     type="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)}
+                                     placeholder="Enter your email"
+                                     className="w-full pl-4 pr-4 py-3 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50"
+                                 />
+                             ) : (
+                                 <div className="flex gap-2">
+                                     <select
+                                         value={resetCountry.code}
+                                         onChange={(e) => {
+                                             const country = countryCodes.find(c => c.code === e.target.value);
+                                             if (country) setResetCountry(country);
+                                         }}
+                                         className="p-3 rounded-xl neomorphism-inset focus:ring-2 focus:ring-luxury-gold/50 flex-shrink-0 w-32"
+                                     >
+                                         {countryCodes.map(c => <option key={c.code} value={c.code}>{c.name} ({c.code})</option>)}
+                                     </select>
+                                     <input
+                                         type="tel" value={resetPhone} onChange={(e) => setResetPhone(e.target.value)}
+                                         placeholder="Phone number"
+                                         className="w-full flex-1 p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50"
+                                     />
+                                 </div>
+                             )}
+
+                             <button
+                                 type="button" onClick={handleResetPassword} disabled={resetLoading}
+                                 className="w-full btn-premium text-white py-3 rounded-full font-semibold flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                             >
+                                 {resetLoading ? (
+                                     <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                 ) : ( 'Send Reset Link' )}
+                             </button>
+                        </div>
+                     )}
+
+                    <div className="text-center text-sm text-neutral-600 pt-2">
+                        {isLogin ? (
+                            <> Don't have an account?{' '}
+                                <button type="button" onClick={() => setIsLogin(false)} className="font-semibold text-luxury-gold hover:underline focus:outline-none">
+                                    Create one
+                                </button>
+                            </>
+                        ) : (
+                            <> Already have an account?{' '}
+                                <button type="button" onClick={() => setIsLogin(true)} className="font-semibold text-luxury-gold hover:underline focus:outline-none">
+                                    Sign In
+                                </button>
+                            </>
+                        )}
+                    </div>
+
+                    <div className="relative flex items-center pt-4">
+                        <div className="flex-grow border-t border-neutral-300"></div>
+                        <span className="flex-shrink mx-4 text-xs text-neutral-500 uppercase">Or continue with</span>
+                        <div className="flex-grow border-t border-neutral-300"></div>
+                    </div>
+
+                    <div className="space-y-3">
+                        <button type="button" onClick={() => handleOAuthSignIn('google')} className="w-full flex items-center justify-center gap-3 py-3 border border-neutral-300 rounded-full hover:bg-neutral-50 transition-colors">
+                            <img src={googleimg} alt="Google" className="w-6 h-6" />
+                            <span className="font-semibold text-neutral-700">Continue with Google</span>
+                        </button>
+                        <button type="button" onClick={() => handleOAuthSignIn('facebook')} className="w-full flex items-center justify-center gap-3 py-3 border border-neutral-300 rounded-full hover:bg-neutral-50 transition-colors">
+                            <img src={facebookimg} alt="Facebook" className="w-6 h-6" />
+                            <span className="font-semibold text-neutral-700">Continue with Facebook</span>
+                        </button>
+                        {/* FIXED: Apple login button added back */}
+                        <button type="button" onClick={() => handleOAuthSignIn('apple')} className="w-full flex items-center justify-center gap-3 py-3 border border-neutral-300 rounded-full hover:bg-neutral-50 transition-colors">
+                            <img src={appleimg} alt="Apple" className="w-6 h-6" />
+                            <span className="font-semibold text-neutral-700">Continue with Apple</span>
+                        </button>
+                    </div>
+                    
+                    {errorMsg && <div className="text-red-500 text-center text-sm">{errorMsg}</div>}
+                    {successMsg && <div className="text-green-600 text-center text-sm">{successMsg}</div>}
+                    {infoMsg && <div className="text-yellow-600 text-center text-sm">{infoMsg}</div>}
+                </form>
+            </div>
+
+            <div className="text-center mt-6 text-xs text-neutral-500">
+                <div className="flex items-center justify-center gap-x-4 sm:gap-x-6">
+                    <span>🔒 Secure & Encrypted</span>
+                    <span>⚡ Instant Access</span>
                 </div>
-                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-              </div>
-            )}
-
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
-                <input
-                  type="email" name="email" value={formData.email} onChange={handleInputChange}
-                  className={`w-full pl-12 pr-4 py-3 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${errors.email ? 'ring-2 ring-red-500' : ''}`}
-                  placeholder="Enter your email"
-                />
-              </div>
-              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
             </div>
-
-            {/* IMPROVEMENT: Redesigned Phone Input for mobile */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
-                Phone Number {isLogin ? '(optional)' : ''}
-              </label>
-              <div className="relative flex items-center w-full">
-                <div className="absolute left-0 pl-3 flex items-center pointer-events-none">
-                   
-                </div>
-                 <select
-                    value={formData.country.code}
-                    onChange={e => handleCountryChange(e.target.value)}
-                    // NOTE: This select is visually layered under the input but is functionally on top.
-                    className="absolute left-0 opacity-0 w-20 h-full cursor-pointer"
-                >
-                  {countryCodes.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
-                </select>
-                <div className="absolute left-10 pl-2 pointer-events-none font-medium text-neutral-600">{formData.country.code}</div>
-                <input
-                  type="tel" name="phone" value={formData.phone} onChange={handleInputChange}
-                  className={`w-full pl-24 pr-4 py-3 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 ${errors.phone ? 'ring-2 ring-red-500' : ''}`}
-                  placeholder="Phone number"
-                />
-              </div>
-              {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password" value={formData.password} onChange={handleInputChange}
-                  className={`w-full pl-12 pr-12 py-3 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${errors.password ? 'ring-2 ring-red-500' : ''}`}
-                  placeholder="Enter your password"
-                />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-luxury-gold">
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
-            </div>
-
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">Confirm Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="confirmPassword" value={formData.confirmPassword} onChange={handleInputChange}
-                    className={`w-full pl-12 pr-4 py-3 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 transition-all duration-300 ${errors.confirmPassword ? 'ring-2 ring-red-500' : ''}`}
-                    placeholder="Confirm your password"
-                  />
-                </div>
-                {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
-              </div>
-            )}
-            
-            {isLogin && (
-              <p className="text-sm text-right text-luxury-gold hover:underline cursor-pointer" onClick={() => setShowReset(!showReset)}>
-                Forgot Password?
-              </p>
-            )}
-
-            {/* IMPROVEMENT: Login/Register toggle replaced with a simple text link */}
-            <div className="text-center text-sm text-neutral-600 pt-2">
-              {isLogin ? (
-                <> Don't have an account?{' '}
-                  <button type="button" onClick={() => setIsLogin(false)} className="font-semibold text-luxury-gold hover:underline focus:outline-none">
-                    Create one
-                  </button>
-                </>
-              ) : (
-                <> Already have an account?{' '}
-                  <button type="button" onClick={() => setIsLogin(true)} className="font-semibold text-luxury-gold hover:underline focus:outline-none">
-                    Sign In
-                  </button>
-                </>
-              )}
-            </div>
-
-            {/* IMPROVEMENT: Enhanced Social Login buttons */}
-            <div className="relative flex items-center pt-4">
-                <div className="flex-grow border-t border-neutral-300"></div>
-                <span className="flex-shrink mx-4 text-xs text-neutral-500 uppercase">Or continue with</span>
-                <div className="flex-grow border-t border-neutral-300"></div>
-            </div>
-
-            <div className="space-y-3">
-                <button type="button" onClick={() => handleOAuthSignIn('google')} className="w-full flex items-center justify-center gap-3 py-3 border border-neutral-300 rounded-full hover:bg-neutral-50 transition-colors">
-                    <img src={googleimg} alt="Google" className="w-6 h-6" />
-                    <span className="font-semibold text-neutral-700">Continue with Google</span>
-                </button>
-                <button type="button" onClick={() => handleOAuthSignIn('facebook')} className="w-full flex items-center justify-center gap-3 py-3 border border-neutral-300 rounded-full hover:bg-neutral-50 transition-colors">
-                    <img src={facebookimg} alt="Facebook" className="w-6 h-6" />
-                    <span className="font-semibold text-neutral-700">Continue with Facebook</span>
-                </button>
-            </div>
-            
-            {errorMsg && <div className="text-red-500 text-center text-sm">{errorMsg}</div>}
-            {successMsg && <div className="text-green-600 text-center text-sm">{successMsg}</div>}
-            {infoMsg && <div className="text-yellow-600 text-center text-sm">{infoMsg}</div>}
-            
-          </form>
         </div>
-
-        <div className="text-center mt-6 text-xs text-neutral-500">
-          <div className="flex items-center justify-center gap-x-4 sm:gap-x-6">
-            <span>🔒 Secure & Encrypted</span>
-            <span>⚡ Instant Access</span>
-          </div>
+        
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/70 backdrop-blur-sm border-t border-neutral-200">
+            <button
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="w-full max-w-md mx-auto btn-premium text-white py-3.5 rounded-full font-semibold text-lg flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                {isLoading ? (
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                    <>
+                        <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+                        <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
+                    </>
+                )}
+            </button>
         </div>
-      </div>
-      
-      {/* IMPROVEMENT: Sticky Button at the bottom of the viewport */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/70 backdrop-blur-sm border-t border-neutral-200">
-        <button
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className="w-full max-w-md mx-auto btn-premium text-white py-3.5 rounded-full font-semibold text-lg flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? (
-            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          ) : (
-            <>
-              <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
-              <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
-            </>
-          )}
-        </button>
-      </div>
     </div>
-  );
+);
 };
 
 export default Auth;

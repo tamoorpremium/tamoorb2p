@@ -364,7 +364,7 @@ useEffect(() => {
                 </div>
 
                 <div className="absolute top-6 right-6">
-                  <button onClick={() => toggleWishlist(product.id)} className="p-3 glass rounded-full hover:bg-white/20 transition-all duration-300">
+                  <button onClick={(e) => { e.preventDefault(); toggleWishlist(product.id)}} className="p-3 glass rounded-full hover:bg-white/20 transition-all duration-300">
                     <Heart className={`w-6 h-6 ${wishlistItems.some((w) => w.id === product.id) ? 'text-red-500 fill-red-500' : 'text-red-500'}`} />
                   </button>
                 </div>
@@ -392,11 +392,11 @@ useEffect(() => {
                 </div>
 
                 <div className="flex space-x-3">
-                  <button onClick={() => handleWishlistAddToCart(product)} className="flex-1 btn-premium text-white py-3 rounded-full font-semibold text-sm flex items-center justify-center group/btn">
+                  <button onClick={(e) => { e.preventDefault(); handleWishlistAddToCart(product)}} className="flex-1 btn-premium text-white py-3 rounded-full font-semibold text-sm flex items-center justify-center group/btn">
                     <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:rotate-12 transition-transform duration-300" />
                     Add to Cart
                   </button>
-                  <button onClick={() => toggleWishlist(product.id)} className="p-3 hover:bg-red-50 text-red-500 rounded-full transition-all duration-300 hover:scale-110">
+                  <button onClick={(e) => { e.preventDefault(); toggleWishlist(product.id)}} className="p-3 hover:bg-red-50 text-red-500 rounded-full transition-all duration-300 hover:scale-110">
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>

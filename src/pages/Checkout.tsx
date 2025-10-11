@@ -7,6 +7,7 @@ import Products from './Products';
 import { useRazorpay } from '../hooks/useRazorpay';  // Adjust the path if needed
 import { useLocation } from 'react-router-dom';
 
+
 // Define interface for the Supabase cart response with joined products
 interface CartItemWithProduct {
   product_id: number;
@@ -32,6 +33,7 @@ const Checkout = () => {
   const discountFromCart = discount;
   const finalTotalFromCart = finalTotal;
   const promoCodeFromCart = promo;
+  const [addressError, setAddressError] = useState('');
 
   console.log("💰 Context totals:", { subtotal, discount, shipping, finalTotal, promo });
 
@@ -713,7 +715,18 @@ const handleSaveNewAddress = async () => {
 
 
   const handleNextStep = () => {
-    if (currentStep < 4) setCurrentStep(currentStep + 1);
+  // Check for address selection only when on Step 1
+    if (currentStep === 1) {
+      if (!selectedAddressId) {
+        setAddressError('Please select or add a delivery address to continue.');
+        return; // Stop the function from proceeding
+      }
+      setAddressError(''); // Clear error if address is selected
+    }
+
+    if (currentStep < 4) {
+      setCurrentStep(currentStep + 1);
+    }
   };
 
   const handlePrevStep = () => {
@@ -730,7 +743,7 @@ const handleSaveNewAddress = async () => {
     return <div className="min-h-screen flex items-center justify-center text-red-600 font-semibold">{errorMsg}</div>;
   }
 
-  return (
+ return (
     <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-24 sm:pt-32">
       <div className="container mx-auto px-4 pb-16 sm:pb-20">
         {/* Header */}
@@ -762,23 +775,24 @@ const handleSaveNewAddress = async () => {
           </div>
         </div>
 
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+        {/* Main Grid - UPDATED Gutter for mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
           {/* Main Form */}
           <div className="lg:col-span-2">
             <div className="luxury-card glass rounded-3xl p-4 sm:p-8 space-y-6">
 
-              {/* Step 1: Address - State list updated */}
+              {/* Step 1: Address */}
               {currentStep === 1 && (
                 <div className="animate-slide-up space-y-4">
                   <h2 className="text-xl sm:text-2xl font-display font-bold text-neutral-800 mb-4 sm:mb-6">Delivery Address</h2>
 
                   {savedAddresses.length === 0 && <p className="text-neutral-500">No saved addresses found.</p>}
                   
-                  <div className="max-h-60 overflow-y-auto space-y-3 sm:space-y-4 pr-2">
+                  {/* UPDATED: Responsive max-height */}
+                  <div className="max-h-48 sm:max-h-60 overflow-y-auto space-y-3 sm:space-y-4 pr-2">
                     {savedAddresses.map(addr => (
                       <div key={addr.id} className="border border-white/20 p-3 rounded-lg">
-                        {editingAddressId === addr.id ? (
+                         {editingAddressId === addr.id ? (
                           <div className="space-y-3">
                             <input name="full_name" value={editAddressData.full_name} onChange={handleEditAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" placeholder="Full Name" />
                             <input name="email" value={editAddressData.email} onChange={handleEditAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" placeholder="Email" />
@@ -789,13 +803,10 @@ const handleSaveNewAddress = async () => {
                             <input name="address" value={editAddressData.address} onChange={handleEditAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" placeholder="Address" />
                             <div className="flex flex-col sm:flex-row gap-2">
                               <input name="city" value={editAddressData.city} onChange={handleEditAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" placeholder="City" />
-                              
-                              {/* UPDATED: Full list of Indian states */}
                               <select name="state" value={editAddressData.state} onChange={handleEditAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base">
                                 <option value="">Select State</option>
                                 {indianStates.map(state => <option key={state} value={state}>{state}</option>)}
                               </select>
-
                             </div>
                             <input name="pincode" value={editAddressData.pincode} onChange={handleEditAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" placeholder="PIN Code" />
                             <div className="flex flex-col sm:flex-row gap-2 pt-2">
@@ -839,8 +850,6 @@ const handleSaveNewAddress = async () => {
                       <input name="address" placeholder="Address" value={newAddress.address} onChange={handleNewAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" />
                       <div className="flex flex-col sm:flex-row gap-2">
                         <input name="city" placeholder="City" value={newAddress.city} onChange={handleNewAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base" />
-                        
-                        {/* UPDATED: Full list of Indian states */}
                         <select name="state" value={newAddress.state} onChange={handleNewAddressChange} className="w-full p-3 rounded-xl neomorphism-inset focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base">
                           <option value="">Select State</option>
                           {indianStates.map(state => <option key={state} value={state}>{state}</option>)}
@@ -850,6 +859,8 @@ const handleSaveNewAddress = async () => {
                       <button type="button" className="btn-premium text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold w-full" onClick={handleSaveNewAddress}>Save Address</button>
                     </div>
                   )}
+                   {/* ADDED: Address validation error message */}
+                   {addressError && <p className="text-red-500 text-center text-sm font-semibold pt-2">{addressError}</p>}
                 </div>
               )}
 
@@ -857,7 +868,8 @@ const handleSaveNewAddress = async () => {
               {currentStep === 2 && (
                 <div className="animate-slide-up space-y-4 sm:space-y-6">
                   <h2 className="text-2xl sm:text-3xl font-display font-bold text-neutral-800 mb-6 sm:mb-8">Delivery Options</h2>
-                  <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+                  {/* UPDATED: Responsive max-height */}
+                  <div className="space-y-4 max-h-72 sm:max-h-96 overflow-y-auto pr-2">
                     {deliveryOptions.map(option => (
                       <div key={option.id} className={`neomorphism rounded-2xl p-4 sm:p-6 cursor-pointer transition-all duration-300 ${formData.deliveryOption === option.id ? 'ring-2 ring-luxury-gold bg-luxury-gold/5' : 'hover:shadow-lg'} ${!option.enabled ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={() => option.enabled && setFormData(prev => ({ ...prev, deliveryOption: option.id }))}>
                         <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 sm:gap-0">
@@ -888,7 +900,8 @@ const handleSaveNewAddress = async () => {
                   <div className="space-y-4 sm:space-y-6">
                     <div className="neomorphism rounded-2xl p-4 sm:p-6 space-y-4">
                       <h3 className="font-display font-semibold text-lg mb-2 sm:mb-4">Order Items</h3>
-                      <div className="max-h-72 overflow-y-auto space-y-3 sm:space-y-4 pr-2">
+                      {/* UPDATED: Responsive max-height */}
+                      <div className="max-h-60 sm:max-h-72 overflow-y-auto space-y-3 sm:space-y-4 pr-2">
                         {cartItems.map((item) => (
                           <div key={`${item.id}-${item.weight}`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                             <div className="flex items-center space-x-3 sm:space-x-4">

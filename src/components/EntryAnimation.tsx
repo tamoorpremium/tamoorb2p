@@ -164,7 +164,7 @@ const EntryAnimation: React.FC<EntryAnimationProps> = ({ onAnimationComplete }) 
         <motion.h3
           ref={textRef}
           className="font-serif font-bold tamoor-gradient select-none tracking-widest
-            text-[12vw] sm:text-7xl md:text-8xl lg:text-9xl"
+           text-[12vw] sm:text-7xl md:text-8xl lg:text-9xl"
           variants={glowVariants}
           initial="initial"
           animate={glowControls}

@@ -1,9 +1,6 @@
-// src/App.tsx
 import React, { useEffect, useState } from 'react';
-// NEW: Import AnimatePresence and your EntryAnimation component
 import { AnimatePresence } from 'framer-motion';
 import EntryAnimation from './components/EntryAnimation';
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { supabase } from './utils/supabaseClient';
@@ -22,7 +19,6 @@ import Wishlist from './pages/Wishlist';
 import Auth from './pages/Auth';
 import AuthProtectedRoute from './components/AuthProtectedRoute';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
-//import { RequestPasswordReset } from './pages/RequestPasswordReset';
 import ResetPassword from "./pages/ResetPassword";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -56,12 +52,28 @@ import ExcelProductImport from "./pages/admin/ExcelProductImport";
 
 function App() {
   const [loading, setLoading] = useState(true);
-  // NEW: State to control the visibility of the entry animation
-  const [showAnimation, setShowAnimation] = useState(true);
+
+  // --- MODIFIED LOGIC ---
+  // This state is now initialized from a function that checks two conditions:
+  // 1. Has the animation already been seen in this session?
+  // 2. Is the user currently on the homepage?
+  const [showAnimation, setShowAnimation] = useState(() => {
+    const hasSeenAnimation = sessionStorage.getItem('hasSeenAnimation');
+    return !hasSeenAnimation && window.location.pathname === '/';
+  });
+
+  // --- NEW HOOK ---
+  // This runs once when the app loads. If the user lands on any page
+  // other than the homepage, it sets the flag immediately to prevent
+  // the animation from playing if they navigate to the homepage later.
+  useEffect(() => {
+    if (window.location.pathname !== '/') {
+      sessionStorage.setItem('hasSeenAnimation', 'true');
+    }
+  }, []);
 
   useEffect(() => {
     const initializeAuth = async () => {
-      // setLoading(true) is not needed here as the animation will cover the initial load
       try {
         const { data: { session } } = await supabase.auth.getSession();
         console.log('🔄 Existing session:', session);
@@ -91,29 +103,28 @@ function App() {
         });
         return () => listener.subscription.unsubscribe();
       } finally {
-        // This will happen in the background while the animation plays
         setLoading(false);
       }
     };
     initializeAuth();
   }, []);
 
-  // NEW: Callback function to hide the animation once it's complete
+  // --- MODIFIED CALLBACK ---
+  // When the animation completes, we now set the flag in sessionStorage
+  // so it won't play again during this session.
   const handleAnimationComplete = () => {
+    sessionStorage.setItem('hasSeenAnimation', 'true');
     setShowAnimation(false);
   };
-
-  // The 'if (loading)' check is removed here, as the animation serves as the initial loading screen.
-  // By the time the animation finishes, the auth check will also be complete.
 
   return (
     <>
       <AnimatePresence>
-        {/* The animation will show initially based on the state */}
+        {/* The animation will now only render if our smart logic allows it */}
         {showAnimation && <EntryAnimation onAnimationComplete={handleAnimationComplete} />}
       </AnimatePresence>
 
-      {/* The rest of your app will only render after the animation is complete */}
+      {/* The rest of your app will render once the animation is done OR if it was skipped */}
       {!showAnimation && !loading && (
         <CartProvider>
           <Router>

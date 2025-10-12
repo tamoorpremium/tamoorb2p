@@ -8,35 +8,32 @@ interface EntryAnimationProps {
 
 const EntryAnimation: React.FC<EntryAnimationProps> = ({ onAnimationComplete }) => {
   const word = "TAMOOR";
-  const letters = word.split("");
   const textRef = useRef<HTMLHeadingElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const shutterControls = useAnimation();
   const scanControls = useAnimation();
-  const glowControls = useAnimation(); // ✨ Added for glowing effect
+  const glowControls = useAnimation();
   const [textWidth, setTextWidth] = useState(0);
 
-  /** 🔧 Measure text width dynamically for accurate scan coverage */
+  /** Measure text width dynamically for accurate scan coverage */
   useEffect(() => {
-    if (textRef.current) {
-      setTextWidth(textRef.current.offsetWidth);
-    }
+    if (textRef.current) setTextWidth(textRef.current.offsetWidth);
   }, []);
 
-  /** 🧠 Master animation sequence controller */
+  /** Animation sequence controller */
   useEffect(() => {
     const runSequence = async () => {
       await shutterControls.start("visible");
-      await new Promise((resolve) => setTimeout(resolve, 100)); // small buffer
+      await new Promise((resolve) => setTimeout(resolve, 100));
       await scanControls.start("scan");
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // hold moment
-      glowControls.start("glow"); // ✨ Trigger glow after swipe
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      glowControls.start("glow");
       onAnimationComplete();
     };
     runSequence();
   }, [onAnimationComplete, shutterControls, scanControls, glowControls]);
 
-  /** ✨ Plexus background animation */
+  /** Responsive Plexus Background Animation */
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -47,10 +44,11 @@ const EntryAnimation: React.FC<EntryAnimationProps> = ({ onAnimationComplete }) 
     canvas.width = cw;
     canvas.height = ch;
 
-    const particleCount = 150,
-      particles: any[] = [],
-      colors = ["#DAA520", "#FFD700", "#B8860B"],
-      maxDistance = 100;
+    // 🔧 Reduce particles on small screens
+    const particleCount = cw < 768 ? 70 : 150;
+    const particles: any[] = [];
+    const colors = ["#DAA520", "#FFD700", "#B8860B"];
+    const maxDistance = cw < 768 ? 80 : 100;
     let animationFrameId: number;
 
     class Particle {
@@ -77,7 +75,6 @@ const EntryAnimation: React.FC<EntryAnimationProps> = ({ onAnimationComplete }) 
         context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         context.fillStyle = colors[1];
         context.fill();
-        context.closePath();
       }
     }
 
@@ -92,10 +89,7 @@ const EntryAnimation: React.FC<EntryAnimationProps> = ({ onAnimationComplete }) 
 
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
-          const dist = Math.hypot(
-            particles[i].x - particles[j].x,
-            particles[i].y - particles[j].y
-          );
+          const dist = Math.hypot(particles[i].x - particles[j].x, particles[i].y - particles[j].y);
           if (dist < maxDistance) {
             context.beginPath();
             context.moveTo(particles[i].x, particles[i].y);
@@ -114,10 +108,22 @@ const EntryAnimation: React.FC<EntryAnimationProps> = ({ onAnimationComplete }) 
     }
 
     loop();
-    return () => cancelAnimationFrame(animationFrameId);
+
+    const handleResize = () => {
+      cw = window.innerWidth;
+      ch = window.innerHeight;
+      canvas.width = cw;
+      canvas.height = ch;
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
-  /** 🕶️ Animation Variants */
+  /** Variants */
   const shutterVariants: Variants = {
     hidden: { y: "0%" },
     visible: {
@@ -134,20 +140,15 @@ const EntryAnimation: React.FC<EntryAnimationProps> = ({ onAnimationComplete }) 
     },
   };
 
-  /** ✨ Subtle glowing pulse effect */
   const glowVariants: Variants = {
     initial: { textShadow: "0px 0px 0px rgba(255,215,0,0)" },
     glow: {
       textShadow: [
-        "0px 0px 15px rgba(255,215,0,0.8)",
-        "0px 0px 25px rgba(255,215,0,1)",
-        "0px 0px 15px rgba(255,215,0,0.8)",
+        "0px 0px 12px rgba(255,215,0,0.6)",
+        "0px 0px 22px rgba(255,215,0,0.9)",
+        "0px 0px 12px rgba(255,215,0,0.6)",
       ],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        repeatType: "mirror",
-      },
+      transition: { duration: 2, repeat: Infinity, repeatType: "mirror" },
     },
   };
 
@@ -159,40 +160,36 @@ const EntryAnimation: React.FC<EntryAnimationProps> = ({ onAnimationComplete }) 
     >
       <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full z-0" />
 
-      {/* Core animation wrapper */}
-      <div className="relative z-10">
-        {/* Base text */}
+      <div className="relative z-10 text-center">
         <motion.h3
           ref={textRef}
-          className="text-7xl sm:text-8xl md:text-9xl font-serif font-bold tamoor-gradient tracking-widest select-none"
+          className="font-serif font-bold tamoor-gradient select-none tracking-widest
+            text-[12vw] sm:text-7xl md:text-8xl lg:text-9xl"
           variants={glowVariants}
           initial="initial"
-          animate={glowControls} // ✨ Apply glowing effect after swipe
+          animate={glowControls}
         >
           {word}
         </motion.h3>
 
-        {/* Unified shutter cover */}
+        {/* Shutter cover */}
         <motion.div
           className="absolute inset-0 overflow-hidden"
           initial="hidden"
           animate={shutterControls}
         >
-          <motion.div
-            className="absolute inset-0 bg-black"
-            variants={shutterVariants}
-          />
+          <motion.div className="absolute inset-0 bg-black" variants={shutterVariants} />
         </motion.div>
 
-        {/* Full-coverage scan line */}
+        {/* Responsive Scan line */}
         <motion.div
-          className="absolute top-[-20%] h-[140%]"
+          className="absolute top-[-25%] h-[150%]"
           style={{
             background:
-              "linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.9), transparent)",
-            width: "20px",
-            boxShadow: "0 0 30px 15px rgba(255, 215, 0, 0.6)",
-            skewX: -15,
+              "linear-gradient(90deg, transparent, rgba(255,215,0,0.9), transparent)",
+            width: "10px",
+            boxShadow: "0 0 20px 10px rgba(255,215,0,0.6)",
+            skewX: "-15deg",
             mixBlendMode: "color-dodge",
           }}
           variants={scanLineVariants}

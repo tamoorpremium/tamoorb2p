@@ -1,29 +1,45 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-// Import needed types for TypeScript
-import { Search, ShoppingCart, User, Menu, X, Heart } from "lucide-react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "../utils/supabaseClient"; // <= Make sure this path is correct
+
+// Import needed icons
+import { 
+    Search, 
+    ShoppingCart, 
+    User, 
+    Menu, 
+    X, 
+    Heart, 
+    Loader2, 
+    Package, 
+    Tag 
+} from "lucide-react";
+
 import "./topbar.css";
 
 // --- Type Definitions (Interfaces) ---
 type SetState<T> = React.Dispatch<React.SetStateAction<T>>;
-
-// REMOVED: showTopBar from TopBarProps as it's no longer needed there.
 interface TopBarProps {}
-
 interface MobileMenuProps {
   isMenuOpen: boolean;
   setIsMenuOpen: SetState<boolean>;
 }
-
 interface IconSetProps extends MobileMenuProps {
   isSearchOpen: boolean;
   setIsSearchOpen: SetState<boolean>;
 }
-
 interface MobileSearchOverlayProps {
   isSearchOpen: boolean;
   setIsSearchOpen: SetState<boolean>;
 }
+// MODIFIED: Type for our unified search results now includes categoryId
+type SearchResult = {
+  id: number;
+  name: string;
+  type: 'product' | 'category';
+  categoryId?: number; // Optional: only products will have this
+};
+
 
 // --- Navigation Data (Centralized) ---
 const NAV_LINKS = [
@@ -34,16 +50,148 @@ const NAV_LINKS = [
   { name: "Contact", href: "/contact" },
 ];
 
-// --- 1. TopBar Component (MODIFIED) ---
-// The TopBar is now simpler. It doesn't handle its own animation.
-// We give it a fixed height (h-10) to make the parent animation precise.
+
+// ===================================================================
+// --- SearchBar Component (MODIFIED) ---
+// ===================================================================
+const SearchBar: React.FC = () => {
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState<SearchResult[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isFocused, setIsFocused] = useState(false);
+    const navigate = useNavigate();
+    const searchRef = useRef<HTMLDivElement>(null);
+  
+    // Debounced search logic
+    useEffect(() => {
+      if (query.trim() === '') {
+        setResults([]);
+        return;
+      }
+  
+      const searchProductsAndCategories = async () => {
+        setIsLoading(true);
+  
+        // MODIFIED: The product query now also selects the 'category_id'
+        const fetchProducts = supabase
+          .from('products')
+          .select('id, name, category_id') 
+          .ilike('name', `%${query}%`)
+          .limit(5);
+  
+        const fetchCategories = supabase
+          .from('categories')
+          .select('id, name')
+          .ilike('name', `%${query}%`)
+          .limit(3);
+  
+        const [productResponse, categoryResponse] = await Promise.all([
+          fetchProducts,
+          fetchCategories,
+        ]);
+  
+        // The mapping now correctly handles 'category_id'
+        const products = productResponse.data?.map(p => ({ ...p, categoryId: p.category_id, type: 'product' as const })) || [];
+        const categories = categoryResponse.data?.map(c => ({ ...c, type: 'category' as const })) || [];
+        
+        setResults([...products, ...categories]);
+        setIsLoading(false);
+      };
+  
+      const timerId = setTimeout(() => {
+        searchProductsAndCategories();
+      }, 300);
+  
+      return () => clearTimeout(timerId);
+    }, [query]);
+  
+    // MODIFIED: Navigation handler logic is updated for products
+    const handleSelect = (item: SearchResult) => {
+      setQuery('');
+      setResults([]);
+      setIsFocused(false);
+  
+      if (item.type === 'category') {
+        navigate(`/products?categoryId=${item.id}`);
+      } else { // This block handles 'product' type
+        if (item.categoryId) {
+          // If the product has a category, navigate to that category page
+          navigate(`/products?categoryId=${item.categoryId}`);
+        } else {
+          // Fallback: If a product has no category, navigate via search term
+          navigate(`/products?search=${encodeURIComponent(item.name)}`);
+        }
+      }
+    };
+  
+    // Click outside handler to close dropdown
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+          setIsFocused(false);
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+  
+    return (
+      <div className="relative w-full" ref={searchRef}>
+        <div className="flex items-center glass rounded-full px-3 py-1.5 w-full shadow-sm focus-within:ring-2 focus-within:ring-luxury-gold transition-all duration-300">
+          <Search className="w-4 h-4 text-neutral-500 mr-2 flex-shrink-0" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            placeholder="Search products & categories..."
+            className="bg-transparent flex-1 outline-none text-sm text-neutral-700 placeholder-neutral-400 min-w-0"
+          />
+          {isLoading && <Loader2 className="w-4 h-4 text-neutral-400 animate-spin" />}
+        </div>
+  
+        {isFocused && (query.length > 0 || isLoading) && (
+          <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-xl overflow-hidden z-10 animate-fade-in">
+            {isLoading && results.length === 0 ? (
+              <div className="p-4 text-center text-neutral-500">Searching...</div>
+            ) : results.length > 0 ? (
+              <ul>
+                {results.map((item) => (
+                  <li
+                    key={`${item.type}-${item.id}`}
+                    onClick={() => handleSelect(item)}
+                    className="flex items-center px-4 py-3 cursor-pointer hover:bg-luxury-gold/10 transition-colors duration-200"
+                  >
+                    {item.type === 'product' ? (
+                       <Package className="w-4 h-4 mr-3 text-neutral-500" />
+                    ) : (
+                       <Tag className="w-4 h-4 mr-3 text-neutral-500" />
+                    )}
+                    <span className="text-neutral-700">{item.name}</span>
+                    <span className="ml-auto text-xs text-neutral-400 capitalize">{item.type}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              !isLoading && <div className="p-4 text-center text-neutral-500">No results found.</div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+};
+// ===================================================================
+// --- END: SearchBar Component ---
+// ===================================================================
+
+
+// --- 1. TopBar Component (Unchanged) ---
 const TopBar: React.FC<TopBarProps> = React.memo(() => {
   const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024;
   const sparkleCount = isDesktop ? 100 : 30;
 
   return (
     <div
-      // CHANGED: Removed animation classes, added fixed height and flexbox for alignment.
       className="metallic-bar w-full h-10 flex items-center relative overflow-hidden"
     >
       <div className="relative overflow-hidden">
@@ -191,160 +339,135 @@ const MobileSearchOverlay: React.FC<MobileSearchOverlayProps> = ({ isSearchOpen,
             <X className="w-6 h-6 text-neutral-700" />
           </button>
         </div>
-        <div className="flex items-center glass rounded-full px-4 py-3 w-full mt-6 shadow-md">
-          <Search className="w-6 h-6 text-neutral-500 mr-3 flex-shrink-0" />
-          <input
-            type="text"
-            placeholder="Search premium dry fruits..."
-            aria-label="Search"
-            autoFocus 
-            className="bg-transparent flex-1 outline-none text-lg text-neutral-700 placeholder-neutral-400 min-w-0"
-          />
-        </div>
-        <div className="mt-8">
-            <p className="text-sm text-neutral-500">Popular Searches:</p>
+        <div className="mt-6">
+            <SearchBar />
         </div>
       </div>
     );
 };
 
-// --- FINAL HEADER COMPONENT (MODIFIED) ---
+// --- FINAL HEADER COMPONENT (Unchanged) ---
 const Header: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [showTopBar, setShowTopBar] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const SCROLL_THRESHOLD = 50;
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
+    const [showTopBar, setShowTopBar] = useState(true);
+    const [lastScrollY, setLastScrollY] = useState(0);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const SCROLL_THRESHOLD = 50;
 
-  const handleEscape = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        if (isMenuOpen) setIsMenuOpen(false);
-        if (isSearchOpen) setIsSearchOpen(false);
-      }
-    },
-    [isMenuOpen, isSearchOpen]
-  );
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [handleEscape]);
-
-  useEffect(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const delta = currentScrollY - lastScrollY;
-          if (delta > SCROLL_THRESHOLD && showTopBar && currentScrollY > 50) {
-            setShowTopBar(false);
-          } else if (delta < -SCROLL_THRESHOLD && !showTopBar) {
-            setShowTopBar(true);
+    const handleEscape = useCallback(
+        (event: KeyboardEvent) => {
+          if (event.key === "Escape") {
+            if (isMenuOpen) setIsMenuOpen(false);
+            if (isSearchOpen) setIsSearchOpen(false);
           }
-          setIsScrolled(currentScrollY > 20);
-          setLastScrollY(currentScrollY);
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY, showTopBar]);
+        },
+        [isMenuOpen, isSearchOpen]
+    );
 
-  return (
-    <header
-      // CHANGED: The header is now just a sticky container that clips its content.
-      // The background styles have been moved to the main content div below.
-      className="sticky top-0 z-50 overflow-hidden"
-    >
-      <MobileSearchOverlay
-        isSearchOpen={isSearchOpen}
-        setIsSearchOpen={setIsSearchOpen}
-      />
+    useEffect(() => {
+        document.addEventListener("keydown", handleEscape);
+        return () => document.removeEventListener("keydown", handleEscape);
+    }, [handleEscape]);
 
-      {/* ADDED: This wrapper groups the TopBar and main content for a unified animation. */}
-      <div
-        className={`transition-transform duration-300 ease-in-out ${
-          showTopBar ? "translate-y-0" : "-translate-y-10" // Moves up by 2.5rem (h-10)
-        }`}
-      >
-        <TopBar />
+    useEffect(() => {
+        let ticking = false;
+        const handleScroll = () => {
+          const currentScrollY = window.scrollY;
+          if (!ticking) {
+            window.requestAnimationFrame(() => {
+              const delta = currentScrollY - lastScrollY;
+              if (delta > SCROLL_THRESHOLD && showTopBar && currentScrollY > 50) {
+                setShowTopBar(false);
+              } else if (delta < -SCROLL_THRESHOLD && !showTopBar) {
+                setShowTopBar(true);
+              }
+              setIsScrolled(currentScrollY > 20);
+              setLastScrollY(currentScrollY);
+              ticking = false;
+            });
+            ticking = true;
+          }
+        };
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, [lastScrollY, showTopBar]);
 
-        {/* This is the main header content area */}
-        <div
-          // CHANGED: This div now holds the background and shadow styles.
-          className={`w-full px-4 sm:px-6 lg:px-8 transition-all duration-500 ${
-            isScrolled
-              ? "glass backdrop-blur-xl shadow-luxury"
-              : "bg-white/95 backdrop-blur-sm"
-          }`}
+    return (
+        <header
+            className="sticky top-0 z-50 overflow-visible"
         >
-          <div className="flex items-center justify-between py-4 lg:py-6">
-            {/* --- Zone 1: Logo (Left) --- */}
-            <div className="flex-shrink-0">
-              <Link to="/" className="flex items-center whitespace-nowrap group">
-                <img
-                  src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
-                  alt="Tamoor Logo"
-                  loading="eager"
-                  className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 object-contain mr-1 transition-transform duration-300 group-hover:scale-110"
-                />
-                <h1 className="text-2xl sm:text-4xl lg:text-5xl font-serif font-bold tamoor-gradient mr-1">
-                  TAMOOR
-                </h1>
-                <span className="hidden sm:inline-block text-xs lg:text-sm text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-1 py-0.5 rounded-full">
-                  Premium
-                </span>
-              </Link>
-            </div>
-
-            {/* --- Zone 2: Navigation (Center, Desktop Only) --- */}
-            <div className="hidden lg:flex justify-center">
-              <DesktopNav />
-            </div>
-
-            {/* --- Zone 3: Actions (Right, Desktop Only) --- */}
-            <div className="hidden lg:flex items-center justify-end space-x-6">
-              <div className="flex items-center glass rounded-full px-3 py-1.5 group hover:shadow-lg transition-all duration-300">
-                <Search className="w-4 h-4 text-neutral-400 mr-2 group-hover:text-luxury-gold transition-colors duration-300" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  aria-label="Search premium dry fruits"
-                  className="bg-transparent outline-none text-xs text-neutral-700 placeholder-neutral-400 w-28 xl:w-36 transition-all duration-300 focus:w-44"
-                />
-              </div>
-              <IconSet
-                isMenuOpen={isMenuOpen}
-                setIsMenuOpen={setIsMenuOpen}
+            <MobileSearchOverlay
                 isSearchOpen={isSearchOpen}
                 setIsSearchOpen={setIsSearchOpen}
-              />
-            </div>
+            />
 
-            {/* --- Mobile-Only Icons --- */}
-            <div className="lg:hidden">
-              <IconSet
-                isMenuOpen={isMenuOpen}
-                setIsMenuOpen={setIsMenuOpen}
-                isSearchOpen={isSearchOpen}
-                setIsSearchOpen={setIsSearchOpen}
-              />
-            </div>
-          </div>
+            <div
+                className={`transition-transform duration-300 ease-in-out ${
+                showTopBar ? "translate-y-0" : "-translate-y-10"
+                }`}
+            >
+                <TopBar />
 
-          <MobileMenu
-            isMenuOpen={isMenuOpen}
-            setIsMenuOpen={setIsMenuOpen}
-          />
-        </div>
-      </div>
-    </header>
-  );
+                <div
+                className={`w-full px-4 sm:px-6 lg:px-8 transition-all duration-500 ${
+                    isScrolled
+                    ? "glass backdrop-blur-xl shadow-luxury"
+                    : "bg-white/95 backdrop-blur-sm"
+                }`}
+                >
+                <div className="flex items-center justify-between py-4 lg:py-6">
+                    <div className="flex-shrink-0">
+                        <Link to="/" className="flex items-center whitespace-nowrap group">
+                            <img
+                                src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png"
+                                alt="Tamoor Logo"
+                                loading="eager"
+                                className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 object-contain mr-1 transition-transform duration-300 group-hover:scale-110"
+                            />
+                            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-serif font-bold tamoor-gradient mr-1">
+                                TAMOOR
+                            </h1>
+                            <span className="hidden sm:inline-block text-xs lg:text-sm text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-1 py-0.5 rounded-full">
+                                Premium
+                            </span>
+                        </Link>
+                    </div>
+
+                    <div className="hidden lg:flex justify-center">
+                        <DesktopNav />
+                    </div>
+
+                    <div className="hidden lg:flex items-center justify-end space-x-4">
+                        <div className="w-64">
+                            <SearchBar />
+                        </div>
+                        <IconSet
+                            isMenuOpen={isMenuOpen}
+                            setIsMenuOpen={setIsMenuOpen}
+                            isSearchOpen={isSearchOpen}
+                            setIsSearchOpen={setIsSearchOpen}
+                        />
+                    </div>
+
+                    <div className="lg:hidden">
+                        <IconSet
+                            isMenuOpen={isMenuOpen}
+                            setIsMenuOpen={setIsMenuOpen}
+                            isSearchOpen={isSearchOpen}
+                            setIsSearchOpen={setIsSearchOpen}
+                        />
+                    </div>
+                </div>
+
+                <MobileMenu
+                    isMenuOpen={isMenuOpen}
+                    setIsMenuOpen={setIsMenuOpen}
+                />
+                </div>
+            </div>
+        </header>
+    );
 };
 
 export default Header;

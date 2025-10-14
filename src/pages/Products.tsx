@@ -622,7 +622,7 @@ useEffect(() => {
                                     className="block"
                                 >
                                     <div
-                                        className={`product-card luxury-card neomorphism rounded-3xl overflow-hidden group opacity-0 ${viewMode === "list" ? "flex flex-col md:flex-row" : ""
+                                        className={`product-card luxury-card neomorphism rounded-3xl overflow-hidden group ${viewMode === "list" ? "flex flex-col md:flex-row" : ""
                                             }`}
                                     >
                                         {/* Product Image */}

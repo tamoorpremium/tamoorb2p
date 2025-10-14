@@ -47,6 +47,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from '../utils/supabaseClient';
+import almonds from 'src\assets\categories\almondcat.jpg'
 
 interface Category {
   id: number;
@@ -58,7 +59,7 @@ interface Category {
 // --- UPDATED: More relevant and specific image URLs ---
 const subcategoryImages: Record<string, string> = {
   // Premium Nuts
-  "almonds-badam": "https://images.unsplash.com/photo-1607532941433-304659e8198a?q=80&w=1978&auto=format&fit=crop",
+  "almonds-badam": almonds,
   "cashews-kaju": "https://images.unsplash.com/photo-1615485925894-3d9de0b21319?q=80&w=1974&auto=format&fit=crop",
   "pistachios-pista": "https://images.unsplash.com/photo-1621451439009-133b3b2cb9b8?q=80&w=1964&auto=format&fit=crop",
   "walnuts-akhrot": "https://images.unsplash.com/photo-1596701871256-07a8f3522f77?q=80&w=1974&auto=format&fit=crop",

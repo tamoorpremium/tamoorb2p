@@ -62,13 +62,13 @@ const About = () => {
     {
       name: 'Firaz Mustaqim',
       role: 'Founder',
-      image: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=400',
+      image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/firaz.jpg',
       description: 'Visionary entrepreneur with extensive experience in AI.'
     },
     {
       name: 'Musaveer Iqbal',
       role: 'Co-Founder & Head of Sourcing',
-      image: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=400',
+      image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/musaveer.jpg',
       description: 'Expert in global supply chain and quality assurance with over 15 years of experience.'
     },
     {
@@ -117,9 +117,9 @@ const About = () => {
           loop
           muted
           playsInline
-          poster="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-videos/1068328799-preview.mp4"
+          poster="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-videos/About.mp4"
         >
-          <source src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-videos/1068328799-preview.mp4" type="video/mp4" />
+          <source src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-videos/About.mp4" type="video/mp4" />
         </video>
 
         {/* Overlay */}

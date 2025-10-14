@@ -58,7 +58,7 @@ const ProductDetails: React.FC = () => {
     rating: 5,
   });
   const [showQuantityModal, setShowQuantityModal] = useState(false);
-  const [selectedWeight, setSelectedWeight] = useState<number | "custom">(500);
+  const [selectedWeight, setSelectedWeight] = useState<number | "custom">(1000);
   const [customWeight, setCustomWeight] = useState(50);
   const [quantity, setQuantity] = useState(1);
   const [cartMessage, setCartMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
@@ -273,7 +273,7 @@ useEffect(() => {
 
     setTimeout(() => setCartMessage(null), 3000);
     setShowQuantityModal(false);
-    setSelectedWeight(500);
+    setSelectedWeight(1000);
     setCustomWeight(50);
     setQuantity(1);
   };

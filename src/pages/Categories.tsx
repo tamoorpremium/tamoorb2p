@@ -97,6 +97,12 @@ import healham from "../assets/categories/healham.jpg";
 import woodham from "../assets/categories/woodenham.jpg";
 import baskham from "../assets/categories/baskethampers.jpg";
 import desham from "../assets/categories/desham.jpg";
+import fruitj from "../assets/categories/fruitjcat.jpg";
+import impj from "../assets/categories/impjcat.jpg";
+import specialj from "../assets/categories/spejcat.jpg";
+import softj from "../assets/categories/softjcat.jpg";
+import healthj from "../assets/categories/heljcat.jpg";
+
 
 
 
@@ -172,11 +178,11 @@ const subcategoryImages: Record<string, string> = {
   "designer-hampers": desham,
 
   // Juices
-  "fruit-juices": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?q=80&w=1974&auto=format&fit=crop",
-  "special-juices": "https://images.unsplash.com/photo-1621263764928-df1444c53853?q=80&w=1974&auto=format&fit=crop",
-  "imported-juices": "https://images.unsplash.com/photo-1613278277239-a1b32729a531?q=80&w=1974&auto=format&fit=crop",
-  "soft-drinks": "https://images.unsplash.com/photo-1554866585-cd94860890b7?q=80&w=1964&auto=format&fit=crop",
-  "health-detox": "https://images.unsplash.com/photo-1544196722-e7b3a4a75417?q=80&w=1974&auto=format&fit=crop",
+  "fruit-juices": fruitj,
+  "special-juices": specialj,
+  "imported-juices": impj,
+  "soft-drinks": softj,
+  "health-detox": healthj,
 };
 
 

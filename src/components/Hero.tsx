@@ -75,7 +75,7 @@ const Hero = () => {
             
             <h1 className="leading-tight">
               {/* Brand Name with extra-large size and gradient */}
-              <span className="font-serif tamoor-gradient text-7xl sm:text-8xl lg:text-9xl font-bold">
+              <span className="font-serif tamoor-gradient text-6xl sm:text-8xl lg:text-9xl font-bold">
                 TAMOOR
               </span>
               <br />

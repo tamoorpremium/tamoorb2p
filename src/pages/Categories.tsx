@@ -48,6 +48,13 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from '../utils/supabaseClient';
 import almonds from "../assets/categories/almondcat.jpg";
+import cashews from "../assets/categories/cashewcat.jpg";
+import pista from "../assets/categories/pistacat.jpg";
+import walnut from "../assets/categories/walnutcat.jpg";
+import hazlnuts from "../assets/categories/hazelcat.jpg";
+import pecans from "../assets/categories/pecans.jpg";
+import macadamia from "../assets/categories/macadamiacat.jpg";
+import pinenuts from "../assets/categories/pinecat.jpg";
 
 interface Category {
   id: number;
@@ -60,13 +67,13 @@ interface Category {
 const subcategoryImages: Record<string, string> = {
   // Premium Nuts
   "almonds-badam": almonds,
-  "cashews-kaju": "https://images.unsplash.com/photo-1615485925894-3d9de0b21319?q=80&w=1974&auto=format&fit=crop",
-  "pistachios-pista": "https://images.unsplash.com/photo-1621451439009-133b3b2cb9b8?q=80&w=1964&auto=format&fit=crop",
-  "walnuts-akhrot": "https://images.unsplash.com/photo-1596701871256-07a8f3522f77?q=80&w=1974&auto=format&fit=crop",
-  "hazelnuts": "https://images.unsplash.com/photo-1628609548325-8435cd536f66?q=80&w=1974&auto=format&fit=crop",
-  "pecans": "https://images.unsplash.com/photo-1608682339502-c9b5d2a2a096?q=80&w=1968&auto=format&fit=crop",
-  "macadamia": "https://images.unsplash.com/photo-1615485925828-56f8c77f0b9f?q=80&w=1974&auto=format&fit=crop",
-  "pine-nuts-chilgoza": "https://images.unsplash.com/photo-1595152281895-a48b350f2824?q=80&w=1974&auto=format&fit=crop",
+  "cashews-kaju": cashews,
+  "pistachios-pista": pista,
+  "walnuts-akhrot": walnut,
+  "hazelnuts": hazlnuts,
+  "pecans": pecans,
+  "macadamia": macadamia,
+  "pine-nuts-chilgoza": pinenuts,
 
   // Dried Fruits
   "raisins-kishmish": "https://images.unsplash.com/photo-1596590213134-d193153c3e87?q=80&w=1974&auto=format&fit=crop",

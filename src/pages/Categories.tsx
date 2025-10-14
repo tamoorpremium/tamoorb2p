@@ -47,7 +47,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from '../utils/supabaseClient';
-import almonds from 'src\assets\categories\almondcat.jpg'
+import almonds from "../assets/categories/almondcat.jpg";
 
 interface Category {
   id: number;

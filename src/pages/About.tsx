@@ -62,7 +62,7 @@ const About = () => {
     {
       name: 'Firaz Mustaqim',
       role: 'Founder',
-      image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/firaz.jpg',
+      image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/trail.jpg',
       description: 'Visionary entrepreneur with extensive experience in AI.'
     },
     {

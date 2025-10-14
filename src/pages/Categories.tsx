@@ -55,6 +55,52 @@ import hazlnuts from "../assets/categories/hazelcat.jpg";
 import pecans from "../assets/categories/pecans.jpg";
 import macadamia from "../assets/categories/macadamiacat.jpg";
 import pinenuts from "../assets/categories/pinecat.jpg";
+import raisins from "../assets/categories/raisincat.jpg";
+import anjeer from "../assets/categories/anjeercat.jpg";
+import apricot from "../assets/categories/apricotcat.jpg";
+import dates from "../assets/categories/datecat.jpg";
+import prunes from "../assets/categories/prunecat.jpg";
+import cranberry from "../assets/categories/crancat.jpg";
+import blueberry from "../assets/categories/blueberrycat.jpg";
+import black from "../assets/categories/blackcat.jpg";
+import pumpkin from "../assets/categories/pumpcat.jpg";
+import sunflower from "../assets/categories/suncat.jpg";
+import chia from "../assets/categories/chiaseedscat.jpg";
+import flax from "../assets/categories/flaxcat.jpg";
+import mixseeds from "../assets/categories/seedsmixcat.jpg";
+import mixes from "../assets/categories/nutsmix.jpg";
+import trail from "../assets/categories/trailmix.jpg";
+import exotic from "../assets/categories/berries.jpg";
+import salted from "../assets/categories/saltedmixcat.jpg";
+import roasted from "../assets/categories/roastedmixcat.jpg";
+import darkc from "../assets/categories/darkcat.jpg";
+import milkc from "../assets/categories/milkcat.jpg";
+import whitec from "../assets/categories/whitecat.jpg";
+import barc from "../assets/categories/cbar.jpg";
+import trufc from "../assets/categories/truffls.jpg";
+import ccn from "../assets/categories/ccncat.jpg";
+import hpc from "../assets/categories/cpowdercat.jpg";
+import swissc from "../assets/categories/swisscat.jpg";
+import belgianc from "../assets/categories/belgiumcat.jpg";
+import giftc from "../assets/categories/giftboxcat.jpg";
+import importedc from "../assets/categories/importedcat.jpg";
+import sugarc from "../assets/categories/sugarfreecat.jpg";
+import birham from "../assets/categories/birthham.jpg";
+import anniham from "../assets/categories/anniham.jpg";
+import wedham from "../assets/categories/wedham.jpg";
+import festham from "../assets/categories/festham.jpg";
+import corham from "../assets/categories/corham.jpeg";
+import dryham from "../assets/categories/dryham.jpg";
+import choham from "../assets/categories/chocham.jpg";
+import mixham from "../assets/categories/mixham.jpg";
+import healham from "../assets/categories/healham.jpg";
+import woodham from "../assets/categories/woodenham.jpg";
+import baskham from "../assets/categories/baskethampers.jpg";
+import desham from "../assets/categories/desham.jpg";
+
+
+
+
 
 interface Category {
   id: number;
@@ -76,54 +122,54 @@ const subcategoryImages: Record<string, string> = {
   "pine-nuts-chilgoza": pinenuts,
 
   // Dried Fruits
-  "raisins-kishmish": "https://images.unsplash.com/photo-1596590213134-d193153c3e87?q=80&w=1974&auto=format&fit=crop",
-  "figs-anjeer": "https://images.unsplash.com/photo-1593282247775-305f818a52a9?q=80&w=1974&auto=format&fit=crop",
-  "apricots-khubani": "https://images.unsplash.com/photo-1631081519416-01584285d886?q=80&w=1974&auto=format&fit=crop",
-  "dates-khajoor": "https://images.unsplash.com/photo-1609182315899-73d8b365e89d?q=80&w=2080&auto=format&fit=crop",
-  "prunes-dried-plums": "https://images.unsplash.com/photo-1620700753985-112e4c46f04c?q=80&w=1974&auto=format&fit=crop",
-  "cranberries": "https://images.unsplash.com/photo-1542841845-835b4a78107c?q=80&w=1974&auto=format&fit=crop",
-  "blueberries": "https://images.unsplash.com/photo-1498569107929-89a1c1a6a1f8?q=80&w=2070&auto=format&fit=crop",
-  "black-currants": "https://images.unsplash.com/photo-1596590213134-d193153c3e87?q=80&w=1974&auto=format&fit=crop", // Using raisins as a close visual substitute
+  "raisins-kishmish": raisins,
+  "figs-anjeer": anjeer,
+  "apricots-khubani": apricot,
+  "dates-khajoor": dates,
+  "prunes-dried-plums": prunes,
+  "cranberries": cranberry,
+  "blueberries": blueberry,
+  "black-currants": black,
 
   // Seeds & Others
-  "pumpkin-seeds": "https://images.unsplash.com/photo-1600053936815-c2a265f02abf?q=80&w=1974&auto=format&fit=crop",
-  "sunflower-seeds": "https://images.unsplash.com/photo-1649129290159-1589c3a32194?q=80&w=1974&auto=format&fit=crop",
-  "chia-seeds": "https://images.unsplash.com/photo-1542365287-d42851a14a73?q=80&w=1974&auto=format&fit=crop",
-  "flax-seeds": "https://images.unsplash.com/photo-1547999335-8a2b534a413d?q=80&w=1974&auto=format&fit=crop",
-  "mixed-seeds": "https://images.unsplash.com/photo-1620700753985-112e4c46f04c?q=80&w=1974&auto=format&fit=crop", // Using a general mix image
-  "mixes": "https://images.unsplash.com/photo-1558231713-26a11e4e2920?q=80&w=1974&auto=format&fit=crop",
-  "trail-mix": "https://images.unsplash.com/photo-1581347941097-f58a36c7a40b?q=80&w=1974&auto=format&fit=crop",
-  "exotic-mix": "https://images.unsplash.com/photo-1610421258288-51e604169d2f?q=80&w=1974&auto=format&fit=crop",
-  "salted-mix": "https://images.unsplash.com/photo-1601924352235-99d0c5e97uer?q=80&w=2070&auto=format&fit=crop",
-  "roasted-mix": "https://images.unsplash.com/photo-1599399120612-e7894a4c6a46?q=80&w=1974&auto=format&fit=crop",
+  "pumpkin-seeds": pumpkin,
+  "sunflower-seeds": sunflower,
+  "chia-seeds": chia,
+  "flax-seeds": flax,
+  "mixed-seeds": mixseeds,
+  "mixes": mixes,
+  "trail-mix": trail,
+  "exotic-mix": exotic,
+  "salted-mix": salted,
+  "roasted-mix": roasted,
 
   // Chocolate
-  "dark-chocolate": "https://images.unsplash.com/photo-1593284984131-9a3a93feb80e?q=80&w=1974&auto=format&fit=crop",
-  "milk-chocolate": "https://images.unsplash.com/photo-1623805322986-e9b4ce48c34f?q=80&w=1974&auto=format&fit=crop",
-  "white-chocolate": "https://images.unsplash.com/photo-1602351447937-745cb72f6c2f?q=80&w=1974&auto=format&fit=crop",
-  "chocolate-bars": "https://images.unsplash.com/photo-1558535441-85b9f7a7a46f?q=80&w=1974&auto=format&fit=crop",
-  "chocolate-truffles": "https://images.unsplash.com/photo-1584370848010-d7f9d45a4a42?q=80&w=1974&auto=format&fit=crop",
-  "chocolate-covered-nuts-fruits": "https://images.unsplash.com/photo-1615557929837-c140464a9355?q=80&w=1974&auto=format&fit=crop",
-  "hot-chocolate-powder": "https://images.unsplash.com/photo-1542345339-f06a1f813936?q=80&w=1974&auto=format&fit=crop",
-  "swiss-chocolates": "https://images.unsplash.com/photo-1511381939415-e340a6479905?q=80&w=2070&auto=format&fit=crop",
-  "belgian-chocolates": "https://images.unsplash.com/photo-1566453883393-9c5950538a2b?q=80&w=1974&auto=format&fit=crop",
-  "luxury-chocolate-gift-packs": "https://images.unsplash.com/photo-1579558965939-8e9a288a38b5?q=80&w=1974&auto=format&fit=crop",
-  "imported-chocolates": "https://images.unsplash.com/photo-1571113394142-990832049e1b?q=80&w=1974&auto=format&fit=crop",
-  "sugarfree-chocolates": "https://images.unsplash.com/photo-1627485352697-4022842101e4?q=80&w=1974&auto=format&fit=crop",
+  "dark-chocolate": darkc,
+  "milk-chocolate": milkc,
+  "white-chocolate": whitec,
+  "chocolate-bars": barc,
+  "chocolate-truffles": trufc,
+  "chocolate-covered-nuts-fruits": ccn,
+  "hot-chocolate-powder": hpc,
+  "swiss-chocolates": swissc,
+  "belgian-chocolates": belgianc,
+  "luxury-chocolate-gift-packs": giftc,
+  "imported-chocolates": importedc,
+  "sugarfree-chocolates": sugarc,
 
   // Gift Hampers
-  "birthday-hampers": "https://images.unsplash.com/photo-1599458362584-77aab1a8a29a?q=80&w=1974&auto=format&fit=crop",
-  "anniversary-hampers": "https://images.unsplash.com/photo-1611213025260-204a0808c1c2?q=80&w=1974&auto=format&fit=crop",
-  "wedding-hampers": "https://images.unsplash.com/photo-1622241634707-30756434430f?q=80&w=1974&auto=format&fit=crop",
-  "festival-hampers": "https://images.unsplash.com/photo-1604169115220-4a84918231a2?q=80&w=1974&auto=format&fit=crop", // Diwali theme
-  "corporate-hampers": "https://images.unsplash.com/photo-1633113089632-47400d3a5a2a?q=80&w=2070&auto=format&fit=crop",
-  "dry-fruit-hampers": "https://images.unsplash.com/photo-1604353434113-5a507a21381d?q=80&w=1974&auto=format&fit=crop",
-  "chocolate-hampers": "https://images.unsplash.com/photo-1579558965939-8e9a288a38b5?q=80&w=1974&auto=format&fit=crop",
-  "mixed-hampers": "https://images.unsplash.com/photo-1576801386621-e789b70b42c6?q=80&w=1974&auto=format&fit=crop",
-  "healthy-hampers": "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1974&auto=format&fit=crop",
-  "premium-wooden-box": "https://images.unsplash.com/photo-1604353434049-57e05a303867?q=80&w=1974&auto=format&fit=crop",
-  "basket-hampers": "https://images.unsplash.com/photo-1568181283152-a5951f53524b?q=80&w=1974&auto=format&fit=crop",
-  "designer-hampers": "https://images.unsplash.com/photo-1622241634707-30756434430f?q=80&w=1974&auto=format&fit=crop",
+  "birthday-hampers": birham,
+  "anniversary-hampers": anniham,
+  "wedding-hampers": wedham,
+  "festival-hampers": festham,
+  "corporate-hampers": corham,
+  "dry-fruit-hampers": dryham,
+  "chocolate-hampers": choham,
+  "mixed-hampers": mixham,
+  "healthy-hampers": healham,
+  "premium-wooden-box": woodham,
+  "basket-hampers": baskham,
+  "designer-hampers": desham,
 
   // Juices
   "fruit-juices": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?q=80&w=1974&auto=format&fit=crop",

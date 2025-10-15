@@ -331,14 +331,13 @@ const Auth = () => {
     //else setSuccessMsg('Password reset email sent!');
 
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-reset-password`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: emailToReset }),
-        }
-      );
+      const FUNCTION_URL = "https://bvnjxbbwxsibslembmty.supabase.co/functions/v1/send-reset-email";
+
+      const res = await fetch(FUNCTION_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailToReset }),
+      });
 
       const data = await res.json();
 
@@ -352,7 +351,6 @@ const Auth = () => {
         setErrorMsg("An unknown error occurred.");
       }
     }
-
 
     setResetLoading(false);
   };

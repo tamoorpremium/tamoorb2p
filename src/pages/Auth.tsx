@@ -323,12 +323,36 @@ const Auth = () => {
     }
 
     // Trigger Supabase reset
-    const { error } = await supabase.auth.resetPasswordForEmail(emailToReset, {
-      redirectTo: window.location.origin + '/auth',
-    });
+    //const { error } = await supabase.auth.resetPasswordForEmail(emailToReset, {
+      //redirectTo: window.location.origin + '/auth',
+    //});
 
-    if (error) setErrorMsg(error.message);
-    else setSuccessMsg('Password reset email sent!');
+    //if (error) setErrorMsg(error.message);
+    //else setSuccessMsg('Password reset email sent!');
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-reset-password`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: emailToReset }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Failed to send reset email");
+
+      setSuccessMsg("Password reset email sent successfully!");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setErrorMsg(err.message);
+      } else {
+        setErrorMsg("An unknown error occurred.");
+      }
+    }
+
 
     setResetLoading(false);
   };

@@ -514,8 +514,8 @@ const AdminOrderDetails: React.FC = () => {
           },
           body: JSON.stringify({
             orderId: order.id,
-            testEmail: 'tamoorpremium@gmail.com', // test email
-            // testEmail: order.address?.email, // use customer email in prod
+            //testEmail: 'tamoorpremium@gmail.com', // test email
+            testEmail: order.address?.email, // use customer email in prod
           }),
         }
       );

@@ -388,7 +388,7 @@ const Header: React.FC = () => {
                         <div className="flex items-center justify-between py-4 lg:py-6">
                             <div className="flex-shrink-0">
                                 <Link to="/" className="flex items-center whitespace-nowrap group">
-                                    <img src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo.png" alt="Tamoor Logo" loading="eager" className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 object-contain mr-1 transition-transform duration-300 group-hover:scale-110" />
+                                    <img src="https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/logo%20(5).webp" alt="Tamoor Logo" loading="eager" className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 object-contain mr-1 transition-transform duration-300 group-hover:scale-110" />
                                     <h1 className="text-2xl sm:text-4xl lg:text-5xl font-serif font-bold tamoor-gradient mr-1">TAMOOR</h1>
                                     <span className="hidden sm:inline-block text-xs lg:text-sm text-luxury-gold font-serif font-medium bg-luxury-gold/10 px-1 py-0.5 rounded-full">Premium</span>
                                 </Link>

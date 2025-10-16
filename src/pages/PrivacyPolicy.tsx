@@ -70,7 +70,7 @@ We will make reasonable efforts to acknowledge and address grievances in a timel
 
   contact: `If you have questions, concerns, or requests regarding this Privacy Policy or our privacy practices, please contact us at:
 
-Email: care@tamoor.in
+Email: support@tamoor.in
 Phone: +91-72599 66388
 Postal Address: Tamoor - A Unit of FIFA FOODS, Rahmania Complex, Doddapete, Kolar, Karnataka, India
 
@@ -136,7 +136,7 @@ const PrivacyPolicy: React.FC = () => {
 
           <footer className="mt-10 text-sm text-gray-400 text-center">
             <p>
-              This Privacy Policy should be read together with Tamoor’s Terms of Service and Returns Policy. For assistance or to exercise your rights, contact us at <a href="mailto:care@tamoor.in" className="text-amber-300 hover:underline">care@tamoor.in</a>.
+              This Privacy Policy should be read together with Tamoor’s Terms of Service and Returns Policy. For assistance or to exercise your rights, contact us at <a href="mailto:support@tamoor.in" className="text-amber-300 hover:underline">support@tamoor.in</a>.
             </p>
 
             <p className="mt-3 font-serif font-extrabold">© {new Date().getFullYear()} Tamoor — All rights reserved.</p>

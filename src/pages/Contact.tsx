@@ -78,7 +78,7 @@ const Contact = () => {
     {
       icon: Mail,
       title: 'Email Us',
-      details: ['enquiry@tamoor.in', 'support@tamoor.in'],
+      details: ['inquiry@tamoor.in', 'support@tamoor.in'],
       description: 'We reply within 24 hours'
     },
     {
@@ -90,8 +90,8 @@ const Contact = () => {
     {
       icon: Clock,
       title: 'Business Hours',
-      details: ['Mon-Fri: 10AM-11PM', 'Sat: 10AM-10PM'],
-      description: 'Sunday: We Are open on Sundays as well'
+      details: ['Mon-Fri: 10AM-11PM', 'Sat-Sun: 10AM-10PM'],
+      description: 'Sunday: Voila!! We Are open on Sundays as well'
     }
   ];
 

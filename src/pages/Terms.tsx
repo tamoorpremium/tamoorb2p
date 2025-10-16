@@ -80,7 +80,7 @@ In no event shall Tamoor’s aggregate liability, whether in contract, tort, neg
   
   contact: `For queries, feedback, complaints, or clarifications regarding these Terms of Service, you may contact us at:
 
-📧 care@tamoor.in
+📧 support@tamoor.in
 
 📞 +91-72599 66388
 
@@ -149,9 +149,9 @@ const Terms: React.FC = () => {
           <footer className="mt-10 text-sm text-gray-400 text-center">
             <p>
               These Terms shall be read along with Tamoor’s Privacy Policy and Returns Policy. For assistance, contact us at <a
-                href="mailto:care@tamoor.in"
+                href="mailto:support@tamoor.in"
                 className="text-amber-300 hover:underline"
-              >care@tamoor.in</a> or call <span className="font-medium">+91-72599 66388</span>.
+              >support@tamoor.in</a> or call <span className="font-medium">+91-72599 66388</span>.
             </p>
             <p className="mt-3 font-serif font-extrabold">© {new Date().getFullYear()} Tamoor — All rights reserved.</p>
           </footer>

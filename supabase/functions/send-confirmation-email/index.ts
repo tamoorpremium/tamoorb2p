@@ -89,7 +89,7 @@ serve(async (req: Request) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "onboarding@resend.dev", // replace with verified sender
+        from: "orders@tamoor.in", // replace with verified sender
         to: [toEmail],
         subject: template.subject,
         html: finalHtml,

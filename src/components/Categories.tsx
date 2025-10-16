@@ -1,5 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from "react-router-dom";
+import precat from '../assets/home/mixnuts.webp'
+import drycat from '../assets/home/driedfruits.webp'
+import seedcat from '../assets/home/berries.webp'
+import trailcat from '../assets/home/trail.webp'
+import giftcat from '../assets/home/gifthampers2.webp'
+import orgcat from '../assets/home/chocolates1.webp'
+
 
 
 const Categories = () => {
@@ -34,7 +41,7 @@ const Categories = () => {
   const categories = [
     {
       name: 'Premium Nuts',
-      image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/mixnuts.jpg',
+      image: precat,
       count: '120+ Products',
       gradient: 'from-amber-50 to-orange-50',
       hoverGradient: 'group-hover:from-amber-100 group-hover:to-orange-100',
@@ -42,7 +49,7 @@ const Categories = () => {
     },
     {
       name: 'Dried Fruits',
-      image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/driedfruits.jpg',
+      image: drycat,
       count: '85+ Products',
       gradient: 'from-purple-50 to-pink-50',
       hoverGradient: 'group-hover:from-purple-100 group-hover:to-pink-100',
@@ -50,7 +57,7 @@ const Categories = () => {
     },
     {
       name: 'Seeds & Berries',
-      image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/berries.jpg',
+      image: seedcat,
       count: '65+ Products',
       gradient: 'from-blue-50 to-indigo-50',
       hoverGradient: 'group-hover:from-blue-100 group-hover:to-indigo-100',
@@ -58,7 +65,7 @@ const Categories = () => {
     },
     {
       name: 'Trail Mixes',
-      image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/trail.jpg',
+      image: trailcat,
       count: '45+ Products',
       gradient: 'from-green-50 to-emerald-50',
       hoverGradient: 'group-hover:from-green-100 group-hover:to-emerald-100',
@@ -66,7 +73,7 @@ const Categories = () => {
     },
     {
       name: 'Gift Hampers',
-      image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/gifthampers2.jpg',
+      image: giftcat,
       count: '300+ Products',
       gradient: 'from-red-50 to-rose-50',
       hoverGradient: 'group-hover:from-red-100 group-hover:to-rose-100',
@@ -74,7 +81,7 @@ const Categories = () => {
     },
     {
       name: 'Organic Range',
-      image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/chocolates1.jpg',
+      image: orgcat,
       count: '75+ Products',
       gradient: 'from-lime-50 to-green-50',
       hoverGradient: 'group-hover:from-lime-100 group-hover:to-green-100',

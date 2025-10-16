@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { ArrowRight, Star, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import alhero from '../assets/home/almond.webp'
+import pisher from '../assets/home/pista.webp'
+import cashero from '../assets/home/cashew.webp'
+import medhero from '../assets/home/medjool.webp'
+
+
 
 const Hero = () => {
   const [scrollY, setScrollY] = useState(0);
@@ -144,7 +150,7 @@ const Hero = () => {
                     desc: 'Rich in omega-3 & vitamin E', 
                     price: 'Starts from ₹799',
                     gradient: 'from-amber-100 to-orange-100',
-                    image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/almond.jpg'
+                    image: alhero
                   },
                   { 
                     emoji: '🌰', 
@@ -152,7 +158,7 @@ const Hero = () => {
                     desc: 'Buttery smooth & creamy', 
                     price: 'Starts from ₹999',
                     gradient: 'from-rose-100 to-pink-100',
-                    image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/cashew.jpg'
+                    image: cashero
                   }
                 ].map((product, index) => (
                   <div 
@@ -183,7 +189,7 @@ const Hero = () => {
                     desc: 'Heart-healthy superfood', 
                     price: 'Starts from ₹1,199',
                     gradient: 'from-emerald-100 to-green-100',
-                    image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/pista.jpg'
+                    image: pisher
                   },
                   { 
                     //emoji: '🍇', 
@@ -191,7 +197,7 @@ const Hero = () => {
                     desc: 'Nature\'s candy', 
                     price: 'Starts from ₹799',
                     gradient: 'from-purple-100 to-indigo-100',
-                    image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/medjool.jpg'
+                    image: medhero
                   }
                 ].map((product, index) => (
                   <div 

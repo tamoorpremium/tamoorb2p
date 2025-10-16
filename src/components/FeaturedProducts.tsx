@@ -1,15 +1,15 @@
 import React, { useEffect, useRef } from "react";
 import { Star, ShoppingCart, Heart, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import almondsVideo from "../assets/videos/Almonds.mp4";
-import cashewsVideo from "../assets/videos/cashews.mp4";
-import pistaVideo from "../assets/videos/Pista.mp4";
-import wallnutsVideo from "../assets/videos/wallnut.mp4";
-import mixnutsVideo from "../assets/videos/mixnuts.mp4";
-import mixbowlVideo from "../assets/videos/mixbowlrotate.mp4";
-import medjoolVideo from "../assets/videos/medjool.mp4";
-import candlesVideo from "../assets/videos/candles.mp4";
-import giftsVideo from "../assets/videos/gift.mp4";
+import almondsVideo from "../assets/videos/Almonds.webm";
+import cashewsVideo from "../assets/videos/cashews.webm";
+import pistaVideo from "../assets/videos/Pista.webm";
+import wallnutsVideo from "../assets/videos/wallnut.webm";
+import mixnutsVideo from "../assets/videos/mixnuts.webm";
+import mixbowlVideo from "../assets/videos/mixbowlrotate.webm";
+import medjoolVideo from "../assets/videos/medjool.webm";
+import candlesVideo from "../assets/videos/candle.webm";
+import giftsVideo from "../assets/videos/gift.webm";
 
 const FeaturedProducts = () => {
   const sectionRef = useRef<HTMLDivElement>(null);

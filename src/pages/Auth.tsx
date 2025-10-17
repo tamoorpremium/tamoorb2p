@@ -388,7 +388,7 @@ const Auth = () => {
 
 return (
     // The main container is now a flex-col to allow for the sticky button
-    <div className="min-h-screen bg-gradient-to-br from-luxury-cream via-white to-luxury-cream-dark flex flex-col pt-12 pb-28 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-luxury-cream via-white to-luxury-cream-dark flex flex-col pt-12 pb-12 px-4">
         <div className="w-full max-w-md mx-auto">
             <div className="text-center mb-8">
                 <h1 className="text-3xl sm:text-5xl font-serif font-extrabold tamoor-gradient mb-4">TAMOOR</h1>
@@ -584,6 +584,23 @@ return (
                     {errorMsg && <div className="text-red-500 text-center text-sm">{errorMsg}</div>}
                     {successMsg && <div className="text-green-600 text-center text-sm">{successMsg}</div>}
                     {infoMsg && <div className="text-yellow-600 text-center text-sm">{infoMsg}</div>}
+                    {/* 👇 ADD THE BUTTON HERE 👇 */}
+                    <div className="pt-6">
+                      <button
+                        type="submit" // Use type="submit" for the main form button
+                        disabled={isLoading}
+                        className="w-full btn-premium text-white py-3.5 rounded-full font-semibold text-lg flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isLoading ? (
+                          <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                          <>
+                            <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+                            <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
+                          </>
+                        )}
+                      </button>
+                    </div>
                 </form>
             </div>
 
@@ -593,23 +610,6 @@ return (
                     <span>⚡ Instant Access</span>
                 </div>
             </div>
-        </div>
-        
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/70 backdrop-blur-sm border-t border-neutral-200">
-            <button
-                onClick={handleSubmit}
-                disabled={isLoading}
-                className="w-full max-w-md mx-auto btn-premium text-white py-3.5 rounded-full font-semibold text-lg flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-                {isLoading ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                    <>
-                        <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
-                        <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
-                    </>
-                )}
-            </button>
         </div>
     </div>
 );

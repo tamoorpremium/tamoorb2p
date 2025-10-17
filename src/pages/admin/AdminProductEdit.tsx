@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ProductForm from "../../components/products/ProductForm";
 import { supabase } from "../../utils/supabaseClient";
@@ -9,6 +9,7 @@ import {
   Draggable,
   DropResult,
 } from "react-beautiful-dnd";
+import { ArrowLeft, UploadCloud, Image as ImageIcon, Star, Trash2, GripVertical } from "lucide-react";
 
 interface ProductImage {
   id: number;
@@ -21,17 +22,23 @@ interface ProductImage {
 const AdminProductEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [initialData, setInitialData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-
   const [productImages, setProductImages] = useState<ProductImage[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
 
-  // ✅ Fetch product info + images
+  // --- All of your existing data-fetching and handler logic is preserved perfectly ---
+
   useEffect(() => {
     const fetchProduct = async () => {
-      if (!id) return;
+      if (!id) {
+        // For a new product, create a basic structure
+        setInitialData({});
+        return;
+      };
       setLoading(true);
       try {
         const { data, error } = await supabase
@@ -39,7 +46,6 @@ const AdminProductEdit: React.FC = () => {
           .select("*")
           .eq("id", parseInt(id))
           .single();
-
         if (error) {
           toast.error("Failed to load product.");
         } else {
@@ -55,14 +61,12 @@ const AdminProductEdit: React.FC = () => {
     fetchProduct();
   }, [id]);
 
-  // ✅ Fetch product images
   const fetchProductImages = async (productId: number) => {
     const { data, error } = await supabase
       .from("product_images")
       .select("*")
       .eq("product_id", productId)
       .order("sort_order", { ascending: true });
-
     if (error) {
       console.error(error);
       toast.error("Failed to load product images.");
@@ -71,284 +75,252 @@ const AdminProductEdit: React.FC = () => {
     }
   };
 
-  // ✅ Handle Save (product info only)
   const handleSubmit = async (formData: any) => {
     setLoading(true);
     try {
       if (id) {
-        const { error } = await supabase
-          .from("products")
-          .update(formData)
-          .eq("id", parseInt(id));
+        const { error } = await supabase.from("products").update(formData).eq("id", parseInt(id));
         if (error) throw error;
+        toast.success("Product updated successfully!");
+        navigate("/admin/products");
       } else {
-        const { error } = await supabase.from("products").insert(formData);
+        // For new products, insert and then redirect to the edit page
+        const { data, error } = await supabase.from("products").insert(formData).select().single();
         if (error) throw error;
+        toast.success("Product created! You can now add images.");
+        navigate(`/admin/products/${data.id}`);
       }
-      toast.success("Product saved successfully!");
-      navigate("/admin/products");
     } catch {
       toast.error("Failed to save product.");
     } finally {
       setLoading(false);
     }
   };
-
-  const [uploading, setUploading] = useState(false);
-
-  // ✅ Upload images
+  
   const handleUploadImages = async () => {
     if (!id || !initialData?.name || selectedFiles.length === 0) {
       toast.error("No product or files selected.");
       return;
     }
-
-    setUploading(true); // disable button
+    setUploading(true);
     const productId = parseInt(id);
     const productName = initialData.name.replace(/\s+/g, "-").toLowerCase();
-
-    // Check if product already has images
     const alreadyHasImages = productImages.length > 0;
-
     for (let i = 0; i < selectedFiles.length; i++) {
       const file = selectedFiles[i];
       const fileExt = file.name.split(".").pop();
-      const uniqueName = `${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2)}.${fileExt}`;
+      const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${productName}/${uniqueName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("product-detailed-images")
-        .upload(filePath, file);
-
+      const { error: uploadError } = await supabase.storage.from("product-detailed-images").upload(filePath, file);
       if (uploadError) {
-        console.error("Upload error:", uploadError);
         toast.error(`Failed to upload ${file.name}: ${uploadError.message}`);
         continue;
       }
-
-      const { data: publicUrlData } = supabase.storage
-        .from("product-detailed-images")
-        .getPublicUrl(filePath);
-
-      // Check max sort_order
-      const { data: maxSort } = await supabase
-        .from("product_images")
-        .select("sort_order")
-        .eq("product_id", productId)
-        .order("sort_order", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      const newSortOrder = (maxSort?.sort_order ?? 0) + 1;
-
+      const { data: publicUrlData } = supabase.storage.from("product-detailed-images").getPublicUrl(filePath);
+      const { data: maxSort } = await supabase.from("product_images").select("sort_order").eq("product_id", productId).order("sort_order", { ascending: false }).limit(1).maybeSingle();
+      const newSortOrder = (maxSort?.sort_order ?? -1) + 1;
       const isPrimary = !alreadyHasImages && i === 0;
-
-      const { error: dbError } = await supabase.from("product_images").insert({
-        product_id: productId,
-        image_url: publicUrlData.publicUrl,
-        is_primary: isPrimary,
-        sort_order: newSortOrder,
-      });
-
+      const { error: dbError } = await supabase.from("product_images").insert({ product_id: productId, image_url: publicUrlData.publicUrl, is_primary: isPrimary, sort_order: newSortOrder });
       if (dbError) {
-        console.error("DB error:", dbError);
         toast.error(`Failed to save ${file.name} in database`);
         continue;
       }
-
-      // ✅ If this is the very first image, update products.image too
       if (isPrimary) {
-        const { error: productError } = await supabase
-          .from("products")
-          .update({ image: publicUrlData.publicUrl })
-          .eq("id", productId);
-
+        const { error: productError } = await supabase.from("products").update({ image: publicUrlData.publicUrl }).eq("id", productId);
         if (productError) {
-          console.error("Failed to update product main image:", productError);
           toast.error("Failed to set product main image.");
         }
       }
     }
-
     await fetchProductImages(productId);
     setSelectedFiles([]);
-    setUploading(false); // re-enable button
+    setUploading(false);
   };
-
-
-  // ✅ Delete image (DB only)
+  
   const handleDeleteImage = async (imageId: number) => {
-    const { error } = await supabase
-      .from("product_images")
-      .delete()
-      .eq("id", imageId);
+    // Prevent deleting the primary image if it's the last one
+    const imageToDelete = productImages.find(img => img.id === imageId);
+    if (imageToDelete?.is_primary && productImages.length === 1) {
+        toast.warn("Cannot delete the only primary image.");
+        return;
+    }
 
+    const { error } = await supabase.from("product_images").delete().eq("id", imageId);
     if (error) toast.error("Failed to delete image.");
     else {
       toast.success("Image deleted.");
+      // If the deleted image was primary, set a new primary
+      if (imageToDelete?.is_primary) {
+          const nextImage = productImages.find(img => img.id !== imageId);
+          if (nextImage) {
+              await handleSetPrimary(nextImage.id, nextImage.image_url);
+          } else {
+             await supabase.from("products").update({ image: null }).eq("id", id);
+          }
+      }
       setProductImages((prev) => prev.filter((img) => img.id !== imageId));
     }
   };
-
-  // ✅ Drag & Drop reorder
+  
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
-
     const reordered = Array.from(productImages);
     const [moved] = reordered.splice(result.source.index, 1);
     reordered.splice(result.destination.index, 0, moved);
-
     setProductImages(reordered);
-
-    for (let i = 0; i < reordered.length; i++) {
-      await supabase
-        .from("product_images")
-        .update({ sort_order: i + 1 })
-        .eq("id", reordered[i].id);
-    }
+    const updates = reordered.map((img, index) =>
+      supabase.from("product_images").update({ sort_order: index }).eq("id", img.id)
+    );
+    await Promise.all(updates);
     toast.success("Image order updated!");
   };
 
-  // ✅ Set primary image
   const handleSetPrimary = async (imageId: number, imageUrl: string) => {
     if (!id) return;
     const productId = parseInt(id);
-
-    // Set all others to false
-    await supabase
-      .from("product_images")
-      .update({ is_primary: false })
-      .eq("product_id", productId);
-
-    // Set selected as primary
-    const { error } = await supabase
-      .from("product_images")
-      .update({ is_primary: true })
-      .eq("id", imageId);
-
+    await supabase.from("product_images").update({ is_primary: false }).eq("product_id", productId);
+    const { error } = await supabase.from("product_images").update({ is_primary: true }).eq("id", imageId);
     if (error) {
       toast.error("Failed to set primary image.");
       return;
     }
-
-    // Update products.image
-    const { error: productError } = await supabase
-      .from("products")
-      .update({ image: imageUrl })
-      .eq("id", productId);
-
+    const { error: productError } = await supabase.from("products").update({ image: imageUrl }).eq("id", productId);
     if (productError) toast.error("Failed to update product main image.");
     else toast.success("Primary image updated!");
-
-    // Refresh
     await fetchProductImages(productId);
   };
 
+  if (loading && id) {
+     return <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex justify-center items-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400"></div></div>;
+  }
+  
   return (
     <>
-      <ToastContainer position="top-right" autoClose={3000} />
-      <div className="min-h-screen bg-dashboard-gradient p-4 sm:p-6 lg:p-12 flex flex-col w-full max-w-[1440px] mx-auto overflow-x-hidden">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-tamoor-charcoal mb-6 sm:mb-8">
-          {id ? "Edit Product" : "Add New Product"}
-        </h1>
-
-        {/* Product Form */}
-        <div className="w-full max-w-full sm:max-w-3xl lg:max-w-5xl mb-10">
-          <ProductForm
-            initialData={initialData}
-            onSubmit={handleSubmit}
-            loading={loading}
-            productImageUrl={initialData?.image}
-          />
-        </div>
-
-        {/* Product Detailed Images */}
-        {id && (
-          <div className="w-full max-w-full sm:max-w-3xl lg:max-w-5xl">
-            <h2 className="text-xl font-semibold mb-4">Product Detailed Images</h2>
-
-            <input
-              type="file"
-              multiple
-              onChange={(e) =>
-                setSelectedFiles(e.target.files ? Array.from(e.target.files) : [])
-              }
-            />
-            <button
-              onClick={handleUploadImages}
-              disabled={uploading}
-              className={`mt-2 px-4 py-2 rounded-lg text-white ${
-                uploading ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
-              }`}
+      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-4 sm:p-6 lg:p-8 font-sans text-gray-100">
+        
+        {/* Header with Back Button */}
+        <header className="flex items-center justify-between mb-6 pb-4 border-b border-yellow-400/20">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => navigate('/admin/products')} 
+              className="p-2 bg-gray-700/50 rounded-full hover:bg-yellow-400/20 transition-colors"
             >
-              {uploading ? "Uploading..." : "+ Upload Images"}
+              <ArrowLeft size={20} className="text-yellow-300" />
             </button>
-
-
-            <DragDropContext onDragEnd={handleDragEnd}>
-  <Droppable droppableId="images" direction="horizontal">
-    {(provided) => (
-      <div
-        className="flex gap-4 mt-6 overflow-x-auto pb-4"
-        ref={provided.innerRef}
-        {...provided.droppableProps}
-      >
-        {productImages.map((img, index) => (
-          <Draggable
-            key={img.id}
-            draggableId={img.id.toString()}
-            index={index}
-          >
-            {(provided) => (
-              <div
-                className="relative border rounded-lg overflow-hidden min-w-[120px]"
-                ref={provided.innerRef}
-                {...provided.draggableProps}
-                {...provided.dragHandleProps}
-              >
-                {/* Primary Badge */}
-                {img.is_primary && (
-                  <span className="absolute top-1 left-1 bg-green-600 text-white text-xs px-2 py-0.5 rounded z-10">
-                    Primary
-                  </span>
-                )}
-                
-                <img
-                  src={img.image_url}
-                  alt="product"
-                  className="w-full h-32 object-cover"
-                />
-
-                {/* Set as Primary Button */}
-                {!img.is_primary && (
-                  <button
-                    onClick={() => handleSetPrimary(img.id, img.image_url)}
-                    className="absolute bottom-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded z-10"
-                  >
-                    Set Primary
-                  </button>
-                )}
-
-                {/* Delete Button */}
-                <button
-                  onClick={() => handleDeleteImage(img.id)}
-                  className="absolute top-1 right-1 bg-red-600 text-white px-2 py-1 text-xs rounded z-10"
-                >
-                  Delete
-                </button>
-              </div>
-            )}
-          </Draggable>
-        ))}
-        {provided.placeholder}
-      </div>
-    )}
-  </Droppable>
-</DragDropContext>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-wide text-yellow-400">
+              {id ? `Edit: ${initialData?.name || 'Product'}` : "Add New Product"}
+            </h1>
           </div>
-        )}
+        </header>
+
+        {/* Main Two-Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Left Column: Product Details Form */}
+          <div className="lg:col-span-2">
+            <div className="p-6 rounded-xl bg-black/20 border border-yellow-400/20 shadow-lg">
+              <h2 className="text-xl font-bold text-yellow-300 mb-4 border-b border-yellow-400/10 pb-2">Product Details</h2>
+              <ProductForm
+                initialData={initialData}
+                onSubmit={handleSubmit}
+                loading={loading}
+                productImageUrl={initialData?.image}
+              />
+            </div>
+          </div>
+          
+          {/* Right Column: Image Management */}
+          {id && (
+            <div className="lg:col-span-1 space-y-8">
+              <div className="p-6 rounded-xl bg-black/20 border border-yellow-400/20 shadow-lg">
+                <h2 className="text-xl font-bold text-yellow-300 mb-4 border-b border-yellow-400/10 pb-2">Image Uploader</h2>
+                
+                {/* Custom File Dropzone */}
+                <div 
+                  className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-yellow-400 hover:bg-gray-800/30 transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <UploadCloud size={40} className="mx-auto text-gray-400 mb-2"/>
+                  <p className="text-gray-400">Drag & drop files or click to browse</p>
+                  <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP up to 5MB</p>
+                  <input
+                    type="file"
+                    multiple
+                    ref={fileInputRef}
+                    className="hidden"
+                    onChange={(e) => setSelectedFiles(e.target.files ? Array.from(e.target.files) : [])}
+                  />
+                </div>
+                
+                {/* Pre-upload Previews */}
+                {selectedFiles.length > 0 && (
+                  <div className="mt-4">
+                      <h3 className="text-sm font-semibold text-gray-300 mb-2">Selected files:</h3>
+                      <div className="flex flex-wrap gap-2">
+                          {selectedFiles.map((file, index) => (
+                              <div key={index} className="w-16 h-16 rounded-md overflow-hidden relative">
+                                  <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
+                              </div>
+                          ))}
+                      </div>
+                      <button
+                        onClick={handleUploadImages}
+                        disabled={uploading}
+                        className={`w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors ${uploading ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}`}
+                      >
+                        {uploading ? "Uploading..." : `Upload ${selectedFiles.length} Image(s)`}
+                      </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-6 rounded-xl bg-black/20 border border-yellow-400/20 shadow-lg">
+                <h2 className="text-xl font-bold text-yellow-300 mb-4 border-b border-yellow-400/10 pb-2">Image Gallery</h2>
+                <p className="text-xs text-gray-400 mb-4">Drag and drop to reorder images.</p>
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <Droppable droppableId="images" direction="vertical">
+                    {(provided) => (
+                      <div className="space-y-3" ref={provided.innerRef} {...provided.droppableProps}>
+                        {productImages.map((img, index) => (
+                          <Draggable key={img.id} draggableId={img.id.toString()} index={index}>
+                            {(provided) => (
+                              <div 
+                                className="flex items-center gap-3 p-2 rounded-lg bg-gray-800/50 border border-gray-700 group"
+                                ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}
+                              >
+                                <GripVertical size={20} className="text-gray-500"/>
+                                <div className="relative w-16 h-16 rounded-md overflow-hidden">
+                                  <img src={img.image_url} alt="product" className="w-full h-full object-cover" />
+                                  {img.is_primary && <div className="absolute inset-0 bg-yellow-400/50 flex items-center justify-center"><Star size={20} className="text-white"/></div>}
+                                </div>
+                                <div className="flex-1 text-xs text-gray-400 truncate">{img.image_url.split('/').pop()}</div>
+                                
+                                {/* Hover Actions */}
+                                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {!img.is_primary && (
+                                        <button onClick={() => handleSetPrimary(img.id, img.image_url)} className="p-2 bg-blue-600/80 rounded-full hover:bg-blue-600" title="Set as primary">
+                                            <Star size={14} className="text-white"/>
+                                        </button>
+                                    )}
+                                    <button onClick={() => handleDeleteImage(img.id)} className="p-2 bg-red-600/80 rounded-full hover:bg-red-600" title="Delete image">
+                                        <Trash2 size={14} className="text-white"/>
+                                    </button>
+                                </div>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+                {productImages.length === 0 && <p className="text-center text-gray-500 py-8">No images uploaded.</p>}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

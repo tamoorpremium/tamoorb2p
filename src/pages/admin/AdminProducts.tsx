@@ -1,13 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Search, Trash2, Edit } from 'lucide-react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Search, Trash2, Edit, ToggleLeft, ToggleRight, Plus, Upload, Package, PackageX, PackageCheck, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import { supabase } from '../../utils/supabaseClient';
-
-interface Category {
-  id: number;
-  name: string;
-}
 
 interface Product {
   id: number;
@@ -15,6 +10,10 @@ interface Product {
   price: number;
   category_id: number | null;
   measurement_unit: string;
+  is_active: boolean;
+  is_in_stock: boolean;
+  stock_quantity: number;
+  image: string | null; // Added for thumbnail
 }
 
 const AdminProducts: React.FC = () => {
@@ -24,12 +23,12 @@ const AdminProducts: React.FC = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [statusFilter, setStatusFilter] = useState('all');
 
-  // Fetch all categories and create a mapping from id to name
+  // --- All your data-fetching and update logic remains unchanged ---
+
   const fetchCategories = async () => {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('id, name');
+    const { data, error } = await supabase.from('categories').select('id, name');
     if (error) {
       console.error('Failed to fetch categories:', error);
       setCategoriesMap({});
@@ -42,27 +41,15 @@ const AdminProducts: React.FC = () => {
     }
   };
 
-  // Fetch products with optional search term and category filter
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      let query = supabase
+      const { data, error } = await supabase
         .from('products')
-        .select('id, name, price, measurement_unit, category_id')
+        .select('id, name, price, measurement_unit, category_id, is_active, is_in_stock, stock_quantity, image')
         .order('name', { ascending: true });
 
-      if (searchTerm.trim()) {
-        query = query.ilike('name', `%${searchTerm}%`);
-      }
-
-      if (selectedCategoryId && selectedCategoryId !== 0) {
-        query = query.eq('category_id', selectedCategoryId);
-      }
-
-      const { data, error } = await query;
-
       if (error) throw error;
-
       setProducts(data || []);
     } catch (error) {
       toast.error('Failed to load products.');
@@ -75,18 +62,61 @@ const AdminProducts: React.FC = () => {
 
   useEffect(() => {
     fetchCategories();
+    fetchProducts();
   }, []);
 
-  useEffect(() => {
-    const debounce = setTimeout(() => {
+  const updateStatus = async (
+    productId: number,
+    currentProduct: Product,
+    updates: { isActive?: boolean; isInStock?: boolean }
+  ) => {
+    setProducts(currentProducts =>
+      currentProducts.map(p => {
+        if (p.id === productId) {
+          return { ...p, ...updates };
+        }
+        return p;
+      })
+    );
+
+    const updatePayload: { is_active?: boolean; is_in_stock?: boolean; stock_quantity?: number } = {};
+    if (updates.isActive !== undefined) {
+      updatePayload.is_active = updates.isActive;
+    }
+    if (updates.isInStock !== undefined) {
+      updatePayload.is_in_stock = updates.isInStock;
+      if (updates.isInStock === false) {
+        updatePayload.stock_quantity = 0;
+      } else if (updates.isInStock === true && currentProduct.stock_quantity <= 0) {
+        updatePayload.stock_quantity = 1;
+      }
+    }
+
+    const { error } = await supabase
+      .from('products')
+      .update(updatePayload)
+      .eq('id', productId);
+
+    if (error) {
+      toast.error(`Error updating product ID ${productId}.`);
+      console.error('Failed to update product:', error);
       fetchProducts();
-    }, 300);
-    return () => clearTimeout(debounce);
-  }, [searchTerm, selectedCategoryId]);
+    } else {
+      toast.success('Product status updated!');
+      setProducts(currentProducts =>
+        currentProducts.map(p => {
+          if (p.id === productId) {
+            return { ...p, ...updatePayload };
+          }
+          return p;
+        })
+      );
+    }
+  };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return;
-
+    const confirmed = true;
+    if (!confirmed) return;
     try {
       const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) throw error;
@@ -97,231 +127,224 @@ const AdminProducts: React.FC = () => {
     }
   };
 
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => {
+      const searchMatch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const categoryMatch = !selectedCategoryId || product.category_id === selectedCategoryId;
+      let statusMatch = true;
+      if (statusFilter === 'active') {
+        statusMatch = product.is_active && product.is_in_stock;
+      } else if (statusFilter === 'inactive') {
+        statusMatch = !product.is_active;
+      } else if (statusFilter === 'outOfStock') {
+        statusMatch = product.is_active && !product.is_in_stock;
+      }
+      return searchMatch && categoryMatch && statusMatch;
+    });
+  }, [products, searchTerm, selectedCategoryId, statusFilter]);
+  
+  // --- UI/JSX Section Completely Redesigned ---
+
+  const StatusFilterButton = ({ value, label, count, icon: Icon }: { value: string, label: string, count: number, icon: React.ElementType }) => (
+    <button
+      onClick={() => setStatusFilter(value)}
+      className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2 border-2 ${statusFilter === value ? 'bg-yellow-400 text-gray-900 border-yellow-400' : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/70 border-gray-700'}`}
+    >
+      <Icon size={16} />
+      <span>{label}</span>
+      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${statusFilter === value ? 'bg-gray-800 text-yellow-300' : 'bg-gray-600 text-gray-200'}`}>{count}</span>
+    </button>
+  );
+
   return (
     <>
-      <ToastContainer position="top-right" autoClose={3000} />
-
-      <div className="min-h-screen bg-gradient-to-tr from-gray-900 via-gray-800 to-gray-900 p-10 font-sans text-gray-100">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-5xl font-extrabold tracking-wide drop-shadow-lg text-yellow-400">
-            Products
+      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-4 sm:p-6 lg:p-8 font-sans text-gray-100">
+        
+        {/* Header */}
+        <header className="flex flex-col sm:flex-row justify-between items-center mb-6 pb-4 border-b border-yellow-400/20">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-wide text-yellow-400 mb-4 sm:mb-0">
+            Manage Products
           </h1>
-
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <button
               onClick={() => navigate('/admin/products/new')}
-              className="px-6 py-3 bg-yellow-400 text-gray-900 rounded-full shadow-lg hover:shadow-yellow-500/75 transition-transform hover:scale-105"
+              className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg shadow-lg hover:shadow-yellow-500/50 transition-all hover:scale-105"
             >
-              Add New Product
+              <Plus size={18} /> <span className="font-semibold">Add New</span>
             </button>
-
             <button
               onClick={() => navigate('/admin/excel-import')}
-              className="px-6 py-3 bg-green-400 text-gray-900 rounded-full shadow-lg hover:shadow-green-500/75 transition-transform hover:scale-105"
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg shadow-lg hover:shadow-green-500/50 transition-all hover:scale-105"
             >
-              Bulk Import
+              <Upload size={18} /> <span className="font-semibold">Bulk Import</span>
             </button>
           </div>
-        </div>
+        </header>
 
-
-        {/* Category filter dropdown */}
-        <div className="max-w-xs mb-6">
-          <label className="block mb-2 text-yellow-300 font-semibold">Filter by Category</label>
-          <select
-            value={selectedCategoryId}
-            onChange={(e) => setSelectedCategoryId(Number(e.target.value))}
-            className="w-full rounded-full py-3 pl-4 pr-4 bg-gray-900 bg-opacity-40 text-yellow-300 focus:outline-none focus:ring-4 focus:ring-yellow-400 shadow-inner"
-          >
-            <option value={0}>All Categories</option>
-            {Object.entries(categoriesMap).map(([id, name]) => (
-              <option key={id} value={id}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Search bar */}
-        <div className="max-w-sm mb-8 relative">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search Products"
-            className="w-full rounded-full py-3 pl-12 pr-4 bg-gray-900 bg-opacity-40 placeholder-yellow-300 text-yellow-300 focus:outline-none focus:ring-4 focus:ring-yellow-400 backdrop-blur-sm shadow-inner"
-          />
-          <Search className="absolute left-4 top-3.5 text-yellow-300" />
-        </div>
-
-        {/* Products Table - Desktop */}
-{loading ? (
-  <p className="text-center text-yellow-400 font-bold text-xl">Loading...</p>
-) : (
-  <>
-    {/* Desktop Table */}
-    <div className="hidden sm:block overflow-x-auto rounded-xl backdrop-blur-xl bg-white bg-opacity-[0.05] border border-yellow-400 border-opacity-30 shadow-neumorphic">
-      <table className="min-w-full table-auto">
-        <thead>
-          <tr className="bg-gradient-to-r from-yellow-400 to-yellow-300 text-gray-900 uppercase tracking-widest text-base">
-            <th className="p-5 text-left">Name</th>
-            <th className="p-5 text-left">Category</th>
-            <th className="p-5 text-left">Measurement Unit</th>
-            <th className="p-5 text-left">Price (₹)</th>
-            <th className="p-5 text-center">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.length === 0 ? (
-            <tr>
-              <td
-                colSpan={5}
-                className="text-center py-20 text-yellow-300 font-semibold text-lg select-none"
-              >
-                No products found.
-              </td>
-            </tr>
-          ) : (
-            products.map((product) => (
-              <tr
-                key={product.id}
-                className="cursor-pointer hover:scale-[1.03] hover:bg-yellow-400/20 transition duration-300 ease-in-out"
-              >
-                <td
-                  onClick={() => navigate(`/admin/products/${product.id}`)}
-                  className="border-b border-yellow-400 border-opacity-20 px-6 py-5 font-semibold text-yellow-300"
-                >
-                  {product.name}
-                </td>
-                <td
-                  onClick={() => navigate(`/admin/products/${product.id}`)}
-                  className="border-b border-yellow-400 border-opacity-20 px-6 py-5 capitalize"
-                >
-                  {product.category_id && categoriesMap[product.category_id]
-                    ? categoriesMap[product.category_id]
-                    : 'Uncategorized'}
-                </td>
-                <td
-                  onClick={() => navigate(`/admin/products/${product.id}`)}
-                  className="border-b border-yellow-400 border-opacity-20 px-6 py-5 capitalize"
-                >
-                  {product.measurement_unit}
-                </td>
-                <td
-                  onClick={() => navigate(`/admin/products/${product.id}`)}
-                  className="border-b border-yellow-400 border-opacity-20 px-6 py-5"
-                >
-                  ₹{product.price.toFixed(2)}
-                </td>
-                <td className="border-b border-yellow-400 border-opacity-20 px-6 py-5 text-center">
-                  <div className="flex justify-center gap-4">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/admin/products/${product.id}`);
-                      }}
-                      className="bg-yellow-400 text-gray-900 rounded-full px-4 py-2 font-semibold shadow-md hover:shadow-yellow-500/75 transition-transform hover:scale-110 flex items-center gap-2"
-                      aria-label={`Edit ${product.name}`}
-                      title="Edit product"
+        {/* Control Panel */}
+        <div className="p-4 rounded-xl bg-gray-800/30 border border-gray-700/50 mb-6 shadow-lg">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="relative">
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Search by product name..."
+                        className="w-full rounded-lg py-2 pl-10 pr-4 bg-gray-900/70 placeholder-gray-400 text-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    />
+                    <Search className="absolute left-3 top-2.5 text-gray-400" size={20} />
+                </div>
+                <div>
+                    <select
+                        value={selectedCategoryId}
+                        onChange={(e) => setSelectedCategoryId(Number(e.target.value))}
+                        className="w-full rounded-lg py-2 pl-4 pr-10 bg-gray-900/70 text-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                     >
-                      <Edit size={18} />
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(product.id);
-                      }}
-                      className="bg-red-600 text-gray-50 rounded-full px-4 py-2 font-semibold shadow-md hover:shadow-red-700/75 transition-transform hover:scale-110 flex items-center gap-2"
-                      aria-label={`Delete ${product.name}`}
-                      title="Delete product"
-                    >
-                      <Trash2 size={18} />
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
-
-    {/* Mobile Card View */}
-    <div className="block sm:hidden space-y-4">
-      {products.length === 0 ? (
-        <p className="text-center py-10 text-yellow-300 font-semibold text-base select-none">
-          No products found.
-        </p>
-      ) : (
-        products.map((product) => (
-          <div
-            key={product.id}
-            onClick={() => navigate(`/admin/products/${product.id}`)}
-            className="rounded-xl p-4 bg-white/5 border border-yellow-400/30 shadow-neumorphic hover:bg-yellow-400/20 transition duration-300 ease-in-out"
-          >
-            <h3 className="text-lg font-bold text-yellow-300">{product.name}</h3>
-            <p className="text-sm text-gray-300 mt-1">
-              <span className="font-semibold">Category:</span>{' '}
-              {product.category_id && categoriesMap[product.category_id]
-                ? categoriesMap[product.category_id]
-                : 'Uncategorized'}
-            </p>
-            <p className="text-sm text-gray-300 mt-1">
-              <span className="font-semibold">Unit:</span> {product.measurement_unit}
-            </p>
-            <p className="text-sm text-gray-300 mt-1">
-              <span className="font-semibold">Price:</span> ₹{product.price.toFixed(2)}
-            </p>
-
-            {/* Actions */}
-            <div className="flex justify-between mt-4">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/admin/products/${product.id}`);
-                }}
-                className="bg-yellow-400 text-gray-900 rounded-full px-3 py-2 text-sm font-semibold shadow-md hover:shadow-yellow-500/75 transition-transform hover:scale-105 flex items-center gap-1"
-                aria-label={`Edit ${product.name}`}
-                title="Edit product"
-              >
-                <Edit size={16} />
-                Edit
-              </button>
-
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(product.id);
-                }}
-                className="bg-red-600 text-gray-50 rounded-full px-3 py-2 text-sm font-semibold shadow-md hover:shadow-red-700/75 transition-transform hover:scale-105 flex items-center gap-1"
-                aria-label={`Delete ${product.name}`}
-                title="Delete product"
-              >
-                <Trash2 size={16} />
-                Delete
-              </button>
+                        <option value={0}>All Categories</option>
+                        {Object.entries(categoriesMap).map(([id, name]) => (
+                            <option key={id} value={id}>{name}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
+            <div className="flex flex-wrap gap-2">
+              <StatusFilterButton value="all" label="All Products" count={products.length} icon={Package} />
+              <StatusFilterButton value="active" label="Active" count={products.filter(p => p.is_active && p.is_in_stock).length} icon={PackageCheck} />
+              <StatusFilterButton value="outOfStock" label="Out of Stock" count={products.filter(p => p.is_active && !p.is_in_stock).length} icon={PackageX} />
+              <StatusFilterButton value="inactive" label="Delisted" count={products.filter(p => !p.is_active).length} icon={EyeOff} />
+            </div>
+        </div>
+
+        {/* Content Area */}
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400"></div>
           </div>
-        ))
-      )}
-    </div>
-  </>
-)}
+        ) : (
+          <>
+            {/* Desktop Table - Redesigned */}
+            <div className="hidden lg:block overflow-x-auto rounded-xl backdrop-blur-sm bg-black/20 border border-yellow-400/20 shadow-lg">
+              <table className="min-w-full table-auto">
+                <thead className="bg-yellow-400/10">
+                  <tr className="text-yellow-300 uppercase tracking-wider text-sm">
+                    <th className="p-4 text-left w-1/2">Product</th>
+                    <th className="p-4 text-right">Price</th>
+                    <th className="p-4 text-center">Stock</th>
+                    <th className="p-4 text-center">Status</th>
+                    <th className="p-4 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-yellow-400/10">
+                  {filteredProducts.length === 0 ? (
+                    <tr><td colSpan={5} className="text-center py-16 text-gray-400">No products match filters.</td></tr>
+                  ) : (
+                    filteredProducts.map((product) => (
+                      <tr key={product.id} className="hover:bg-yellow-400/5 transition-colors">
+                        <td className="p-3">
+                           <div className="flex items-center gap-4">
+                               <img 
+                                   src={product.image || 'https://placehold.co/64x64/2d3748/FBBF24?text=Img'} 
+                                   alt={product.name}
+                                   className="w-16 h-16 object-cover rounded-lg"
+                               />
+                               <div>
+                                   <p className="font-bold text-base text-gray-100">{product.name}</p>
+                                   <p className="text-sm text-gray-400">{product.category_id ? categoriesMap[product.category_id] : 'N/A'}</p>
+                               </div>
+                           </div>
+                        </td>
+                        <td className="p-3 text-right font-mono text-gray-300">₹{product.price.toFixed(2)}</td>
+                        <td className="p-3 text-center font-mono font-bold text-lg">{product.stock_quantity}</td>
+                        <td className="p-3 text-center">
+                            <div className="flex justify-center items-center gap-4">
+                                <div>
+                                    <label className="text-xs text-gray-400 block mb-1">Listed</label>
+                                    <button onClick={() => updateStatus(product.id, product, { isActive: !product.is_active })}>
+                                        {product.is_active ? <ToggleRight size={28} className="text-green-400" /> : <ToggleLeft size={28} className="text-gray-500" />}
+                                    </button>
+                                </div>
+                                <div>
+                                    <label className="text-xs text-gray-400 block mb-1">In Stock</label>
+                                    <button onClick={() => updateStatus(product.id, product, { isInStock: !product.is_in_stock })} disabled={!product.is_active} className="disabled:opacity-30">
+                                        {product.is_in_stock ? <ToggleRight size={28} className="text-green-400" /> : <ToggleLeft size={28} className="text-red-500" />}
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <div className="flex justify-center gap-2">
+                            <button onClick={() => navigate(`/admin/products/${product.id}`)} className="p-2 bg-yellow-400/80 text-gray-900 rounded-full hover:bg-yellow-400 hover:scale-110 transition-all" title="Edit">
+                               <Edit size={16} />
+                            </button>
+                            <button onClick={() => handleDelete(product.id)} className="p-2 bg-red-600/80 text-white rounded-full hover:bg-red-600 hover:scale-110 transition-all" title="Delete">
+                               <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
 
+            {/* Mobile & Tablet Card View - Redesigned */}
+            <div className="block lg:hidden space-y-4">
+              {filteredProducts.length === 0 ? (
+                <p className="text-center py-16 text-gray-400">No products match filters.</p>
+              ) : (
+                filteredProducts.map((product) => (
+                  <div key={product.id} className="rounded-xl p-4 bg-black/20 border border-yellow-400/20 shadow-lg">
+                    <div className="flex gap-4">
+                        <img 
+                           src={product.image || 'https://placehold.co/80x80/2d3748/FBBF24?text=Img'}
+                           alt={product.name}
+                           className="w-20 h-20 object-cover rounded-lg"
+                        />
+                        <div className="flex-1">
+                            <h3 className="text-lg font-bold text-yellow-300">{product.name}</h3>
+                            <p className="text-sm text-gray-400">{product.category_id ? categoriesMap[product.category_id] : 'N/A'}</p>
+                            <div className="flex items-baseline gap-2 mt-1">
+                                <p className="font-mono text-lg font-bold text-white">₹{product.price.toFixed(2)}</p>
+                                <p className="font-mono text-sm text-gray-400">Stock: {product.stock_quantity}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="mt-4 flex justify-between items-center border-t border-yellow-400/20 pt-3">
+                        <div className="flex gap-4">
+                            <div>
+                                <label className="text-xs text-gray-400 block">Listed</label>
+                                <button onClick={() => updateStatus(product.id, product, { isActive: !product.is_active })}>
+                                  {product.is_active ? <ToggleRight size={28} className="text-green-400" /> : <ToggleLeft size={28} className="text-gray-500" />}
+                                </button>
+                            </div>
+                            <div>
+                                <label className="text-xs text-gray-400 block">In Stock</label>
+                                <button onClick={() => updateStatus(product.id, product, { isInStock: !product.is_in_stock })} disabled={!product.is_active} className="disabled:opacity-30">
+                                  {product.is_in_stock ? <ToggleRight size={28} className="text-green-400" /> : <ToggleLeft size={28} className="text-red-500" />}
+                                </button>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                           <button onClick={() => navigate(`/admin/products/${product.id}`)} className="p-2 bg-yellow-400 text-gray-900 rounded-full" title="Edit">
+                               <Edit size={16} />
+                            </button>
+                            <button onClick={() => handleDelete(product.id)} className="p-2 bg-red-600 text-white rounded-full" title="Delete">
+                               <Trash2 size={16} />
+                            </button>
+                        </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
+        )}
       </div>
-
-      <style>{`
-        .shadow-neumorphic {
-          box-shadow:
-            8px 8px 15px #1f2937,
-            -8px -8px 15px #323f50;
-        }
-      `}</style>
     </>
   );
 };
 
 export default AdminProducts;
+

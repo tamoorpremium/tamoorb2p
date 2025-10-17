@@ -1,31 +1,27 @@
-// src/pages/AdminLogin.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../utils/supabaseClient";
 import { User } from "@supabase/supabase-js";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { LogIn, Mail, Key, Send } from 'lucide-react';
 
 const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [resetEmail, setResetEmail] = useState(""); // For reset password
+  const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
-  const [showReset, setShowReset] = useState(false); // Toggle for reset section
+  const [showReset, setShowReset] = useState(false);
 
-  // 🔄 Check existing session on mount
+  // --- All original logic is preserved ---
   useEffect(() => {
     const checkExistingSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
+      const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         const user: User = session.user;
         const role = (user.user_metadata as any)?.role;
-
         if (role) {
           localStorage.setItem("userRole", role);
           localStorage.setItem("token", session.access_token);
@@ -35,21 +31,17 @@ const AdminLogin: React.FC = () => {
         }
       }
     };
-
     checkExistingSession();
   }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      alert(error.message);
+      // FIX: Replaced alert with toast
+      toast.error(error.message);
       setLoading(false);
       return;
     }
@@ -62,9 +54,11 @@ const AdminLogin: React.FC = () => {
       localStorage.setItem("token", data.session!.access_token);
       navigate("/admin/dashboard", { replace: true });
     } else {
-      alert("Access denied. You are not an admin user.");
+      // FIX: Replaced alert with toast
+      toast.error("Access denied. You are not an admin user.");
+      // Also sign out the non-admin user
+      await supabase.auth.signOut();
     }
-
     setLoading(false);
   };
 
@@ -76,7 +70,7 @@ const AdminLogin: React.FC = () => {
     setResetLoading(true);
 
     const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: window.location.origin + "/admin-login",
+      redirectTo: window.location.origin + "/reset-password", // Using your existing public reset page
     });
 
     if (error) {
@@ -84,81 +78,87 @@ const AdminLogin: React.FC = () => {
     } else {
       toast.success("Password reset email sent!");
       setResetEmail("");
-      setShowReset(false); // hide reset form after sending
+      setShowReset(false);
     }
-
     setResetLoading(false);
   };
 
+  // --- UI/JSX Section Redesigned for Consistency ---
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-800 px-4">
-      <div className="w-full max-w-md p-8 rounded-2xl bg-white/10 backdrop-blur-xl shadow-xl border border-white/20">
-        <h1 className="text-2xl sm:text-3xl font-bold text-center text-white mb-6">
-          Admin Login
-        </h1>
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div>
-            <label className="block text-sm text-gray-200 mb-2">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-400 sm:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              placeholder="Enter your email"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-gray-200 mb-2">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              placeholder="Enter your password"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 active:scale-95 text-black font-semibold rounded-xl shadow-lg transition disabled:opacity-50"
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
-
-        {/* 🔹 Forgot Password Link */}
-        <div className="mt-6 text-center">
-          <p
-            className="text-blue-400 cursor-pointer hover:underline mb-2"
-            onClick={() => setShowReset(!showReset)}
-          >
-            Forgot password?
-          </p>
-
-          {/* 🔹 Reset Password Section (shown only when clicked) */}
-          {showReset && (
-            <div className="mt-2">
-              <input
-                type="email"
-                value={resetEmail}
-                onChange={(e) => setResetEmail(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 mb-2"
-                placeholder="Enter your email"
-              />
-              <button
-                onClick={handleResetPassword}
-                disabled={resetLoading}
-                className="w-full py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl shadow-lg transition disabled:opacity-50"
-              >
-                {resetLoading ? "Sending..." : "Reset Password"}
-              </button>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black px-4">
+        <ToastContainer position="top-center" theme="dark" />
+        <div className="w-full max-w-sm p-8 rounded-2xl bg-black/20 backdrop-blur-xl shadow-2xl border border-yellow-400/20">
+            <div className="text-center mb-8">
+                <h1 className="text-4xl font-extrabold tracking-wide text-yellow-400">TAMOOR</h1>
+                <p className="text-gray-400">Admin Panel</p>
             </div>
-          )}
+            
+            {!showReset ? (
+                <form onSubmit={handleLogin} className="space-y-5">
+                    <div className="relative">
+                        <Mail className="absolute left-4 top-3.5 text-gray-400" size={20}/>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-900/70 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            placeholder="Enter your email"
+                            required
+                        />
+                    </div>
+                    <div className="relative">
+                        <Key className="absolute left-4 top-3.5 text-gray-400" size={20}/>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-900/70 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            placeholder="Enter your password"
+                            required
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full flex items-center justify-center gap-2 py-3 bg-yellow-400 hover:bg-yellow-500 active:scale-95 text-gray-900 font-bold rounded-xl shadow-lg transition disabled:opacity-50"
+                    >
+                        <LogIn size={18}/>
+                        {loading ? "Authenticating..." : "Login"}
+                    </button>
+                </form>
+            ) : (
+                <div className="space-y-5">
+                    <div className="relative">
+                        <Mail className="absolute left-4 top-3.5 text-gray-400" size={20}/>
+                        <input
+                            type="email"
+                            value={resetEmail}
+                            onChange={(e) => setResetEmail(e.target.value)}
+                            className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-900/70 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            placeholder="Enter your registered email"
+                            required
+                        />
+                    </div>
+                    <button
+                        onClick={handleResetPassword}
+                        disabled={resetLoading}
+                        className="w-full flex items-center justify-center gap-2 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl shadow-lg transition disabled:opacity-50"
+                    >
+                        <Send size={16}/>
+                        {resetLoading ? "Sending..." : "Send Reset Link"}
+                    </button>
+                </div>
+            )}
+            
+            <div className="mt-6 text-center">
+                <button
+                    className="text-sm text-yellow-300/80 hover:text-yellow-300 hover:underline"
+                    onClick={() => setShowReset(!showReset)}
+                >
+                    {showReset ? "Back to Login" : "Forgot your password?"}
+                </button>
+            </div>
         </div>
-      </div>
-      <ToastContainer position="top-center" limit={1} />
     </div>
   );
 };

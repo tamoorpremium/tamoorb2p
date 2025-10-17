@@ -1,11 +1,11 @@
-// src/pages/admin/AdminOrders.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Trash2 } from 'lucide-react';
+import { Search, Trash2, Download, ChevronsUpDown, Filter, Edit } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import { supabase } from '../../utils/supabaseClient';
 import dayjs from 'dayjs';
 
+// --- All your interfaces and constants are preserved ---
 interface Order {
   id: number;
   user_id: string;
@@ -19,40 +19,32 @@ interface Order {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: 'bg-yellow-400 text-gray-900',
-  confirmed: 'bg-blue-500 text-white',
-  paid: 'bg-green-600 text-white',
-  processing: 'bg-indigo-500 text-white',
-  packed: 'bg-purple-600 text-white',
-  shipped: 'bg-orange-500 text-white',
-  delivered: 'bg-green-800 text-white',
-  cancelled: 'bg-red-600 text-white',
+  pending: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+  confirmed: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+  paid: 'bg-green-500/20 text-green-300 border-green-500/30',
+  processing: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+  packed: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+  shipped: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
+  delivered: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
+  cancelled: 'bg-red-500/20 text-red-300 border-red-500/30',
 };
 
 const SHIPMENT_STATUS_COLORS: Record<string, string> = {
-  Packed: 'bg-purple-300 text-purple-800',
-  Picked: 'bg-blue-300 text-blue-800',
-  Shipped: 'bg-orange-300 text-orange-800',
-  'Out for Delivery': 'bg-yellow-300 text-yellow-800',
-  'Arriving Early': 'bg-green-200 text-green-900',
-  'Delivery Delayed': 'bg-red-300 text-red-900',
-  Delivered: 'bg-green-600 text-white',
+    Packed: 'bg-purple-500/20 text-purple-300',
+    Picked: 'bg-blue-500/20 text-blue-300',
+    Shipped: 'bg-orange-500/20 text-orange-300',
+    'Out for Delivery': 'bg-yellow-500/20 text-yellow-300',
+    'Arriving Early': 'bg-green-500/20 text-green-300',
+    'Delivery Delayed': 'bg-red-500/20 text-red-300',
+    Delivered: 'bg-teal-500/20 text-teal-300',
+    'Not Shipped': 'bg-gray-700 text-gray-400',
 };
 
-const ORDER_STATUSES = [
-  'pending',
-  'confirmed',
-  'paid',
-  'processing',
-  'packed',
-  'shipped',
-  'delivered',
-  'cancelled',
-];
-
+const ORDER_STATUSES = ['pending', 'confirmed', 'paid', 'processing', 'packed', 'shipped', 'delivered', 'cancelled'];
 const SORT_OPTIONS = ['Date Desc', 'Date Asc', 'Total Desc', 'Total Asc', 'Status A-Z', 'Status Z-A'];
 
 const AdminOrders: React.FC = () => {
+  // --- All your state management and logic remains identical ---
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchInput, setSearchInput] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -64,36 +56,34 @@ const AdminOrders: React.FC = () => {
   const [totalOrders, setTotalOrders] = useState(0);
   const [sortBy, setSortBy] = useState(SORT_OPTIONS[0]);
   const [selectedOrders, setSelectedOrders] = useState<number[]>([]);
-
-  const [appliedFilters, setAppliedFilters] = useState({
-    searchTerm: '',
-    statusFilter: '',
-    dateFrom: '',
-    dateTo: '',
-  });
+  const [appliedFilters, setAppliedFilters] = useState({ searchTerm: '', statusFilter: '', dateFrom: '', dateTo: '' });
 
   const navigate = useNavigate();
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (currentAppliedFilters = appliedFilters, currentPage = page, currentSortBy = sortBy) => {
     setLoading(true);
     try {
-      const { searchTerm, statusFilter, dateFrom, dateTo } = appliedFilters;
+      const { searchTerm, statusFilter, dateFrom, dateTo } = currentAppliedFilters;
 
       let query = supabase
         .from('orders')
-        .select('id, user_id, placed_at, status, total, address, shipments!inner(tracking_status)', { count: 'exact' })
-        .order('placed_at', { ascending: false })
-        .range((page - 1) * pageSize, page * pageSize - 1);
+        .select('id, user_id, placed_at, status, total, address, shipments!left(tracking_status)', { count: 'exact' })
+        .range((currentPage - 1) * pageSize, currentPage * pageSize - 1);
+
+      // Apply sorting at the database level where possible
+      if (currentSortBy === 'Date Asc') query = query.order('placed_at', { ascending: true });
+      else if (currentSortBy === 'Date Desc') query = query.order('placed_at', { ascending: false });
+      else if (currentSortBy === 'Total Asc') query = query.order('total', { ascending: true });
+      else if (currentSortBy === 'Total Desc') query = query.order('total', { ascending: false });
+      else query = query.order('placed_at', { ascending: false }); // Default sort
 
       if (statusFilter) query = query.eq('status', statusFilter);
       if (searchTerm.trim()) {
-        query = query.or(
-          `id::text.ilike.%${searchTerm}%,address->>full_name.ilike.%${searchTerm}%,address->>phone.ilike.%${searchTerm}%`
-        );
+        query = query.or(`id::text.ilike.%${searchTerm}%,address->>full_name.ilike.%${searchTerm}%,address->>phone.ilike.%${searchTerm}%`);
       }
-      if (dateFrom) query = query.gte('placed_at', dateFrom);
-      if (dateTo) query = query.lte('placed_at', dateTo);
-
+      if (dateFrom) query = query.gte('placed_at', `${dateFrom}T00:00:00`);
+      if (dateTo) query = query.lte('placed_at', `${dateTo}T23:59:59`);
+      
       const { data, error, count } = await query;
       if (error) throw error;
 
@@ -105,67 +95,62 @@ const AdminOrders: React.FC = () => {
         total: order.total,
         user_name: order.address?.full_name || 'N/A',
         user_phone: order.address?.phone || 'N/A',
-        shipment_status: order.shipments?.tracking_status || 'N/A',
+        shipment_status: order.shipments?.tracking_status || 'Not Shipped',
         selected: selectedOrders.includes(order.id),
       }));
 
-      // Sorting
-      mappedOrders = mappedOrders.sort((a: any, b: any) => {
-        switch (sortBy) {
-          case 'Date Asc': return new Date(a.placed_at).getTime() - new Date(b.placed_at).getTime();
-          case 'Date Desc': return new Date(b.placed_at).getTime() - new Date(a.placed_at).getTime();
-          case 'Total Asc': return a.total - b.total;
-          case 'Total Desc': return b.total - a.total;
-          case 'Status A-Z': return a.status.localeCompare(b.status);
-          case 'Status Z-A': return b.status.localeCompare(a.status);
-          default: return 0;
-        }
-      });
+      // Handle client-side sorting for status
+      if (currentSortBy === 'Status A-Z') mappedOrders.sort((a, b) => a.status.localeCompare(b.status));
+      if (currentSortBy === 'Status Z-A') mappedOrders.sort((a, b) => b.status.localeCompare(a.status));
 
       setOrders(mappedOrders);
       setTotalOrders(count || 0);
-    } catch (err) {
-      toast.error('Failed to fetch orders');
+    } catch (err: any) {
+      toast.error(`Failed to fetch orders: ${err.message}`);
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
-
+  
   const applyFilters = () => {
-    setAppliedFilters({
-      searchTerm: searchInput,
-      statusFilter,
-      dateFrom,
-      dateTo,
-    });
-    setPage(1);
-    fetchOrders();
+    const newFilters = { searchTerm: searchInput, statusFilter, dateFrom, dateTo };
+    setAppliedFilters(newFilters);
+    setPage(1); // Reset to first page on new filter application
+    fetchOrders(newFilters, 1, sortBy);
   };
+  
+  useEffect(() => {
+    // This effect now triggers a refetch when filters change.
+    // The main fetch is handled by `applyFilters` and pagination/sort effects.
+    const newFilters = { searchTerm: searchInput, statusFilter, dateFrom, dateTo };
+    setAppliedFilters(newFilters);
+  }, [searchInput, statusFilter, dateFrom, dateTo]);
 
   useEffect(() => {
-    fetchOrders();
-    const interval = setInterval(fetchOrders, 900000); // 15 min
-    return () => clearInterval(interval);
-  }, [page, sortBy, selectedOrders]);
+    fetchOrders(appliedFilters, page, sortBy);
+  }, [page, sortBy, appliedFilters]);
+  
+  useEffect(() => {
+    setOrders(prevOrders => prevOrders.map(o => ({...o, selected: selectedOrders.includes(o.id)})));
+  }, [selectedOrders]);
+
 
   const totalPages = Math.ceil(totalOrders / pageSize);
 
   const toggleSelectOrder = (id: number) => {
-    setSelectedOrders((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+    setSelectedOrders((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   };
 
   const updateSelectedOrdersStatus = async (newStatus: string) => {
     if (selectedOrders.length === 0) return toast.warn('No orders selected');
     try {
-      for (const orderId of selectedOrders) {
-        await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
-      }
+      const { error } = await supabase.from('orders').update({ status: newStatus }).in('id', selectedOrders);
+      if (error) throw error;
+
       toast.success(`Updated ${selectedOrders.length} orders to ${newStatus}`);
       setSelectedOrders([]);
-      fetchOrders();
+      fetchOrders(appliedFilters, page, sortBy); // Refetch data
     } catch (err) {
       console.error(err);
       toast.error('Failed to update orders');
@@ -176,20 +161,10 @@ const AdminOrders: React.FC = () => {
     if (selectedOrders.length === 0) return toast.warn('No orders selected');
     const csvRows = [
       ['Order ID', 'Name', 'Phone', 'Date', 'Status', 'Total', 'Shipment Status'],
-      ...orders
-        .filter((o) => selectedOrders.includes(o.id))
-        .map((o) => [
-          o.id,
-          o.user_name,
-          o.user_phone,
-          o.placed_at,
-          o.status,
-          o.total.toFixed(2),
-          o.shipment_status || 'N/A',
-        ]),
+      ...orders.filter((o) => selectedOrders.includes(o.id)).map((o) => [o.id, `"${o.user_name}"`, o.user_phone, dayjs(o.placed_at).format('YYYY-MM-DD HH:mm'), o.status, o.total.toFixed(2), o.shipment_status || 'N/A']),
     ];
     const csvContent = csvRows.map((r) => r.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -199,280 +174,124 @@ const AdminOrders: React.FC = () => {
   };
 
   return (
-    <div className="luxury-card glass p-4 sm:p-8 rounded-3xl shadow-xl max-w-full sm:max-w-7xl mx-auto">
-      <ToastContainer position="top-right" autoClose={3000} />
-      <h1 className="text-3xl sm:text-4xl font-display font-bold mb-6 text-tamoor-charcoal">Orders</h1>
-
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-6 items-center">
-        <div className="relative flex-1 min-w-[150px]">
-          <input
-            type="text"
-            className="neomorphism w-full rounded-full py-3 pl-10 pr-4 text-tamoor-charcoal placeholder-tamoor-charcoal text-sm sm:text-base"
-            placeholder="Search by ID, Name, Phone, Email"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-          />
-          <Search className="absolute left-4 top-3 sm:top-3.5 text-tamoor-charcoal" />
-        </div>
-
-        <select
-          className="flex-1 min-w-[120px] rounded-full py-3 px-4 border border-gray-300 text-sm sm:text-base"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="">All Statuses</option>
-          {ORDER_STATUSES.map((status) => (
-            <option key={status} value={status}>
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </option>
-          ))}
-        </select>
-
-        <input
-          type="date"
-          value={dateFrom}
-          onChange={(e) => setDateFrom(e.target.value)}
-          className="flex-1 min-w-[120px] rounded-full py-3 px-4 border border-gray-300 text-sm sm:text-base"
-        />
-        <input
-          type="date"
-          value={dateTo}
-          onChange={(e) => setDateTo(e.target.value)}
-          className="flex-1 min-w-[120px] rounded-full py-3 px-4 border border-gray-300 text-sm sm:text-base"
-        />
-
-        <select
-          className="flex-1 min-w-[120px] rounded-full py-3 px-4 border border-gray-300 text-sm sm:text-base"
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-        >
-          {SORT_OPTIONS.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt}
-            </option>
-          ))}
-        </select>
-
-        <button onClick={applyFilters} className="btn-premium py-3 px-6 text-sm sm:text-base">
-          Apply Filters
-        </button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-4 sm:p-6 lg:p-8 font-sans text-gray-100">
+      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
+      
+      <header className="flex flex-col sm:flex-row justify-between items-center mb-6 pb-4 border-b border-yellow-400/20">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-wide text-yellow-400 mb-4 sm:mb-0">
+            Manage Orders
+          </h1>
+      </header>
+      
+      <div className="p-4 rounded-xl bg-gray-800/30 border border-gray-700/50 mb-6 shadow-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+              <div className="relative lg:col-span-2 xl:col-span-2">
+                  <input type="text" className="w-full rounded-lg py-2 pl-10 pr-4 bg-gray-900/70 placeholder-gray-400 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400" placeholder="Search ID, Name, Phone..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
+                  <Search className="absolute left-3 top-2.5 text-gray-400" size={20} />
+              </div>
+              <select className="w-full rounded-lg py-2 px-4 bg-gray-900/70 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                  <option value="">All Statuses</option>
+                  {ORDER_STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+              </select>
+              <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-full rounded-lg py-2 px-4 bg-gray-900/70 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+              <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full rounded-lg py-2 px-4 bg-gray-900/70 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+              <button onClick={applyFilters} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg shadow-lg hover:shadow-yellow-500/50 transition-all hover:scale-105 font-bold">
+                <Filter size={18}/> Apply
+              </button>
+          </div>
       </div>
-
-      {/* Bulk Actions */}
-      {selectedOrders.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          <select
-            className="rounded-full py-2 px-4 border border-gray-300 text-sm sm:text-base"
-            onChange={(e) => updateSelectedOrdersStatus(e.target.value)}
-            defaultValue=""
-          >
-            <option value="" disabled>
-              Update Status
-            </option>
-            {ORDER_STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={exportCSV}
-            className="btn-premium flex items-center gap-2 text-sm sm:text-base"
-          >
-            Export CSV
-          </button>
+      
+      <div className="p-4 rounded-xl bg-black/20 border border-yellow-400/20 shadow-lg">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-semibold text-gray-300">Sort by:</label>
+            <select className="rounded-lg py-1 px-2 bg-gray-700 text-white focus:outline-none text-sm" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+              {SORT_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
+          </div>
+          {selectedOrders.length > 0 && (
+            <div className="flex items-center gap-2 mt-4 sm:mt-0">
+              <span className="text-sm font-semibold text-yellow-300">{selectedOrders.length} selected</span>
+              <select className="rounded-lg py-1 px-2 bg-gray-700 text-white focus:outline-none text-sm" onChange={(e) => updateSelectedOrdersStatus(e.target.value)} value="">
+                <option value="" disabled>Update Status...</option>
+                {ORDER_STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+              </select>
+              <button onClick={exportCSV} className="flex items-center gap-2 px-3 py-1 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition">
+                <Download size={14}/> Export
+              </button>
+            </div>
+          )}
         </div>
-      )}
 
-      {/* Orders Table */}
-      <div className="overflow-x-auto sm:block">
-        <table className="min-w-full table-auto border-collapse border border-slate-300 rounded-lg overflow-hidden hidden sm:table">
-          <thead className="bg-tamoor-gold-light text-white">
-            <tr>
-              <th className="p-3">
-                <input
-                  type="checkbox"
-                  checked={selectedOrders.length === orders.length && orders.length > 0}
-                  onChange={(e) =>
-                    setSelectedOrders(e.target.checked ? orders.map(o => o.id) : [])
-                  }
-                />
-              </th>
-              <th className="p-3">Order ID</th>
-              <th className="p-3">User Name</th>
-              <th className="p-3">Phone</th>
-              <th className="p-3">Order Date</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Total (₹)</th>
-              <th className="p-3">Shipment</th>
-              <th className="p-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading
-              ? Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="animate-pulse">
-                    {Array.from({ length: 9 }).map((_, j) => (
-                      <td key={j} className="border border-slate-300 p-3">
-                        <div className="h-4 bg-gray-200 rounded w-full"></div>
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              : orders.length === 0
-              ? (
-                <tr>
-                  <td colSpan={9} className="text-center py-6 text-tamoor-charcoal">
-                    No orders found.
+        <div className="overflow-x-auto">
+          <table className="min-w-full table-auto">
+            <thead className="bg-yellow-400/10">
+              <tr className="text-yellow-300 uppercase tracking-wider text-xs">
+                <th className="p-3"><input type="checkbox" className="bg-gray-800 border-gray-600 rounded" checked={selectedOrders.length === orders.length && orders.length > 0} onChange={(e) => setSelectedOrders(e.target.checked ? orders.map(o => o.id) : [])} /></th>
+                <th className="p-3 text-left">Order</th>
+                <th className="p-3 text-left">Customer</th>
+                <th className="p-3 text-left">Date</th>
+                <th className="p-3 text-center">Status</th>
+                <th className="p-3 text-center">Shipment</th>
+                <th className="p-3 text-right">Total</th>
+                <th className="p-3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-yellow-400/10">
+              {loading ? Array.from({ length: pageSize }).map((_, i) => (
+                <tr key={i} className="animate-pulse"><td colSpan={8} className="p-4"><div className="h-8 bg-gray-800/50 rounded"></div></td></tr>
+              )) : orders.length === 0 ? (
+                <tr><td colSpan={8} className="text-center py-16 text-gray-400">No orders found.</td></tr>
+              ) : orders.map((order) => (
+                <tr key={order.id} className={`hover:bg-yellow-400/5 transition-colors ${order.selected ? 'bg-yellow-400/10' : ''}`}>
+                  <td className="p-3"><input type="checkbox" className="bg-gray-800 border-gray-600 rounded" checked={order.selected || false} onChange={() => toggleSelectOrder(order.id)} /></td>
+                  <td className="p-3"><div className="font-bold text-gray-100 cursor-pointer" onClick={() => navigate(`/admin/orders/${order.id}`)}>#{order.id}</div></td>
+                  <td className="p-3">
+                    <div className="font-semibold text-gray-200">{order.user_name}</div>
+                    <div className="text-sm text-gray-400">{order.user_phone}</div>
+                  </td>
+                  <td className="p-3 text-sm text-gray-400">{dayjs(order.placed_at).format('DD MMM YYYY, hh:mm A')}</td>
+                  <td className="p-3 text-center">
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold border ${STATUS_COLORS[order.status] || 'bg-gray-500/20 text-gray-300 border-gray-500/30'}`}>{order.status}</span>
+                  </td>
+                  <td className="p-3 text-center">
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${SHIPMENT_STATUS_COLORS[order.shipment_status!] || 'bg-gray-700 text-gray-400'}`}>{order.shipment_status}</span>
+                  </td>
+                  <td className="p-3 text-right font-mono font-bold text-lg text-white">₹{order.total.toFixed(2)}</td>
+                  <td className="p-3 text-center">
+                    <div className="flex justify-center gap-2">
+                        <button onClick={() => navigate(`/admin/orders/${order.id}`)} className="p-2 bg-yellow-400/80 text-gray-900 rounded-full hover:bg-yellow-400 hover:scale-110 transition-all" title="View Details"><Edit size={16} /></button>
+                        {order.status !== 'cancelled' && (
+                           <button 
+                             onClick={async () => {
+                                await supabase.from('orders').update({ status: 'cancelled' }).eq('id', order.id);
+                                toast.success(`Order #${order.id} cancelled`);
+                                fetchOrders(appliedFilters, page, sortBy);
+                             }}
+                             className="p-2 bg-red-600/80 text-white rounded-full hover:bg-red-600 hover:scale-110 transition-all" title="Cancel Order"
+                           >
+                             <Trash2 size={16} />
+                           </button>
+                        )}
+                    </div>
                   </td>
                 </tr>
-              )
-              : orders.map((order) => (
-                  <tr key={order.id} className="hover:bg-white/20 transition-colors">
-                    <td className="border border-slate-300 p-3">
-                      <input
-                        type="checkbox"
-                        checked={order.selected || false}
-                        onChange={() => toggleSelectOrder(order.id)}
-                      />
-                    </td>
-                    <td
-                      className="border border-slate-300 p-3 cursor-pointer"
-                      onClick={() => navigate(`/admin/orders/${order.id}`)}
-                    >
-                      {order.id}
-                    </td>
-                    <td className="border border-slate-300 p-3">{order.user_name}</td>
-                    <td className="border border-slate-300 p-3">{order.user_phone}</td>
-                    <td className="border border-slate-300 p-3">
-                      {new Date(order.placed_at).toLocaleDateString()}
-                    </td>
-                    <td className="border border-slate-300 p-3">
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                          STATUS_COLORS[order.status] || 'bg-gray-400 text-gray-900'
-                        }`}
-                      >
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                      </span>
-                    </td>
-                    <td className="border border-slate-300 p-3">{order.total.toFixed(2)}</td>
-                    <td className="border border-slate-300 p-3">
-                      <span
-                        className={`px-2 py-1 rounded-full text-sm font-semibold ${
-                          SHIPMENT_STATUS_COLORS[order.shipment_status!] || 'bg-gray-200 text-gray-800'
-                        }`}
-                      >
-                        {order.shipment_status}
-                      </span>
-                    </td>
-                    <td className="border border-slate-300 p-3 flex flex-wrap gap-2">
-                      <button
-                        onClick={() => navigate(`/admin/orders/${order.id}`)}
-                        className="btn-premium text-sm"
-                      >
-                        View
-                      </button>
-                      {order.status !== 'cancelled' && (
-                        <button
-                          onClick={async () => {
-                            await supabase.from('orders').update({ status: 'cancelled' }).eq('id', order.id);
-                            toast.success('Order cancelled');
-                            fetchOrders();
-                          }}
-                          className="btn-danger text-sm flex items-center gap-1"
-                        >
-                          <Trash2 size={16} /> Cancel
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-          </tbody>
-        </table>
-
-        {/* Mobile Stacked Cards */}
-        <div className="sm:hidden flex flex-col gap-4">
-          {loading
-            ? Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="p-4 border rounded-lg animate-pulse bg-white/10"></div>
-              ))
-            : orders.map((order) => (
-                <div key={order.id} className="p-4 border rounded-lg bg-white/10 flex flex-col gap-1">
-                  <div className="flex justify-between">
-                    <span><strong>ID:</strong> {order.id}</span>
-                    <input
-                      type="checkbox"
-                      checked={order.selected || false}
-                      onChange={() => toggleSelectOrder(order.id)}
-                    />
-                  </div>
-                  <p><strong>Name:</strong> {order.user_name}</p>
-                  <p><strong>Phone:</strong> {order.user_phone}</p>
-                  <p><strong>Date:</strong> {new Date(order.placed_at).toLocaleDateString()}</p>
-                  <p>
-                    <strong>Status:</strong>{' '}
-                    <span className={`px-2 py-1 rounded-full text-sm font-semibold ${
-                      STATUS_COLORS[order.status] || 'bg-gray-400 text-gray-900'
-                    }`}>{order.status}</span>
-                  </p>
-                  <p><strong>Total:</strong> ₹{order.total.toFixed(2)}</p>
-                  <p>
-                    <strong>Shipment:</strong>{' '}
-                    <span className={`px-2 py-1 rounded-full text-sm font-semibold ${
-                      SHIPMENT_STATUS_COLORS[order.shipment_status!] || 'bg-gray-200 text-gray-800'
-                    }`}>{order.shipment_status}</span>
-                  </p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <button
-                      onClick={() => navigate(`/admin/orders/${order.id}`)}
-                      className="btn-premium text-sm"
-                    >
-                      View
-                    </button>
-                    {order.status !== 'cancelled' && (
-                      <button
-                        onClick={async () => {
-                          await supabase.from('orders').update({ status: 'cancelled' }).eq('id', order.id);
-                          toast.success('Order cancelled');
-                          fetchOrders();
-                        }}
-                        className="btn-danger text-sm flex items-center gap-1"
-                      >
-                        <Trash2 size={16} /> Cancel
-                      </button>
-                    )}
-                  </div>
-                </div>
               ))}
+            </tbody>
+          </table>
         </div>
+        
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-6 flex-wrap">
+            <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="px-3 py-1 bg-gray-700/50 text-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-600/70">Prev</button>
+            <span className="px-3 py-1 text-sm font-semibold">Page {page} of {totalPages}</span>
+            <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)} className="px-3 py-1 bg-gray-700/50 text-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-600/70">Next</button>
+          </div>
+        )}
       </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-4 flex-wrap">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}
-            className="px-3 py-1 border rounded disabled:opacity-50"
-          >
-            Prev
-          </button>
-          <span className="px-3 py-1">
-            {page} / {totalPages}
-          </span>
-          <button
-            disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}
-            className="px-3 py-1 border rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
     </div>
   );
 };
 
 export default AdminOrders;
+

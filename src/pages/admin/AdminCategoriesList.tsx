@@ -1,168 +1,185 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../../utils/supabaseClient';
-import { Link } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, Plus, Folder, CornerDownRight, Edit, Hash } from 'lucide-react';
+import { toast, ToastContainer } from 'react-toastify';
+
+// Interface for a category, now including children
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  parent: { id: number; name: string } | null;
+  children: Category[];
+}
 
 const AdminCategoriesList: React.FC = () => {
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
+  const navigate = useNavigate();
 
-  const fetchCategories = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('categories')
-      .select('id, name, slug, parent:parent_id(id, name)')
-      .order('name', { ascending: true });
-
-    if (error) {
-      alert('Failed to load categories');
-    } else {
-      setCategories(data || []);
-    }
-    setLoading(false);
-  };
-
+  // --- Using YOUR ORIGINAL, WORKING fetchCategories logic ---
   useEffect(() => {
-    fetchCategories();
+    const fetchAndBuildTree = async () => {
+      setLoading(true);
+      try {
+        const { data: flatCategories, error } = await supabase
+          .from('categories')
+          .select('id, name, slug, parent:parent_id(id, name)')
+          .order('name', { ascending: true });
+
+        if (error) {
+          throw error;
+        }
+
+        // --- UI ENHANCEMENT: Build the tree structure on the client-side ---
+        const categoryMap = new Map<number, Category>();
+        const categoryTree: Category[] = [];
+
+        (flatCategories || []).forEach((cat: any) => {
+          // Supabase v2 can return relation as an array. We handle it safely.
+           const parentObject = Array.isArray(cat.parent) && cat.parent.length > 0 ? cat.parent[0] : cat.parent;
+          
+          categoryMap.set(cat.id, {
+            ...cat,
+            parent: parentObject,
+            children: [],
+          });
+        });
+
+        categoryMap.forEach(cat => {
+          if (cat.parent?.id && categoryMap.has(cat.parent.id)) {
+            categoryMap.get(cat.parent.id)!.children.push(cat);
+          } else {
+            categoryTree.push(cat);
+          }
+        });
+
+        setCategories(categoryTree);
+
+      } catch (error: any) {
+        console.error("Failed to load categories:", error);
+        // FIX: Replaced alert with toast
+        toast.error(`Failed to load categories: ${error.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAndBuildTree();
   }, []);
 
-  // Local search filter
+  // Recursive search to filter the tree structure
   const filteredCategories = useMemo(() => {
-    return categories.filter((cat) =>
-      [cat.name, cat.slug, cat.parent?.name]
-        .filter(Boolean)
-        .some((field) => field.toLowerCase().includes(search.toLowerCase()))
-    );
+    if (!search) return categories;
+
+    const filterTree = (nodes: Category[]): Category[] => {
+      return nodes.reduce((acc: Category[], node) => {
+        const children = filterTree(node.children);
+        const hasMatchingChild = children.length > 0;
+        const selfMatches = node.name.toLowerCase().includes(search.toLowerCase()) || node.slug.toLowerCase().includes(search.toLowerCase());
+
+        if (selfMatches || hasMatchingChild) {
+          acc.push({ ...node, children });
+        }
+        return acc;
+      }, []);
+    };
+    return filterTree(categories);
   }, [categories, search]);
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-tr from-gray-900 via-gray-800 to-gray-900 p-6 sm:p-10 font-sans text-gray-100">
-        {/* Header + Actions */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-wide drop-shadow-lg text-yellow-400">
+      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-4 sm:p-6 lg:p-8 font-sans text-gray-100">
+        
+        <header className="flex flex-col sm:flex-row justify-between items-center mb-6 pb-4 border-b border-yellow-400/20">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-wide text-yellow-400 mb-4 sm:mb-0">
             Manage Categories
           </h1>
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="relative flex-1 sm:flex-initial">
-              <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search categories..."
-                className="pl-10 pr-4 py-2 rounded-full bg-gray-800 text-gray-100 border border-yellow-400/40 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
+          <Link
+            to="/admin/categories/new"
+            className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg shadow-lg hover:shadow-yellow-500/50 transition-all hover:scale-105"
+          >
+            <Plus size={18} /> <span className="font-semibold">Add New Category</span>
+          </Link>
+        </header>
+
+        <div className="p-4 rounded-xl bg-gray-800/30 border border-gray-700/50 mb-6 shadow-lg max-w-md">
+            <div className="relative">
+                <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search by name or slug..."
+                    className="w-full rounded-lg py-2 pl-10 pr-4 bg-gray-900/70 placeholder-gray-400 text-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                />
+                <Search className="absolute left-3 top-2.5 text-gray-400" size={20} />
             </div>
-            <Link
-              to="/admin/categories/new"
-              className="px-4 py-2 bg-yellow-400 text-gray-900 rounded-full shadow-lg hover:shadow-yellow-500/75 transition-transform hover:scale-105"
-            >
-              Add New Category
-            </Link>
-          </div>
         </div>
 
-        {/* Loading state */}
         {loading ? (
-          <p className="text-yellow-400 font-semibold text-center py-8 text-lg">
-            Loading categories...
-          </p>
+            <div className="flex justify-center items-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400"></div></div>
         ) : (
-          <>
-            {/* ✅ Mobile view (cards) */}
-            <div className="block sm:hidden space-y-4">
-              {filteredCategories.length === 0 ? (
-                <p className="text-yellow-300 text-center py-10 font-semibold text-lg select-none">
-                  No categories found.
-                </p>
-              ) : (
-                filteredCategories.map((cat) => (
-                  <div
-                    key={cat.id}
-                    className="p-4 rounded-xl bg-gray-800/60 border border-yellow-400/30 shadow-neumorphic hover:scale-[1.02] transition"
-                  >
-                    <p className="text-lg font-semibold text-yellow-300">{cat.name}</p>
-                    <p className="text-sm text-gray-300 mt-1">Slug: {cat.slug}</p>
-                    <p className="text-sm text-gray-300">
-                      Parent: {cat.parent?.name || '-'}
-                    </p>
-                    <Link
-                      to={`/admin/categories/${cat.id}`}
-                      className="mt-3 inline-block bg-yellow-400 text-gray-900 rounded-full px-4 py-1 font-semibold shadow-md hover:scale-105 transition"
-                    >
-                      Edit
-                    </Link>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* ✅ Desktop view (table) */}
-            <div className="hidden sm:block overflow-hidden rounded-xl backdrop-blur-xl bg-white bg-opacity-[0.05] border border-yellow-400 border-opacity-30 shadow-neumorphic">
-              <table className="min-w-full table-auto">
-                <thead>
-                  <tr className="bg-gradient-to-r from-yellow-400 to-yellow-300 text-gray-900 uppercase tracking-widest">
-                    <th className="p-5 text-left">Name</th>
-                    <th className="p-5 text-left">Slug</th>
-                    <th className="p-5 text-left">Parent</th>
-                    <th className="p-5 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredCategories.length === 0 ? (
-                    <tr>
-                      <td
-                        className="text-yellow-300 text-center py-20 font-semibold text-lg select-none"
-                        colSpan={4}
-                      >
-                        No categories found.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredCategories.map((cat) => (
-                      <tr
-                        key={cat.id}
-                        className="cursor-default hover:scale-[1.03] hover:bg-yellow-400/20 transition duration-300 ease-in-out"
-                      >
-                        <td className="border-b border-yellow-400 border-opacity-20 px-6 py-5 font-semibold text-yellow-300 whitespace-nowrap">
-                          {cat.name}
-                        </td>
-                        <td className="border-b border-yellow-400 border-opacity-20 px-6 py-5">
-                          {cat.slug}
-                        </td>
-                        <td className="border-b border-yellow-400 border-opacity-20 px-6 py-5 whitespace-nowrap">
-                          {cat.parent?.name || '-'}
-                        </td>
-                        <td className="border-b border-yellow-400 border-opacity-20 px-6 py-5 text-center">
-                          <Link
-                            to={`/admin/categories/${cat.id}`}
-                            className="bg-yellow-400 text-gray-900 rounded-full px-4 py-2 font-semibold shadow-md hover:shadow-yellow-500/75 transition-transform hover:scale-110"
-                            title="Edit category"
-                          >
-                            Edit
-                          </Link>
-                        </td>
-                      </tr>
+            <div className="space-y-3">
+                {filteredCategories.length === 0 ? (
+                    <div className="text-center py-16 text-gray-400 bg-black/20 rounded-lg">No categories found or match your search.</div>
+                ) : (
+                    filteredCategories.map(parentCat => (
+                        <div key={parentCat.id} className="p-4 rounded-xl bg-black/20 border border-yellow-400/20 shadow-lg">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                <div className="flex-1 flex items-center gap-3">
+                                    <Folder size={20} className="text-yellow-400" />
+                                    <span className="font-bold text-lg text-gray-100">{parentCat.name}</span>
+                                </div>
+                                <div className="flex items-center gap-4 w-full sm:w-auto">
+                                  <div className="flex-1 flex items-center gap-2 text-sm text-gray-400">
+                                    <Hash size={14}/>
+                                    <span>{parentCat.slug}</span>
+                                  </div>
+                                  <button
+                                      onClick={() => navigate(`/admin/categories/${parentCat.id}`)}
+                                      className="flex items-center gap-2 px-3 py-1.5 bg-yellow-400/80 text-gray-900 rounded-full hover:bg-yellow-400 hover:scale-105 transition-all text-sm font-semibold"
+                                  >
+                                      <Edit size={14} /> Edit
+                                  </button>
+                                </div>
+                            </div>
+                            
+                            {parentCat.children.length > 0 && (
+                                <div className="mt-3 ml-4 sm:ml-8 pl-4 border-l-2 border-yellow-400/20 space-y-2">
+                                    {parentCat.children.map(childCat => (
+                                        <div key={childCat.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                            <div className="flex-1 flex items-center gap-3">
+                                                <CornerDownRight size={20} className="text-gray-500"/>
+                                                <span className="font-semibold text-gray-200">{childCat.name}</span>
+                                            </div>
+                                             <div className="flex items-center gap-4 w-full sm:w-auto">
+                                                <div className="flex-1 flex items-center gap-2 text-sm text-gray-400">
+                                                    <Hash size={14}/>
+                                                    <span>{childCat.slug}</span>
+                                                </div>
+                                                <button
+                                                    onClick={() => navigate(`/admin/categories/${childCat.id}`)}
+                                                    className="flex items-center gap-2 px-3 py-1.5 bg-gray-600/50 text-gray-200 rounded-full hover:bg-gray-600 hover:scale-105 transition-all text-sm font-semibold"
+                                                >
+                                                    <Edit size={14} /> Edit
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     ))
-                  )}
-                </tbody>
-              </table>
+                )}
             </div>
-          </>
         )}
       </div>
-
-      <style>{`
-        .shadow-neumorphic {
-          box-shadow:
-            8px 8px 15px #1f2937,
-            -8px -8px 15px #323f50;
-        }
-      `}</style>
     </>
   );
 };
 
 export default AdminCategoriesList;
+

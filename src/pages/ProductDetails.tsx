@@ -4,6 +4,8 @@ import { supabase } from "../utils/supabaseClient";
 import { ShoppingCart, X, Star, Heart } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import { createPortal } from 'react-dom';
+import { useSwipeable } from 'react-swipeable';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Product {
   id: number;
@@ -69,6 +71,13 @@ const ProductDetails: React.FC = () => {
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(true);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isReviewsOpen, setIsReviewsOpen] = useState(false);
+  // ... inside the ProductDetails component
+  // NEW: State to track the current image index
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // NEW: Combine all images into one array for the slider
+  const allImages = product ? [product.image, ...images.map(img => img.image_url)] : [];
+  const uniqueImages = [...new Set(allImages)];
 
 
   // Fetch product
@@ -318,6 +327,36 @@ useEffect(() => {
   reviews.forEach(r => ratingCounts[r.rating] = (ratingCounts[r.rating]||0)+1);
   const totalReviews = reviews.length;
 
+  // ... inside the ProductDetails component
+
+  // NEW: Function to go to the previous image
+  const handlePrev = () => {
+    const newIndex = currentImageIndex === 0 ? uniqueImages.length - 1 : currentImageIndex - 1;
+    setCurrentImageIndex(newIndex);
+  };
+
+  // NEW: Function to go to the next image
+  const handleNext = () => {
+    const newIndex = currentImageIndex === uniqueImages.length - 1 ? 0 : currentImageIndex + 1;
+    setCurrentImageIndex(newIndex);
+  };
+
+  // NEW: useEffect to update the selectedImage when the index changes
+  useEffect(() => {
+    if (uniqueImages.length > 0) {
+      setSelectedImage(uniqueImages[currentImageIndex]);
+    }
+  }, [currentImageIndex, uniqueImages]);
+
+
+  // NEW: Setup swipe handlers
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => handleNext(),
+    onSwipedRight: () => handlePrev(),
+    preventScrollOnSwipe: true, // Prevents page scroll while swiping
+    trackMouse: true // Allows dragging on desktop for testing
+  });
+
   return (
     <div className="max-w-6xl mx-auto p-4">
       {/* Main Section */}
@@ -325,7 +364,7 @@ useEffect(() => {
         {/* Images */}
         <div className="md:w-1/2 flex flex-col gap-2">
           {/* Main Image with Wishlist */}
-          <div className="relative rounded-2xl overflow-hidden">
+          <div {...swipeHandlers} className="relative rounded-2xl overflow-hidden group">
             <img
               src={selectedImage || product.image}
               alt={product.name}
@@ -360,19 +399,36 @@ useEffect(() => {
                 }`}
               />
             </button>
+            {/* NEW: Navigation Buttons for Desktop */}
+              {uniqueImages.length > 1 && (
+                <>
+                  <button
+                    onClick={handlePrev}
+                    className="absolute top-1/2 left-2 -translate-y-1/2 p-2 bg-white/60 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={handleNext}
+                    className="absolute top-1/2 right-2 -translate-y-1/2 p-2 bg-white/60 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity hidden md:block"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                </>
+              )}
           </div>
 
           {/* Thumbnails */}
           <div className="flex gap-2 overflow-x-auto">
-            {images.map((img) => (
+            {uniqueImages.map((imgUrl, index) => (
               <img
-                key={img.id}
-                src={img.image_url}
-                alt={product.name}
+                key={index}
+                src={imgUrl}
+                alt={`${product.name} thumbnail ${index + 1}`}
                 className={`w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg cursor-pointer border-2 ${
-                  selectedImage === img.image_url ? "border-amber-500" : "border-transparent"
+                  currentImageIndex === index ? "border-amber-500" : "border-transparent" // Compare index now
                 }`}
-                onClick={() => setSelectedImage(img.image_url)}
+                onClick={() => setCurrentImageIndex(index)} // Set index on click
               />
             ))}
           </div>

@@ -543,7 +543,7 @@ const Products = () => {
                                             {/* This badge will now appear over the image if the product is out of stock */}
                                             {!product.is_in_stock && (
                                                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                                    <span className="bg-white/90 text-neutral-800 font-bold text-sm px-4 py-2 rounded-full">OUT OF STOCK</span>
+                                                    <span className="bg-red-500 text-white font-bold text-sm px-4 py-2 rounded-full shadow-lg shadow-red-500/50">OUT OF STOCK</span>
                                                 </div>
                                             )}
 

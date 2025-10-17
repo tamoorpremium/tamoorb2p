@@ -181,31 +181,42 @@ useEffect(() => {
   }, [id]);
 
   // ✅ Toggle wishlist
+  // ✅ CORRECTED LOGIC
   const toggleWishlist = async (productId: number) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      window.location.href = "/auth?message=loginRequired&redirect=/product/" + productId;
+      navigate(`/auth?message=loginRequired&redirect=/product/${productId}`);
       return;
     }
 
     const isInWishlist = wishlistIds.includes(productId);
 
     if (isInWishlist) {
-      await supabase.from("wishlists").delete().eq("user_id", user.id).eq("product_id", productId);
-      setWishlistIds((prev) => prev.filter((id) => id !== productId));
-      setWishlistMessage({ text: "Item removed from wishlist ❌", type: "remove" });
+      // Try to delete from DB
+      const { error } = await supabase.from("wishlists").delete().eq("user_id", user.id).eq("product_id", productId);
+      
+      // Only update state and show toast if DB operation was successful
+      if (!error) {
+        setWishlistIds((prev) => prev.filter((id) => id !== productId));
+        toast.info("Removed from Wishlist ❤️"); // MOVED HERE
+      } else {
+        toast.error("Failed to remove item.");
+      }
     } else {
+      // Try to insert into DB
       const { error } = await supabase.from("wishlists").insert({
         user_id: user.id,
         product_id: productId,
       });
+      
+      // Only update state and show toast if DB operation was successful
       if (!error) {
         setWishlistIds((prev) => [...prev, productId]);
-        setWishlistMessage({ text: "Item added to wishlist ✅", type: "success" });
+        toast.success("Added to Wishlist ❤️"); // MOVED HERE
+      } else {
+        toast.error("Failed to add item.");
       }
     }
-
-    setTimeout(() => setWishlistMessage(null), 3000);
   };
 
   // Fetch reviews
@@ -382,15 +393,9 @@ useEffect(() => {
             )}
 
             {/* Wishlist Button */}
+            {/* ✅ CORRECTED JSX */}
             <button
-              onClick={() => {
-                toggleWishlist(product.id);
-                if (wishlistIds.includes(product.id)) {
-                  toast.info("Removed from Wishlist ❤️");
-                } else {
-                  toast.success("Added to Wishlist ❤️");
-                }
-              }}
+              onClick={() => toggleWishlist(product.id)} // Just call the function
               className="absolute top-4 right-4 p-3 bg-white/80 rounded-full shadow-md hover:bg-white transition"
             >
               <Heart

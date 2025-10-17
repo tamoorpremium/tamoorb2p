@@ -564,12 +564,6 @@ const Products = () => {
                                                             }`}
                                                     />
                                                 </button>
-                                                <button
-                                                    onClick={(e) => e.preventDefault()}
-                                                    className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
-                                                >
-                                                    <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                                                </button>
                                             </div>
                                         </div>
 

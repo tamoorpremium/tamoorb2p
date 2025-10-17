@@ -79,6 +79,36 @@ const ProductDetails: React.FC = () => {
   const allImages = product ? [product.image, ...images.map(img => img.image_url)] : [];
   const uniqueImages = [...new Set(allImages)];
 
+    // ... inside the ProductDetails component
+
+  // NEW: Function to go to the previous image
+  const handlePrev = () => {
+    const newIndex = currentImageIndex === 0 ? uniqueImages.length - 1 : currentImageIndex - 1;
+    setCurrentImageIndex(newIndex);
+  };
+
+  // NEW: Function to go to the next image
+  const handleNext = () => {
+    const newIndex = currentImageIndex === uniqueImages.length - 1 ? 0 : currentImageIndex + 1;
+    setCurrentImageIndex(newIndex);
+  };
+
+  // NEW: useEffect to update the selectedImage when the index changes
+  useEffect(() => {
+    if (uniqueImages.length > 0) {
+      setSelectedImage(uniqueImages[currentImageIndex]);
+    }
+  }, [currentImageIndex, uniqueImages]);
+
+
+  // NEW: Setup swipe handlers
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => handleNext(),
+    onSwipedRight: () => handlePrev(),
+    preventScrollOnSwipe: true, // Prevents page scroll while swiping
+    trackMouse: true // Allows dragging on desktop for testing
+  });
+
 
   // Fetch product
   useEffect(() => {
@@ -327,35 +357,7 @@ useEffect(() => {
   reviews.forEach(r => ratingCounts[r.rating] = (ratingCounts[r.rating]||0)+1);
   const totalReviews = reviews.length;
 
-  // ... inside the ProductDetails component
 
-  // NEW: Function to go to the previous image
-  const handlePrev = () => {
-    const newIndex = currentImageIndex === 0 ? uniqueImages.length - 1 : currentImageIndex - 1;
-    setCurrentImageIndex(newIndex);
-  };
-
-  // NEW: Function to go to the next image
-  const handleNext = () => {
-    const newIndex = currentImageIndex === uniqueImages.length - 1 ? 0 : currentImageIndex + 1;
-    setCurrentImageIndex(newIndex);
-  };
-
-  // NEW: useEffect to update the selectedImage when the index changes
-  useEffect(() => {
-    if (uniqueImages.length > 0) {
-      setSelectedImage(uniqueImages[currentImageIndex]);
-    }
-  }, [currentImageIndex, uniqueImages]);
-
-
-  // NEW: Setup swipe handlers
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => handleNext(),
-    onSwipedRight: () => handlePrev(),
-    preventScrollOnSwipe: true, // Prevents page scroll while swiping
-    trackMouse: true // Allows dragging on desktop for testing
-  });
 
   return (
     <div className="max-w-6xl mx-auto p-4">

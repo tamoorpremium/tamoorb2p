@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../../utils/supabaseClient';
-import { Trash2, X, Edit } from 'lucide-react';
+import { Trash2, X, Edit, Plus, Loader2 } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -25,7 +25,7 @@ const PromoCodesAdmin: React.FC = () => {
   const [editingPromo, setEditingPromo] = useState<PromoCode | null>(null);
   const [form, setForm] = useState({
     code: '',
-    type: 'percentage',
+    type: 'percentage' as 'percentage' | 'fixed',
     value: 0,
     min_order_amount: 0,
     valid_from: new Date(),
@@ -143,7 +143,7 @@ const PromoCodesAdmin: React.FC = () => {
         setShowModal(false);
       }
     } else {
-      const { error } = await supabase.from('promo_codes').insert(payload);
+      const { error } = await supabase.from('promo_codes').insert(payload as any);
       if (!error) {
         fetchPromoCodes();
         setShowModal(false);
@@ -151,207 +151,112 @@ const PromoCodesAdmin: React.FC = () => {
     }
   };
 
-  return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-tamoor-charcoal">Promo Codes Admin</h1>
-      <button
-        className="mb-4 px-5 py-2 bg-gradient-to-r from-yellow-500 to-yellow-700 text-white rounded-lg shadow-md hover:scale-105 transition transform"
-        onClick={() => openModal()}
-      >
-        + Add Promo Code
-      </button>
+  const inputClasses = "w-full p-3 bg-slate-800/70 border border-slate-700 rounded-lg text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-colors";
+  const selectClasses = `${inputClasses} appearance-none`;
 
-      {/* Promo Codes Table */}
-      <div className="overflow-x-auto">
-      <table className="min-w-full border-collapse border border-gray-300 rounded-lg overflow-hidden text-sm">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Code</th>
-            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Type</th>
-            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Value</th>
-            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Min Order</th>
-            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Valid From</th>
-            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Valid To</th>
-            <th className="p-3 sm:p-2 text-xs sm:text-sm border">First Order</th>
-            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Enabled</th>
-            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Usage</th>
-            <th className="p-3 sm:p-2 text-xs sm:text-sm border">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
-            <tr>
-              <td colSpan={10} className="text-center p-4">Loading...</td>
-            </tr>
-          ) : promoCodes.length === 0 ? (
-            <tr>
-              <td colSpan={10} className="text-center p-4">No promo codes found.</td>
-            </tr>
-          ) : (
-            promoCodes.map((promo) => (
-              <tr key={promo.id} className="hover:bg-gray-50">
-                <td className="p-2 sm:p-1 text-xs sm:text-sm border">{promo.code}</td>
-                <td className="p-2 sm:p-1 text-xs sm:text-sm border capitalize">{promo.type}</td>
-                <td className="p-2 sm:p-1 text-xs sm:text-sm border">{promo.value}</td>
-                <td className="p-2 sm:p-1 text-xs sm:text-sm border">{promo.min_order_amount}</td>
-                <td className="p-2 sm:p-1 text-xs sm:text-sm border">{new Date(promo.valid_from).toLocaleDateString()}</td>
-                <td className="p-2 sm:p-1 text-xs sm:text-sm border">{new Date(promo.valid_to).toLocaleDateString()}</td>
-                <td className="p-2 sm:p-1 text-xs sm:text-sm border">
-                  {promo.first_order_only ? <span className="text-yellow-700 font-semibold">Yes</span> : 'No'}
-                </td>
-                <td className="p-2 sm:p-1 text-xs sm:text-sm border">
-                  <button
-                    className={`px-3 py-1 rounded-full text-white ${promo.enabled ? 'bg-green-500' : 'bg-gray-400'}`}
-                    onClick={() => toggleEnable(promo.id, promo.enabled)}
-                  >
-                    {promo.enabled ? 'Enabled' : 'Disabled'}
-                  </button>
-                </td>
-                <td className="p-2 border text-center">
-                  {promo.usage_limit ? `${promo.used_count} / ${promo.usage_limit}` : `${promo.used_count}`}
-                </td>
-                <td className="p-2 border flex flex-col sm:flex-row justify-center gap-2">
-                  <button onClick={() => openModal(promo)} className="text-blue-500 hover:text-blue-700">
-                    <Edit />
-                  </button>
-                  <button onClick={() => deletePromo(promo.id)} className="text-red-500 hover:text-red-700">
-                    <Trash2 />
-                  </button>
-                </td>
+  return (
+    <div className="animate-fadeIn">
+      <style>{`
+        .react-datepicker { background-color: #0f172a; border: 1px solid #334155; }
+        .react-datepicker__header { background-color: #1e293b; border-bottom: 1px solid #334155; }
+        .react-datepicker__current-month, .react-datepicker-time__header, .react-datepicker-year-header, .react-datepicker__day-name, .react-datepicker__day, .react-datepicker__time-name { color: #cbd5e1; }
+        .react-datepicker__day:hover { background-color: #334155; }
+        .react-datepicker__day--selected { background-color: #f59e0b; color: #020617; }
+        .react-datepicker__navigation-icon::before { border-color: #cbd5e1; }
+      `}</style>
+
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-yellow-400">Manage Promo Codes</h2>
+          <p className="text-slate-400 mt-1">Create, edit, and track promotional discounts.</p>
+        </div>
+        <button
+          onClick={() => openModal()}
+          className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-bold text-gray-900 bg-yellow-400 hover:bg-yellow-300 transition-all duration-200"
+        >
+          <Plus size={18} /> Add New Code
+        </button>
+      </header>
+      
+      <div className="bg-slate-900/30 border border-slate-800 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm text-left text-slate-300">
+            <thead className="text-xs text-slate-400 uppercase bg-slate-800/60">
+              <tr>
+                <th scope="col" className="px-6 py-3">Code</th>
+                <th scope="col" className="px-6 py-3">Value</th>
+                <th scope="col" className="px-6 py-3">Min. Order</th>
+                <th scope="col" className="px-6 py-3">Validity</th>
+                <th scope="col" className="px-6 py-3">Usage</th>
+                <th scope="col" className="px-6 py-3 text-center">Enabled</th>
+                <th scope="col" className="px-6 py-3 text-center">Actions</th>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={7} className="text-center p-6"><Loader2 className="animate-spin text-cyan-400 mx-auto" /></td></tr>
+              ) : promoCodes.length === 0 ? (
+                <tr><td colSpan={7} className="text-center p-6 text-slate-500">No promo codes found.</td></tr>
+              ) : (
+                promoCodes.map((promo) => (
+                  <tr key={promo.id} className="border-b border-slate-800 hover:bg-slate-800/40">
+                    <td className="px-6 py-4 font-mono font-bold text-yellow-400">{promo.code}</td>
+                    <td className="px-6 py-4">{promo.type === 'percentage' ? `${promo.value}%` : `₹${promo.value}`}</td>
+                    <td className="px-6 py-4">₹{promo.min_order_amount}</td>
+                    <td className="px-6 py-4">{new Date(promo.valid_from).toLocaleDateString()} - {new Date(promo.valid_to).toLocaleDateString()}</td>
+                    <td className="px-6 py-4">{promo.used_count} / {promo.usage_limit ?? '∞'}</td>
+                    <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => toggleEnable(promo.id, promo.enabled)}
+                          className={`px-3 py-1 text-xs rounded-full font-semibold ${promo.enabled ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-700 text-slate-400'}`}
+                        >
+                          {promo.enabled ? 'Enabled' : 'Disabled'}
+                        </button>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex justify-center gap-4">
+                        <button onClick={() => openModal(promo)} className="text-slate-400 hover:text-cyan-400 transition"><Edit size={16} /></button>
+                        <button onClick={() => deletePromo(promo.id)} className="text-slate-400 hover:text-red-500 transition"><Trash2 size={16} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Create / Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white/90 backdrop-blur-md p-4 sm:p-6 rounded-2xl w-full max-w-lg shadow-xl relative animate-slide-in">
-            <h2 className="text-2xl font-bold mb-4 text-tamoor-charcoal">{editingPromo ? 'Edit' : 'Add'} Promo Code</h2>
-            <button
-              className="absolute top-4 right-4 text-gray-700 hover:text-red-500 transition"
-              onClick={() => setShowModal(false)}
-            >
-              <X size={20} />
-            </button>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col">
-                <label className="font-semibold text-gray-700 mb-1">Promo Code</label>
-                <input
-                  type="text"
-                  name="code"
-                  value={form.code}
-                  onChange={handleChange}
-                  placeholder="e.g., WELCOME10"
-                  className="border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none transition"
-                />
-                <span className="text-sm text-gray-500 mt-1">Unique code for users</span>
+        <div className="fixed inset-0 bg-black/60 flex items-start justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-slate-700 p-6 rounded-xl w-full max-w-2xl shadow-xl relative animate-fadeIn">
+            <h2 className="text-xl font-bold mb-6 text-yellow-400">{editingPromo ? 'Edit' : 'Add'} Promo Code</h2>
+            <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 text-slate-500 hover:text-white transition"><X size={20} /></button>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              <div className="md:col-span-2"><label className="block text-sm font-medium text-slate-300 mb-2">Promo Code</label><input type="text" name="code" value={form.code} onChange={handleChange} className={inputClasses} placeholder="e.g., WELCOME10" /></div>
+              <div><label className="block text-sm font-medium text-slate-300 mb-2">Type</label><select name="type" value={form.type} onChange={handleChange} className={selectClasses}><option value="percentage">Percentage</option><option value="fixed">Fixed Amount</option></select></div>
+              <div><label className="block text-sm font-medium text-slate-300 mb-2">Value ({form.type === 'percentage' ? '%' : '₹'})</label><input type="number" name="value" value={form.value} onChange={handleChange} className={inputClasses} /></div>
+              <div><label className="block text-sm font-medium text-slate-300 mb-2">Min. Order Amount (₹)</label><input type="number" name="min_order_amount" value={form.min_order_amount} onChange={handleChange} className={inputClasses} /></div>
+              <div><label className="block text-sm font-medium text-slate-300 mb-2">Usage Limit (0 for unlimited)</label><input type="number" name="usage_limit" value={form.usage_limit} onChange={handleChange} className={inputClasses} /></div>
+              <div><label className="block text-sm font-medium text-slate-300 mb-2">Valid From</label><DatePicker selected={form.valid_from} onChange={(d) => handleDateChange(d!, 'valid_from')} className={inputClasses} /></div>
+              <div><label className="block text-sm font-medium text-slate-300 mb-2">Valid To</label><DatePicker selected={form.valid_to} onChange={(d) => handleDateChange(d!, 'valid_to')} className={inputClasses} /></div>
+              
+              <div className="md:col-span-2 flex items-center justify-between bg-slate-800/50 p-3 rounded-lg mt-2">
+                <span className="font-medium text-slate-200">First Order Only?</span>
+                <label className="flex items-center cursor-pointer"><input type="checkbox" name="first_order_only" checked={form.first_order_only} onChange={handleChange} className="sr-only peer" /><div className="relative w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div></label>
+              </div>
+              <div className="md:col-span-2 flex items-center justify-between bg-slate-800/50 p-3 rounded-lg">
+                <span className="font-medium text-slate-200">Enabled</span>
+                <label className="flex items-center cursor-pointer"><input type="checkbox" name="enabled" checked={form.enabled} onChange={handleChange} className="sr-only peer" /><div className="relative w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div></label>
               </div>
 
-              <div className="flex flex-col">
-                <label className="font-semibold text-gray-700 mb-1">Type</label>
-                <select
-                  name="type"
-                  value={form.type}
-                  onChange={handleChange}
-                  className="border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none transition"
-                >
-                  <option value="percentage">Percentage</option>
-                  <option value="fixed">Fixed Amount</option>
-                </select>
+              <div className="flex justify-end mt-6 gap-3 md:col-span-2">
+                <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 bg-slate-700 text-slate-200 rounded-lg hover:bg-slate-600 transition font-semibold">Cancel</button>
+                <button type="button" onClick={handleSubmit} className="px-6 py-2.5 bg-yellow-400 text-gray-900 font-bold rounded-lg hover:bg-yellow-300 transition flex items-center gap-2">
+                  {editingPromo ? 'Update Code' : 'Create Code'}
+                </button>
               </div>
-
-              <div className="flex flex-col">
-                <label className="font-semibold text-gray-700 mb-1">Value</label>
-                <input
-                  type="number"
-                  name="value"
-                  value={form.value}
-                  onChange={handleChange}
-                  className="border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none transition"
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <label className="font-semibold text-gray-700 mb-1">Minimum Order</label>
-                <input
-                  type="number"
-                  name="min_order_amount"
-                  value={form.min_order_amount}
-                  onChange={handleChange}
-                  className="border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none transition"
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <label className="font-semibold text-gray-700 mb-1">Valid From</label>
-                <DatePicker
-                  selected={form.valid_from}
-                  onChange={(date) => handleDateChange(date!, 'valid_from')}
-                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none transition"
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <label className="font-semibold text-gray-700 mb-1">Valid To</label>
-                <DatePicker
-                  selected={form.valid_to}
-                  onChange={(date) => handleDateChange(date!, 'valid_to')}
-                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none transition"
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <label className="font-semibold text-gray-700 mb-1">Usage Limit (Optional)</label>
-                <input
-                  type="number"
-                  name="usage_limit"
-                  value={form.usage_limit}
-                  onChange={handleChange}
-                  className="border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none transition"
-                />
-              </div>
-
-              <div className="flex flex-col justify-center gap-2 mt-2">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    name="first_order_only"
-                    checked={form.first_order_only}
-                    onChange={handleChange}
-                    className="accent-yellow-500 w-5 h-5"
-                  />
-                  First Order Only
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    name="enabled"
-                    checked={form.enabled}
-                    onChange={handleChange}
-                    className="accent-yellow-500 w-5 h-5"
-                  />
-                  Enabled
-                </label>
-              </div>
-            </div>
-
-            <div className="flex justify-end mt-6 gap-3">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="px-6 py-2 bg-gradient-to-r from-yellow-500 to-yellow-700 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition transform"
-              >
-                {editingPromo ? 'Update' : 'Create'}
-              </button>
             </div>
           </div>
         </div>

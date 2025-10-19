@@ -647,55 +647,60 @@ const Products = () => {
 
                     {/* Pagination - No changes here */}
                     {totalProducts > productsPerPage && (
-                       <div className="mt-4 flex justify-center items-center space-x-2">
-                         {/* ... all your pagination JSX is exactly the same ... */}
-                        <button
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 1}
-                          className={`px-3 py-1 rounded-lg border transition-all duration-300 ${currentPage === 1
-                               ? "bg-neutral-200 text-neutral-500 cursor-default"
-                               : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
-                             }`}
-                        >
-                          Prev
-                        </button>
-                    
-                        {Array.from({ length: Math.ceil(totalProducts / productsPerPage) }, (_, i) => {
-                          const page = i + 1;
-                          const totalPages = Math.ceil(totalProducts / productsPerPage);
-                          if (page === 1 || page === totalPages || (page >= currentPage - 2 && page <= currentPage + 2)) {
-                            return (
-                              <button
-                                key={i}
-                                onClick={() => handlePageChange(page)}
-                                disabled={currentPage === page}
-                                className={`px-4 py-2 rounded-lg border transition-all duration-300 ${currentPage === page
-                                    ? "bg-luxury-gold text-white border-luxury-gold cursor-default"
-                                    : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
-                                  }`}
-                              >
-                                {page}
-                              </button>
-                            );
-                          }
-                          if (page === currentPage - 3 || page === currentPage + 3) {
-                            return <span key={i} className="px-2 text-neutral-400">...</span>;
-                          }
-                          return null;
-                        })}
-                    
-                        <button
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === Math.ceil(totalProducts / productsPerPage)}
-                          className={`px-3 py-1 rounded-lg border transition-all duration-300 ${currentPage === Math.ceil(totalProducts / productsPerPage)
-                              ? "bg-neutral-200 text-neutral-500 cursor-default"
-                              : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
+                        <div className="mt-4 flex flex-wrap justify-center items-center gap-2">
+                            {/* 'Prev' Button */}
+                            <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className={`px-3 py-1 rounded-lg border transition-all duration-300 ${
+                                currentPage === 1
+                                ? "bg-neutral-200 text-neutral-500 cursor-default"
+                                : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
                             }`}
-                        >
-                          Next
-                        </button>
-                      </div>
-                    )}
+                            >
+                            Prev
+                            </button>
+
+                            {/* Page Number Buttons */}
+                            {Array.from({ length: Math.ceil(totalProducts / productsPerPage) }, (_, i) => {
+                            const page = i + 1;
+                            const totalPages = Math.ceil(totalProducts / productsPerPage);
+                            if (page === 1 || page === totalPages || (page >= currentPage - 2 && page <= currentPage + 2)) {
+                                return (
+                                <button
+                                    key={i}
+                                    onClick={() => handlePageChange(page)}
+                                    disabled={currentPage === page}
+                                    className={`px-4 py-2 rounded-lg border transition-all duration-300 ${
+                                    currentPage === page
+                                        ? "bg-luxury-gold text-white border-luxury-gold cursor-default"
+                                        : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
+                                    }`}
+                                >
+                                    {page}
+                                </button>
+                                );
+                            }
+                            if (page === currentPage - 3 || page === currentPage + 3) {
+                                return <span key={i} className="px-2 text-neutral-400">...</span>;
+                            }
+                            return null;
+                            })}
+
+                            {/* 'Next' Button */}
+                            <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === Math.ceil(totalProducts / productsPerPage)}
+                            className={`px-3 py-1 rounded-lg border transition-all duration-300 ${
+                                currentPage === Math.ceil(totalProducts / productsPerPage)
+                                ? "bg-neutral-200 text-neutral-500 cursor-default"
+                                : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
+                            }`}
+                            >
+                            Next
+                            </button>
+                        </div>
+                        )}
                 </div>
             </section>
 
@@ -703,94 +708,94 @@ const Products = () => {
             {showQuantityModal && selectedProduct && createPortal(
                 /* ... your entire modal JSX ... */
                  (() => {
-      const grams = selectedWeight === 'custom' ? customWeight : selectedWeight;
-      const pricePerGram = selectedProduct.price / 1000;
-      const dynamicPrice = Math.round(pricePerGram * grams);
-      return (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-              <div className="glass rounded-3xl p-4 sm:p-8 max-w-md w-full animate-slide-up flex flex-col max-h-[90vh]">
+                const grams = selectedWeight === 'custom' ? customWeight : selectedWeight;
+                const pricePerGram = selectedProduct.price / 1000;
+                const dynamicPrice = Math.round(pricePerGram * grams);
+                return (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                        <div className="glass rounded-3xl p-4 sm:p-8 max-w-md w-full animate-slide-up flex flex-col max-h-[90vh]">
 
-                  <div className="flex-shrink-0 flex items-center justify-between mb-4 sm:mb-6">
-                      <h3 className="text-xl sm:text-2xl font-display font-bold text-amber-500">
-                          Select Quantity
-                      </h3>
-                      <button
-                          onClick={() => setShowQuantityModal(false)}
-                          className="p-2 hover:bg-white/20 rounded-full transition-all duration-300"
-                      >
-                          <X className="w-6 h-6" />
-                      </button>
-                  </div>
+                            <div className="flex-shrink-0 flex items-center justify-between mb-4 sm:mb-6">
+                                <h3 className="text-xl sm:text-2xl font-display font-bold text-amber-500">
+                                    Select Quantity
+                                </h3>
+                                <button
+                                    onClick={() => setShowQuantityModal(false)}
+                                    className="p-2 hover:bg-white/20 rounded-full transition-all duration-300"
+                                >
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
 
-                  <div className="flex-1 overflow-y-auto pr-2">
-                      <div className="mb-6">
-                          <img
-                              src={selectedProduct.image}
-                              alt={selectedProduct.name}
-                              className="w-full h-32 object-cover rounded-2xl mb-4"
-                          />
-                          <h4 className="font-display font-semibold text-lg text-luxury-gold-light">{selectedProduct.name}</h4>
-                          <p className="text-lime-400 text-sm">{selectedProduct.description}</p>
-                      </div>
-                      <div className="space-y-6">
-                          <div>
-                              <label className="block text-sm font-medium text-luxury-gold-light mb-3">
-                                  Weight Options
-                              </label>
-                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                  {weightOptions.map(({ label, value }) => (
-                                      <button
-                                          key={value}
-                                          onClick={() => setSelectedWeight(value)}
-                                          className={`p-3 rounded-lg border-2 transition-all duration-300 ${selectedWeight === value
-                                                  ? 'border-luxury-gold bg-luxury-gold/10 text-luxury-gold'
-                                                  : 'border-neutral-200 hover:border-luxury-gold/50'
-                                              }`}
-                                      >
-                                          {label}
-                                      </button>
-                                  ))}
-                              </div>
-                              <button
-                                  onClick={() => setSelectedWeight('custom')}
-                                  className={`w-full mt-3 p-3 rounded-lg border-2 transition-all duration-300 ${selectedWeight === 'custom'
-                                          ? 'border-luxury-gold bg-luxury-gold/10 text-luxury-gold'
-                                          : 'border-neutral-200 hover:border-luxury-gold/50'
-                                      }`}
-                              >
-                                  Custom Weight (Min 50g)
-                              </button>
-                              {selectedWeight === 'custom' && (
-                                  <div className="flex items-center justify-between gap-2 mt-4">
-                                      <button
-                                          onClick={() => setCustomWeight(Math.max(50, customWeight - 50))}
-                                          className="p-2 glass rounded-lg hover:bg-white/20"
-                                      >
-                                          -
-                                      </button>
-                                      <input
-                                          type="number"
-                                          value={customWeight}
-                                          onChange={(e) => setCustomWeight(Math.max(50, parseInt(e.target.value) || 50))}
-                                          className="flex-1 p-2 glass rounded-lg text-center"
-                                          min="50"
-                                      />
-                                      <span className="text-sm text-neutral-800">grams</span>
-                                      <button
-                                          onClick={() => setCustomWeight(customWeight + 50)}
-                                          className="p-2 glass rounded-lg hover:bg-white/20"
-                                      >
-                                          +
-                                      </button>
-                                  </div>
-                              )}
-                          </div>
-                      </div>
-                  </div>
+                            <div className="flex-1 overflow-y-auto pr-2">
+                                <div className="mb-6">
+                                    <img
+                                        src={selectedProduct.image}
+                                        alt={selectedProduct.name}
+                                        className="w-full h-32 object-cover rounded-2xl mb-4"
+                                    />
+                                    <h4 className="font-display font-semibold text-lg text-luxury-gold-light">{selectedProduct.name}</h4>
+                                    <p className="text-lime-400 text-sm">{selectedProduct.description}</p>
+                                </div>
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-luxury-gold-light mb-3">
+                                            Weight Options
+                                        </label>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                            {weightOptions.map(({ label, value }) => (
+                                                <button
+                                                    key={value}
+                                                    onClick={() => setSelectedWeight(value)}
+                                                    className={`p-3 rounded-lg border-2 transition-all duration-300 ${selectedWeight === value
+                                                            ? 'border-luxury-gold bg-luxury-gold/10 text-luxury-gold'
+                                                            : 'border-neutral-200 hover:border-luxury-gold/50'
+                                                        }`}
+                                                >
+                                                    {label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <button
+                                            onClick={() => setSelectedWeight('custom')}
+                                            className={`w-full mt-3 p-3 rounded-lg border-2 transition-all duration-300 ${selectedWeight === 'custom'
+                                                    ? 'border-luxury-gold bg-luxury-gold/10 text-luxury-gold'
+                                                    : 'border-neutral-200 hover:border-luxury-gold/50'
+                                                }`}
+                                        >
+                                            Custom Weight (Min 50g)
+                                        </button>
+                                        {selectedWeight === 'custom' && (
+                                            <div className="flex items-center justify-between gap-2 mt-4">
+                                                <button
+                                                    onClick={() => setCustomWeight(Math.max(50, customWeight - 50))}
+                                                    className="p-2 glass rounded-lg hover:bg-white/20"
+                                                >
+                                                    -
+                                                </button>
+                                                <input
+                                                    type="number"
+                                                    value={customWeight}
+                                                    onChange={(e) => setCustomWeight(Math.max(50, parseInt(e.target.value) || 50))}
+                                                    className="flex-1 p-2 glass rounded-lg text-center"
+                                                    min="50"
+                                                />
+                                                <span className="text-sm text-neutral-800">grams</span>
+                                                <button
+                                                    onClick={() => setCustomWeight(customWeight + 50)}
+                                                    className="p-2 glass rounded-lg hover:bg-white/20"
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
 
-                  <div className="flex-shrink-0 flex items-center justify-between pt-4 border-t border-white/20 mt-4">
-                      <div className="text-2xl font-display font-bold tamoor-gradient">
-                          ₹{dynamicPrice}
+                        <div className="flex-shrink-0 flex items-center justify-between pt-4 border-t border-white/20 mt-4">
+                            <div className="text-2xl font-display font-bold tamoor-gradient">
+                                ₹{dynamicPrice}
                       </div>
                       <button
                           onClick={handleAddCart}

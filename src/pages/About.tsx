@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Award, Users, Globe, Heart, Leaf, Shield, Linkedin, Twitter } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import cus1 from '../assets/videos/cus1.jpeg'
+import cus2 from '../assets/videos/cus2.jpeg'
+import cus3 from '../assets/videos/cus3.jpeg'
 
 // CountUp hook for smooth number animation
 const useCountUp = (end: number, duration = 3000) => {
@@ -70,18 +73,6 @@ const About = () => {
       role: 'Co-Founder & Head of Sourcing',
       image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/musaveer.jpg',
       description: 'Expert in global supply chain and quality assurance with over 15 years of experience.'
-    },
-    {
-      name: 'Emily Rodriguez',
-      role: 'Nutrition Specialist',
-      image: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400',
-      description: 'Certified nutritionist ensuring health benefits in every product.'
-    },
-    {
-      name: 'David Kumar',
-      role: 'Sustainability Director',
-      image: 'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=400',
-      description: 'Leading our commitment to environmental responsibility.'
     }
   ];
 
@@ -95,9 +86,9 @@ const About = () => {
   ];
 
   const testimonials = [
-    { name: "Aisha Khan", text: "The quality of Tamoor dry fruits is unmatched. The luxury packaging made it perfect for gifting!", image: "https://randomuser.me/api/portraits/women/68.jpg" },
-    { name: "Rahul Verma", text: "I loved the freshness and taste. Customer service was also top-notch!", image: "https://randomuser.me/api/portraits/men/44.jpg" },
-    { name: "Sophia Lee", text: "Tamoor brings health and luxury together. Highly recommend their hampers!", image: "https://randomuser.me/api/portraits/women/12.jpg" }
+    { name: "Dhnaush", text: "The quality of Tamoor dry fruits is unmatched. The luxury packaging made it perfect for gifting!", image: cus1 },
+    { name: "Anusha Gowda", text: "I loved the freshness and taste. Customer service was also top-notch!", image: cus2 },
+    { name: "Abhishek k", text: "Tamoor brings health and luxury together. Highly recommend their hampers!", image: cus3 }
   ];
 
   const certifications = [

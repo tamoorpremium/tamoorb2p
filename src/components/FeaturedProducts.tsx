@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 import almondsVideo from "../assets/videos/Almonds.mp4";
 import cashewsVideo from "../assets/videos/Cashews.mp4";
 import pistaVideo from "../assets/videos/Pista.mp4";
-import wallnutsVideo from "../assets/videos/wallnut.mp4";
-import mixnutsVideo from "../assets/videos/mixnuts.mp4";
-import mixbowlVideo from "../assets/videos/mixbowlrotate.mp4";
-import medjoolVideo from "../assets/videos/medjool.mp4";
-import candlesVideo from "../assets/videos/candle.mp4";
+import wallnutsVideo from "../assets/videos/Wallnut.mp4";
+import mixnutsVideo from "../assets/videos/Mixnuts.mp4";
+import mixbowlVideo from "../assets/videos/Mixbowlrotate.mp4";
+import medjoolVideo from "../assets/videos/Medjool.mp4";
+import candlesVideo from "../assets/videos/Candle.mp4";
 import giftsVideo from "../assets/videos/gift.mp4";
 
 const FeaturedProducts = () => {

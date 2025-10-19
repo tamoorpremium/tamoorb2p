@@ -1,15 +1,15 @@
 import React, { useEffect, useRef } from "react";
 import { Star, ShoppingCart, Heart, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import almondsVideo from "../assets/videos/Almonds.webm";
-import cashewsVideo from "../assets/videos/cashews.webm";
-import pistaVideo from "../assets/videos/Pista.webm";
-import wallnutsVideo from "../assets/videos/wallnut.webm";
-import mixnutsVideo from "../assets/videos/mixnuts.webm";
-import mixbowlVideo from "../assets/videos/mixbowlrotate.webm";
-import medjoolVideo from "../assets/videos/medjool.webm";
-import candlesVideo from "../assets/videos/candle.webm";
-import giftsVideo from "../assets/videos/gift.webm";
+import almondsVideo from "../assets/videos/Almonds.mp4";
+import cashewsVideo from "../assets/videos/Cashews.mp4";
+import pistaVideo from "../assets/videos/Pista.mp4";
+import wallnutsVideo from "../assets/videos/wallnut.mp4";
+import mixnutsVideo from "../assets/videos/mixnuts.mp4";
+import mixbowlVideo from "../assets/videos/mixbowlrotate.mp4";
+import medjoolVideo from "../assets/videos/medjool.mp4";
+import candlesVideo from "../assets/videos/candle.mp4";
+import giftsVideo from "../assets/videos/gift.mp4";
 
 const FeaturedProducts = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -49,7 +49,6 @@ const FeaturedProducts = () => {
     originalPrice: 1299,
     rating: 4.9,
     reviews: 2245,
-    image: "https://images.pexels.com/photos/137119/pexels-photo-137119.jpeg?auto=compress&cs=tinysrgb&w=500",
     video: almondsVideo, // local video
     badge: "Best Seller",
     badgeColor: "bg-gradient-to-r from-green-500 to-emerald-500",
@@ -62,7 +61,6 @@ const FeaturedProducts = () => {
     originalPrice: 1899,
     rating: 4.8,
     reviews: 189,
-    image: "https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=500",
     video: cashewsVideo, // local video
     badge: "Premium",
     badgeColor: "bg-gradient-to-r from-luxury-gold to-luxury-gold-light",
@@ -75,7 +73,6 @@ const FeaturedProducts = () => {
     originalPrice: 2299,
     rating: 4.7,
     reviews: 156,
-    image: "https://images.pexels.com/photos/616833/pexels-photo-616833.jpeg?auto=compress&cs=tinysrgb&w=500",
     video: pistaVideo, // local video
     badge: "Limited",
     badgeColor: "bg-gradient-to-r from-red-500 to-rose-500",
@@ -88,7 +85,6 @@ const FeaturedProducts = () => {
     originalPrice: 1199,
     rating: 4.6,
     reviews: 203,
-    image: "https://images.pexels.com/photos/461431/pexels-photo-461431.jpeg?auto=compress&cs=tinysrgb&w=500",
     video: medjoolVideo, // no video yet, safe fallback
     badge: "Organic",
     badgeColor: "bg-gradient-to-r from-luxury-sage to-luxury-sage-dark",
@@ -101,7 +97,6 @@ const FeaturedProducts = () => {
     originalPrice: 1799,
     rating: 4.8,
     reviews: 312,
-    image: "https://images.pexels.com/photos/4113898/pexels-photo-4113898.jpeg?auto=compress&cs=tinysrgb&w=500",
     video: mixnutsVideo, // local video
     badge: "Popular",
     badgeColor: "bg-gradient-to-r from-blue-500 to-indigo-500",
@@ -114,7 +109,6 @@ const FeaturedProducts = () => {
     originalPrice: 1699,
     rating: 4.5,
     reviews: 178,
-    image: "https://images.pexels.com/photos/725998/pexels-photo-725998.jpeg?auto=compress&cs=tinysrgb&w=500",
     video: wallnutsVideo, // local video
     badge: "Fresh",
     badgeColor: "bg-gradient-to-r from-orange-500 to-amber-500",
@@ -127,7 +121,6 @@ const FeaturedProducts = () => {
     originalPrice: 1199,
     rating: 4.6,
     reviews: 4093,
-    image: "https://images.pexels.com/photos/461431/pexels-photo-461431.jpeg?auto=compress&cs=tinysrgb&w=500",
     video: mixbowlVideo, // no video yet, safe fallback
     badge: "Healthy",
     badgeColor: "bg-gradient-to-r from-luxury-sage to-luxury-sage-dark",
@@ -140,7 +133,6 @@ const FeaturedProducts = () => {
     originalPrice: 499,
     rating: 4.8,
     reviews: 6312,
-    image: "https://images.pexels.com/photos/4113898/pexels-photo-4113898.jpeg?auto=compress&cs=tinysrgb&w=500",
     video: candlesVideo, // local video
     badge: "Popular",
     badgeColor: "bg-gradient-to-r from-blue-500 to-indigo-500",
@@ -153,7 +145,6 @@ const FeaturedProducts = () => {
     originalPrice: 1299,
     rating: 4.8,
     reviews: 1412,
-    image: "https://images.pexels.com/photos/4113898/pexels-photo-4113898.jpeg?auto=compress&cs=tinysrgb&w=500",
     video: giftsVideo, // local video
     badge: "Popular",
     badgeColor: "bg-gradient-to-r from-blue-500 to-indigo-500",
@@ -195,23 +186,16 @@ const FeaturedProducts = () => {
             >
               {/* Media Section */}
               <div className="relative overflow-hidden">
-                {sub.video ? (
-                  <video
-                    src={sub.video}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-64 sm:h-72 object-cover group-hover:scale-110 transition-transform duration-700"
-                    poster={sub.image}
-                  />
-                ) : (
-                  <img
-                    src={sub.image}
-                    alt={sub.name}
-                    className="w-full h-64 sm:h-72 object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                )}
+                {sub.video && (
+                <video
+                  src={sub.video} // Use your .mp4 file here
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-64 sm:h-72 object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+              )}
 
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

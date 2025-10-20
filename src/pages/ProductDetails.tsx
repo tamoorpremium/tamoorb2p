@@ -6,6 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { createPortal } from 'react-dom';
 import { useSwipeable } from 'react-swipeable';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import WatermarkedImage from "../components/WatermarkedImage";
 
 interface Product {
   id: number;
@@ -248,6 +249,7 @@ useEffect(() => {
           .from("products")
           .select("*")
           .eq("category_id", categoryIdToUse)
+          .eq('is_active', true)
           .neq("id", product.id);
         if (parentError) throw parentError;
 
@@ -259,6 +261,7 @@ useEffect(() => {
           let { data: fallbackProducts, error: fallbackError } = await supabase
             .from("products")
             .select("*")
+            .eq('is_active', true)
             .neq("id", product.id)
             .limit(20);
           if (fallbackError) throw fallbackError;
@@ -378,11 +381,24 @@ useEffect(() => {
         <div className="md:w-1/2 flex flex-col gap-2">
           {/* Main Image with Wishlist */}
           <div {...swipeHandlers} className="relative rounded-2xl overflow-hidden group">
-            <img
+            <WatermarkedImage
               src={selectedImage || product.image}
               alt={product.name}
+              watermarkText="Tamoor.in"
               className="w-full h-64 sm:h-96 object-cover rounded-2xl"
             />
+
+            {/* Change justify-center to justify-start */}
+            <div className="absolute inset-0 flex items-end justify-start pointer-events-none">
+              <img
+                src="/tamoorlogo.png"
+                alt="Tamoor watermark"
+                // 👇 KEY CHANGES HERE 👇
+                // 1. Removed opacity-100 to keep it as a watermark
+                // 2. Added negative margins to push it down and left
+                className="w-1/4 opacity-100 -mb-4 -ml-4" 
+              />
+            </div>
             {/* 👇 ADD THIS BLOCK 👇 */}
             {!product.is_in_stock && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-2xl">
@@ -538,7 +554,22 @@ useEffect(() => {
             {/* NEW: Main Content Area (scrollable) */}
             <div className="flex-1 overflow-y-auto pr-2">
                 <div className="mb-4">
-                    <img src={selectedImage || product.image} alt={product.name} className="w-full h-32 sm:h-40 object-cover rounded-2xl mb-4" />
+                    <WatermarkedImage
+                        src={selectedImage || product.image}
+                        alt={product.name}
+                        watermarkText="Tamoor.in"
+                        className="w-full h-64 sm:h-96 object-cover rounded-2xl"
+                      />
+
+                    {/* Change justify-center to justify-start */}
+                      <div className="absolute inset-0 flex items-end justify-start p-4 pointer-events-none">
+                        {/* This container now controls the position (bottom-left) */}
+                        <img
+                          src="/tamoorlogo.png" // The path to your logo in the 'public' folder
+                          alt="Tamoor watermark"
+                          className="w-1/4 opacity-50" // Controls size and transparency
+                        />
+                      </div>
                     <h4 className="font-semibold text-lg text-luxury-gold-light">{product.name}</h4>
                     {/* CHANGED: Made description smaller to prevent overflow */}
                     <p className="text-sm text-lime-400">{product.description}</p>

@@ -236,48 +236,61 @@ const [defaultAddressId, setDefaultAddressId] = useState<number | null>(null);
   };
 
   const handleUpdateAddress = async () => {
-  // 1. Prevent multiple clicks if already submitting or if no address is being edited
-    if (!editingAddressId || isSubmittingAddress) return;
+  // Prevent multiple clicks if already submitting or if no address is being edited
+  if (!editingAddressId || isSubmittingAddress) return;
 
-    // 2. Start the loading state immediately
-    setIsSubmittingAddress(true);
+  // Start the loading state immediately
+  setIsSubmittingAddress(true);
 
-    try {
-      // You could add your `validateForm` logic here for immediate feedback if needed
+  try {
+    const updateData = {
+      full_name: editAddressData.full_name,
+      email: editAddressData.email,
+      country_code: editAddressData.country_code || '+91',
+      phone: editAddressData.phone,
+      address: editAddressData.address,
+      city: editAddressData.city,
+      state: editAddressData.state,
+      pincode: editAddressData.pincode
+    };
 
-      const updateData = {
-        full_name: editAddressData.full_name,
-        email: editAddressData.email,
-        country_code: editAddressData.country_code || '+91',
-        phone: editAddressData.phone,
-        address: editAddressData.address,
-        city: editAddressData.city,
-        state: editAddressData.state,
-        pincode: editAddressData.pincode
-      };
+    const { error } = await supabase.from('addresses').update(updateData).eq('id', editingAddressId);
 
-      const { error } = await supabase.from('addresses').update(updateData).eq('id', editingAddressId);
-
-      // If there's a database error, throw it to be handled by the catch block
-      if (error) {
-        throw error;
-      }
-
-      // If successful, update the UI state
-      setSavedAddresses(prev =>
-        prev.map(item => (item.id === editingAddressId ? { ...item, ...updateData } : item))
-      );
-      setEditingAddressId(null); // Exit editing mode
-      setErrorMsg(''); // Clear any previous errors
-
-    } catch (error: any) {
-      // Set a user-friendly error message if the request fails
-      setErrorMsg('Failed to update address: ' + error.message);
-    } finally {
-      // 3. IMPORTANT: Always stop the loading state, whether the request succeeded or failed
-      setIsSubmittingAddress(false);
+    if (error) {
+      throw error;
     }
-  };
+
+    // Update the address list in the UI
+    setSavedAddresses(prev =>
+      prev.map(item => (item.id === editingAddressId ? { ...item, ...updateData } : item))
+    );
+
+    // ✅ THIS IS THE CRITICAL FIX ✅
+    // If the address being edited is the one currently selected, update the main formData too.
+    if (selectedAddressId === editingAddressId) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: updateData.full_name,
+        email: updateData.email,
+        countryCode: updateData.country_code,
+        phone: updateData.phone,
+        address: updateData.address,
+        city: updateData.city,
+        state: updateData.state,
+        pincode: updateData.pincode
+      }));
+    }
+
+    setEditingAddressId(null); // Exit editing mode
+    setErrorMsg(''); // Clear any previous errors
+
+  } catch (error: any) {
+    setErrorMsg('Failed to update address: ' + error.message);
+  } finally {
+    // IMPORTANT: Always stop the loading state
+    setIsSubmittingAddress(false);
+  }
+};
 
 
   const handleDeleteAddress = async () => {
@@ -723,79 +736,79 @@ const handleNewAddressChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSele
 
 const handleSaveNewAddress = async () => {
   // 1. Prevent multiple clicks if a submission is already in progress
-    if (isSubmittingAddress) return;
+  if (isSubmittingAddress) return;
 
-    // 2. Start the loading state immediately
-    setIsSubmittingAddress(true);
-    setErrorMsg(''); // Clear previous errors
+  // 2. Start the loading state immediately
+  setIsSubmittingAddress(true);
+  setErrorMsg(''); // Clear previous errors
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        // It's better to throw an error to be caught below
-        throw new Error('User not logged in.');
-      }
-
-      // You can add validation logic here if you want immediate feedback for the user
-
-      const { data, error } = await supabase.from('addresses').insert([
-        { 
-          user_id: user.id,
-          full_name: newAddress.full_name,
-          email: newAddress.email,
-          country_code: newAddress.country_code || '+91',
-          phone: newAddress.phone,
-          address: newAddress.address,
-          city: newAddress.city,
-          state: newAddress.state,
-          pincode: newAddress.pincode
-        }
-      ]).select().single();
-
-      // If there's a database error, throw it
-      if (error) {
-        throw error;
-      }
-
-      // If successful, update the UI state
-      if (data) {
-        setSavedAddresses(prev => [...prev, data]);
-        setSelectedAddressId(data.id);
-        setAddingNewAddress(false);
-
-        // Automatically fill the main form with the new address details
-        setFormData(prev => ({
-          ...prev,
-          fullName: data.full_name,
-          email: data.email,
-          countryCode: data.country_code,
-          phone: data.phone,
-          address: data.address,
-          city: data.city,
-          state: data.state,
-          pincode: data.pincode
-        }));
-
-        // Reset the new address form for the next time
-        setNewAddress({
-          full_name: '',
-          email: '',
-          country_code: '+91',
-          phone: '',
-          address: '',
-          city: '',
-          state: '',
-          pincode: ''
-        });
-      }
-    } catch (error: any) {
-      // Set a user-friendly error message if anything in the try block fails
-      setErrorMsg('Failed to save new address: ' + error.message);
-    } finally {
-      // 3. IMPORTANT: Always stop the loading state, whether the request succeeded or failed
-      setIsSubmittingAddress(false);
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      // It's better to throw an error to be caught below
+      throw new Error('User not logged in.');
     }
-  };
+
+    // You can add validation logic here if you want immediate feedback for the user
+
+    const { data, error } = await supabase.from('addresses').insert([
+      { 
+        user_id: user.id,
+        full_name: newAddress.full_name,
+        email: newAddress.email,
+        country_code: newAddress.country_code || '+91',
+        phone: newAddress.phone,
+        address: newAddress.address,
+        city: newAddress.city,
+        state: newAddress.state,
+        pincode: newAddress.pincode
+      }
+    ]).select().single();
+
+    // If there's a database error, throw it
+    if (error) {
+      throw error;
+    }
+
+    // If successful, update the UI state
+    if (data) {
+      setSavedAddresses(prev => [...prev, data]);
+      setSelectedAddressId(data.id);
+      setAddingNewAddress(false);
+
+      // Automatically fill the main form with the new address details
+      setFormData(prev => ({
+        ...prev,
+        fullName: data.full_name,
+        email: data.email,
+        countryCode: data.country_code,
+        phone: data.phone,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        pincode: data.pincode
+      }));
+
+      // Reset the new address form for the next time
+      setNewAddress({
+        full_name: '',
+        email: '',
+        country_code: '+91',
+        phone: '',
+        address: '',
+        city: '',
+        state: '',
+        pincode: ''
+      });
+    }
+  } catch (error: any) {
+    // Set a user-friendly error message if anything in the try block fails
+    setErrorMsg('Failed to save new address: ' + error.message);
+  } finally {
+    // 3. IMPORTANT: Always stop the loading state, whether the request succeeded or failed
+    setIsSubmittingAddress(false);
+  }
+};
 
 
 
@@ -964,7 +977,7 @@ const handleSaveNewAddress = async () => {
                               {defaultAddressId === addr.id ? (
                                 <span className="text-green-600 font-semibold text-xs sm:text-sm">Default</span>
                               ) : (
-                                <button type="button" className="px-3 py-1 text-xs rounded-full font-semibold text-white bg-gradient-to-r from-luxury-gold to-luxury-gold-light shadow-lg hover:brightness-110 transition" onClick={async (e) => { e.preventDefault(); /* ... your set default logic ... */ }}>Set Default</button>
+                                <button type="button" className="px-3 py-1 text-xs rounded-full font-semibold text-white bg-gradient-to-r from-luxury-gold to-luxury-gold-light shadow-lg hover:brightness-110 transition" onClick={async (e) => { e.preventDefault(); if (!userId) return; await supabase.from('addresses').update({ is_default: false }).eq('user_id', userId); const { error } = await supabase.from('addresses').update({ is_default: true }).eq('id', addr.id); if (!error) setDefaultAddressId(addr.id); else setErrorMsg('Failed to set default: ' + error.message); }}>Set Default</button>
                               )}
                               <button type="button" className="px-3 py-1 text-xs rounded-full font-semibold text-white bg-gradient-to-r from-luxury-gold to-luxury-gold-light shadow-lg hover:brightness-110 transition" onClick={() => handleEditClick(addr)}>Edit</button>
                             </div>

@@ -383,16 +383,16 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const newFinal = Math.max(0, newSubtotal - newDiscount);
     const newShipping = newFinal > 999 ? 0 : 49;
 
-    setSubtotal(newSubtotal);
-    setDiscount(newDiscount);
-    setShipping(newShipping);
-    setFinalTotal(newFinal);
+    setSubtotal(Math.round(newSubtotal));
+    setDiscount(Math.round(newDiscount));
+    setShipping(newShipping); // Shipping is already an integer
+    setFinalTotal(Math.round(newFinal));
 
     console.log("💰 Recalculated billing:", {
-      newSubtotal,
-      newDiscount,
+      newSubtotal: Math.round(newSubtotal),
+      newDiscount: Math.round(newDiscount),
       newShipping,
-      newFinal,
+      newFinal: Math.round(newFinal),
       promo,
     });
   }, [cartItems, promo]);

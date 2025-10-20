@@ -102,10 +102,19 @@ import impj from "../assets/categories/impjcat.webp";
 import specialj from "../assets/categories/spejcat.webp";
 import softj from "../assets/categories/softjcat.webp";
 import healthj from "../assets/categories/heljcat.webp";
-
-
-
-
+import brazil from "../assets/categories/brazil.webp"
+import kiwi from "../assets/categories/kiwi.webp";
+import plums from "../assets/categories/blackp.webp";
+import amla from "../assets/categories/amla.webp";
+import ginger from "../assets/categories/ginger.webp";
+import lemon from "../assets/categories/lemon.webp";
+import makhana from "../assets/categories/makha.webp";
+import rasp from "../assets/categories/rasp.webp";
+import blackberry from "../assets/categories/blackber.webp";
+import strawberry from "../assets/categories/straw.webp";
+import cherry from "../assets/categories/cherry.webp";
+import chikki from "../assets/categories/chikki.webp";
+import mouth from "../assets/categories/mukhwa.webp";
 
 
 
@@ -127,6 +136,7 @@ const subcategoryImages: Record<string, string> = {
   "pecans": pecans,
   "macadamia": macadamia,
   "pine-nuts-chilgoza": pinenuts,
+  "brazil-nuts": brazil,
 
   // Dried Fruits
   "raisins-kishmish": raisins,
@@ -137,6 +147,15 @@ const subcategoryImages: Record<string, string> = {
   "cranberries": cranberry,
   "blueberries": blueberry,
   "black-currants": black,
+  "raspberries": rasp,
+  "blackberries": blackberry,
+  "cherries":cherry,
+  "strawberries":strawberry,
+  "kiwi" : kiwi,
+  "amla" : amla,
+  "plums": plums,
+  "ginger":ginger,
+  "lemon":lemon,
 
   // Seeds & Others
   "pumpkin-seeds": pumpkin,
@@ -149,6 +168,8 @@ const subcategoryImages: Record<string, string> = {
   "exotic-mix": exotic,
   "salted-mix": salted,
   "roasted-mix": roasted,
+  "makhana":makhana,
+  
 
   // Chocolate
   "dark-chocolate": darkc,
@@ -184,6 +205,8 @@ const subcategoryImages: Record<string, string> = {
   "imported-juices": impj,
   "soft-drinks": softj,
   "health-detox": healthj,
+  "mouth-freshners" :mouth,
+  "chikkis" : chikki,
 };
 
 

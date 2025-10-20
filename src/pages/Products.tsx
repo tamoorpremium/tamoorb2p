@@ -11,7 +11,7 @@ const Products = () => {
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState<string | number>("all");
+    //const [selectedCategory, setSelectedCategory] = useState<string | number>("all");
     const [priceRange, setPriceRange] = useState([0, 10000]);
     const [sortBy, setSortBy] = useState('featured');
     const [viewMode, setViewMode] = useState('grid');
@@ -81,6 +81,7 @@ const Products = () => {
         fetchCategories();
     }, []);
 
+    {/*
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const categoryIdParam = params.get("categoryId");
@@ -90,6 +91,22 @@ const Products = () => {
             setSelectedCategory(Number(categoryIdParam));
         }
     }, [categoryIdParam]);
+        */}
+
+    // 💡 The main fix is right here.
+// Read the URL parameter immediately.
+    //const [searchParams] = useSearchParams();
+    const categoryIdParam = searchParams.get("categoryId");
+
+    // Initialize the state directly from the URL parameter if it exists.
+    const [selectedCategory, setSelectedCategory] = useState<string | number>(() => {
+        // We use a function here for lazy initialization.
+        if (categoryIdParam) {
+            return Number(categoryIdParam); // Convert the string from the URL to a number
+        }
+        return "all"; // Otherwise, use the default "all"
+    });
+
 
     const weightOptions = [
         { label: '200g', value: 200 },
@@ -150,9 +167,6 @@ const Products = () => {
                 let query = supabase
                     .from('products')
                     .select('*', { count: 'exact' })
-                    // --- CHANGE 1: CRITICAL FILTER ADDED ---
-                    // This ensures that only products marked as 'is_active' in the database
-                    // are ever fetched for the customer-facing page.
                     .eq('is_active', true)
                     .ilike('name', `%${searchTerm}%`)
                     .gte('price', priceRange[0])
@@ -162,10 +176,21 @@ const Products = () => {
                     query = query.in('category_id', categoryIds);
                 }
 
-                if (sortBy === 'price-low') query = query.order('price', { ascending: true });
-                else if (sortBy === 'price-high') query = query.order('price', { ascending: false });
-                else if (sortBy === 'rating') query = query.order('rating', { ascending: false });
-                else if (sortBy === 'newest') query = query.order('created_at', { ascending: false });
+                // --- ⬇️ UPDATED SORTING LOGIC ⬇️ ---
+                if (sortBy === 'featured') {
+                    // Sort by priority number first (nulls last), then by newest.
+                    query = query.order('priority', { ascending: true, nullsFirst: false })
+                                .order('created_at', { ascending: false });
+                } else if (sortBy === 'price-low') {
+                    query = query.order('price', { ascending: true });
+                } else if (sortBy === 'price-high') {
+                    query = query.order('price', { ascending: false });
+                } else if (sortBy === 'rating') {
+                    query = query.order('rating', { ascending: false });
+                } else if (sortBy === 'newest') {
+                    query = query.order('created_at', { ascending: false });
+                }
+                // --- ⬆️ END OF UPDATE ⬆️ ---
 
                 const { data: productsData, count, error } = await query.range(
                     (currentPage - 1) * productsPerPage,
@@ -303,7 +328,7 @@ const Products = () => {
                 style={{
                     backgroundImage: `
               linear-gradient(to bottom right, rgba(0,0,0,0.7), rgba(250,245,240,0)),
-              url('https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/prodherd.jpg')
+              url('https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/prodherd%20(1).webp')
             `,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',

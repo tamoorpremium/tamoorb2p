@@ -575,10 +575,6 @@ return (
                             <span className="font-semibold text-neutral-700">Continue with Facebook</span>
                         </button>
                         {/* FIXED: Apple login button added back */}
-                        <button type="button" onClick={() => handleOAuthSignIn('apple')} className="w-full flex items-center justify-center gap-3 py-3 border border-neutral-300 rounded-full hover:bg-neutral-50 transition-colors">
-                            <img src={appleimg} alt="Apple" className="w-6 h-6" />
-                            <span className="font-semibold text-neutral-700">Continue with Apple</span>
-                        </button>
                     </div>
                     
                     {errorMsg && <div className="text-red-500 text-center text-sm">{errorMsg}</div>}

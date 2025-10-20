@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../utils/supabaseClient";
+import { useCart } from '../context/CartContext';
 
 // Import needed icons, including some new ones for commands
 import { 
@@ -307,11 +308,12 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isMenuOpen, setIsMenuOpen }) =>
 };
 
 const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOpen, setIsSearchOpen }) => {
+    const { cartCount } = useCart(); // <-- 2. Get the real cart count from the context
     const iconData = useMemo(() => ([
         { icon: Heart, count: null, to: "/wishlist", label: "Wishlist" },
         { icon: User, count: null, to: "/profile", label: "Profile" },
-        { icon: ShoppingCart, count: 0, to: "/cart", label: "Shopping Cart" },
-    ]), []);
+        { icon: ShoppingCart, count: cartCount, to: "/cart", label: "Shopping Cart" },
+    ]), [cartCount]);
     
     const handleSearchToggle = () => { if (isMenuOpen) setIsMenuOpen(false); setIsSearchOpen(true); };
     const handleMenuToggle = () => { setIsMenuOpen(!isMenuOpen); if (isSearchOpen) setIsSearchOpen(false); };

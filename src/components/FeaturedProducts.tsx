@@ -57,7 +57,7 @@ const FeaturedProducts = () => {
   {
     id: 3,
     name: "Roasted Cashews Premium",
-    price: 1599,
+    price: 999,
     originalPrice: 1899,
     rating: 4.8,
     reviews: 189,
@@ -69,7 +69,7 @@ const FeaturedProducts = () => {
   {
     id: 4,
     name: "California Pistachios Jumbo",
-    price: 1899,
+    price: 1199,
     originalPrice: 2299,
     rating: 4.7,
     reviews: 156,
@@ -81,8 +81,8 @@ const FeaturedProducts = () => {
   {
     id: 14,
     name: "Medjool Dates Premium",
-    price: 899,
-    originalPrice: 1199,
+    price: 1299,
+    originalPrice: 1899,
     rating: 4.6,
     reviews: 203,
     video: medjoolVideo, // no video yet, safe fallback
@@ -93,7 +93,7 @@ const FeaturedProducts = () => {
   {
     id: 10,
     name: "Mixed Dry Fruits Luxury",
-    price: 1499,
+    price: 1399,
     originalPrice: 1799,
     rating: 4.8,
     reviews: 312,
@@ -105,7 +105,7 @@ const FeaturedProducts = () => {
   {
     id: 5,
     name: "Walnuts Halves Premium",
-    price: 1399,
+    price: 999,
     originalPrice: 1699,
     rating: 4.5,
     reviews: 178,
@@ -117,7 +117,7 @@ const FeaturedProducts = () => {
   {
     id: 19,
     name: "Seeds Mix",
-    price: 899,
+    price: 799,
     originalPrice: 1199,
     rating: 4.6,
     reviews: 4093,
@@ -129,7 +129,7 @@ const FeaturedProducts = () => {
   {
     id: 63,
     name: "Scented Candles",
-    price: 299,
+    price: 99,
     originalPrice: 499,
     rating: 4.8,
     reviews: 6312,
@@ -141,7 +141,7 @@ const FeaturedProducts = () => {
   {
     id: 43,
     name: "Gift Hampers",
-    price: 999,
+    price: 199,
     originalPrice: 1299,
     rating: 4.8,
     reviews: 1412,
@@ -210,20 +210,7 @@ const FeaturedProducts = () => {
                 )}
 
                 {/* Action Buttons */}
-                <div className="absolute top-6 right-6 flex flex-col space-y-2 sm:space-y-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-3 group-hover:translate-x-0">
-                  <button
-                    onClick={(e) => e.stopPropagation()}
-                    className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
-                  >
-                    <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-white hover:text-red-400" />
-                  </button>
-                  <button
-                    onClick={(e) => e.stopPropagation()}
-                    className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
-                  >
-                    <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                  </button>
-                </div>
+                
               </div>
 
               {/* Content Section */}
@@ -239,7 +226,7 @@ const FeaturedProducts = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-2 sm:space-y-0">
                   <div className="flex items-center justify-center sm:justify-start space-x-3">
                     <span className="text-2xl font-display font-bold luxury-gradient">
-                      ₹{sub.price}
+                      Starts from ₹{sub.price}
                     </span>
                     <span className="text-lg text-neutral-400 line-through font-medium">
                       ₹{sub.originalPrice}
@@ -258,7 +245,7 @@ const FeaturedProducts = () => {
                   className="w-full btn-premium text-white py-4 rounded-full font-semibold text-lg flex items-center justify-center group/btn"
                 >
                   <ShoppingCart className="w-5 h-5 mr-3 group-hover/btn:rotate-12 transition-transform duration-300" />
-                  Add to Cart
+                  Explore More
                 </button>
               </div>
             </div>

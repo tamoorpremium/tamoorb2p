@@ -86,7 +86,7 @@ const About = () => {
   ];
 
   const testimonials = [
-    { name: "Dhnaush", text: "The quality of Tamoor dry fruits is unmatched. The luxury packaging made it perfect for gifting!", image: cus1 },
+    { name: "Dhanush", text: "The quality of Tamoor dry fruits is unmatched. The luxury packaging made it perfect for gifting!", image: cus1 },
     { name: "Anusha Gowda", text: "I loved the freshness and taste. Customer service was also top-notch!", image: cus2 },
     { name: "Abhishek k", text: "Tamoor brings health and luxury together. Highly recommend their hampers!", image: cus3 }
   ];

@@ -102,6 +102,7 @@ if (defaultAddress) {
 }
 
 // Fetch profile row for name and phone
+// Fetch profile row for name and phone
 const { data: profileData, error: profileError } = await supabase
   .from('profiles')
   .select('full_name, country_code, phone')
@@ -111,9 +112,15 @@ const { data: profileData, error: profileError } = await supabase
 if (profileData) {
   baseInfo = {
     ...baseInfo,
+    // Use profile name, but fall back to the existing name
     full_name: profileData.full_name || baseInfo.full_name,
-    country_code: profileData.country_code || '+91',
-    phone_number: profileData.phone|| '',
+    
+    // Use profile country code, fall back to existing, then to default
+    country_code: profileData.country_code || baseInfo.country_code || '+91',
+    
+    // **THE FIX:** Use the profile phone number only if it exists.
+    // Otherwise, keep the phone number we already have (from the address table).
+    phone_number: profileData.phone || baseInfo.phone_number || '',
   };
 }
 

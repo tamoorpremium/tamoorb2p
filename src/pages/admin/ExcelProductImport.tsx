@@ -268,7 +268,7 @@ const ExcelProductImport: React.FC = () => {
           </span>
         </p>
          <p className="mb-6 text-lg text-yellow-200">
-          Badges (e.g., "Best Seller", "Premium") will be auto-corrected and colors will be set automatically.
+          Badges (e.g., "Best Seller", "Premium" , "Fresh" , "Limited","Organic","Popular") will be auto-corrected and colors will be set automatically.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">

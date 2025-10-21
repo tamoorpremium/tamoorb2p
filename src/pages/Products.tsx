@@ -566,11 +566,15 @@ const Products = () => {
 
                                             {/* --- CHANGE 2a: OUT OF STOCK BADGE --- */}
                                             {/* This badge will now appear over the image if the product is out of stock */}
-                                            {!product.is_in_stock && (
-                                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                                    <span className="bg-red-500 text-white font-bold text-sm px-4 py-2 rounded-full shadow-lg shadow-red-500/50">OUT OF STOCK</span>
-                                                </div>
-                                            )}
+                                            {product.is_in_stock && product.badge && (
+  <div
+    className={`absolute top-1.5 left-1.5 sm:top-6 sm:left-6 ${ // Positioned tighter to the corner on mobile
+      product.badge_color || 'bg-luxury-gold'
+    } text-white px-2 py-0.5 sm:px-4 sm:py-2 rounded-full text-[11px] sm:text-sm font-semibold shadow-lg z-10`} // Smaller padding and font on mobile
+  >
+    {product.badge}
+  </div>
+)}
 
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300"></div>
 

@@ -19,14 +19,26 @@ const ExcelProductImport: React.FC = () => {
     3: "grams",
   };
 
+  // --- Badge Master List ---
+  // This is the single source of truth for badge names and colors
+  const badgeMasterList = [
+    { name: 'Popular', color: 'bg-gradient-to-r from-blue-500 to-indigo-500' },
+    { name: 'Fresh', color: 'bg-gradient-to-r from-orange-500 to-amber-500' },
+    { name: 'Premium', color: 'bg-gradient-to-r from-yellow-400 to-yellow-600' },
+    { name: 'Limited', color: 'bg-gradient-to-r from-purple-500 to-fuchsia-500' },
+    { name: 'Organic', color: 'bg-gradient-to-r from-lime-500 to-green-500' },
+    { name: 'Best Seller', color: 'bg-gradient-to-r from-rose-500 to-red-500' }
+  ];
+  // -------------------------
+
   // Headers shown in Excel
   const templateHeaders = [
     "Product Name",
     "Category",
     "Our Price",
     "Original Price",
-    "Measurement Unit (0=Kg,1=Pieces,2=Liters,3=Grams)",
-    "Stock Unit (0=Kg,1=Pieces,2=Liters,3=Grams)",
+    "Measurement Unit", // <-- Fixed
+    "Stock Unit",       // <-- Fixed
     "Stock Quantity",
     "Description",
     "Badge",
@@ -47,9 +59,22 @@ const ExcelProductImport: React.FC = () => {
         0, // Kilograms
         100,
         "Premium California Almonds",
-        "Best Seller",
+        "Best Seller", // Example Badge
         5,
         200,
+      ],
+      [
+        "Cashews",
+        "Dry Fruits",
+        800,
+        900,
+        0, // Kilograms
+        0, // Kilograms
+        50,
+        "Premium Cashews",
+        "popularr", // Example spelling mistake
+        4.8,
+        150,
       ],
     ]);
     const workbook = XLSX.utils.book_new();
@@ -76,7 +101,7 @@ const ExcelProductImport: React.FC = () => {
         return;
       }
 
-      // Fetch categories once
+      // --- Set up Category matching ---
       const { data: categories, error: catError } = await supabase
         .from("categories")
         .select("id, name");
@@ -91,16 +116,26 @@ const ExcelProductImport: React.FC = () => {
 
       const categoryNames = categories?.map((c) => c.name) || [];
 
+      // --- Set up Badge matching ---
+      const badgeNames = badgeMasterList.map(b => b.name);
+      const badgeMap: Record<string, { name: string, color: string }> =
+        badgeMasterList.reduce((acc, badge) => {
+          acc[badge.name.toLowerCase().trim()] = badge;
+          return acc;
+        }, {} as Record<string, { name: string, color: string }>);
+      // ----------------------------
+
       const normalize = (str: string) => (str || "").toLowerCase().trim();
 
       const productsToInsert = rows.map((row) => {
+        
+        // --- Category Logic ---
         let rawCategory = normalize(row["Category"]);
         let categoryId = categoryMap[rawCategory];
 
-        // If no exact match → fuzzy match
         if (!categoryId && rawCategory) {
           const { bestMatch } = stringSimilarity.findBestMatch(
-            row["Category"],
+            row["Category"], // Use original string for better matching
             categoryNames
           );
 
@@ -114,12 +149,53 @@ const ExcelProductImport: React.FC = () => {
                 `Auto-corrected category "${row["Category"]}" → "${bestMatch.target}"`,
                 { autoClose: 4000 }
               );
-              console.log(
-                `Auto-corrected category "${row["Category"]}" → "${bestMatch.target}"`
-              );
             }
           }
         }
+
+        // --- Badge Logic ---
+        const rawBadge = row["Badge"] || "";
+        let normalizedBadge = normalize(rawBadge);
+        let correctedBadgeName: string | null = rawBadge;
+        let correspondingColor: string | null = null;
+
+        // 1. Try exact (case-insensitive) match
+        const exactMatch = badgeMap[normalizedBadge];
+        if (exactMatch) {
+          correctedBadgeName = exactMatch.name;
+          correspondingColor = exactMatch.color;
+        } 
+        // 2. If no exact match, try fuzzy match (if not empty)
+        else if (normalizedBadge) {
+          const { bestMatch } = stringSimilarity.findBestMatch(
+            rawBadge, // Use original string for better matching
+            badgeNames
+          );
+
+          // If similarity is high, auto-correct
+          if (bestMatch.rating > 0.8) {
+            const matchedBadge = badgeMasterList.find(
+              (b) => b.name === bestMatch.target
+            );
+            if (matchedBadge) {
+              correctedBadgeName = matchedBadge.name;
+              correspondingColor = matchedBadge.color;
+              toast.info(
+                `Auto-corrected badge "${rawBadge}" → "${matchedBadge.name}"`,
+                { autoClose: 4000 }
+              );
+            }
+          } else {
+            // No good match, keep original user input and set no color
+            correctedBadgeName = rawBadge;
+            correspondingColor = null;
+          }
+        } else {
+           // Badge cell was empty
+           correctedBadgeName = null;
+           correspondingColor = null;
+        }
+        // ---------------------
 
         return {
           name: row["Product Name"] || "",
@@ -135,14 +211,19 @@ const ExcelProductImport: React.FC = () => {
             ? Number(row["Stock Quantity"])
             : 0,
           description: row["Description"] || "",
-          badge: row["Badge"] || "",
+          
+          // --- Updated Badge Fields ---
+          badge: correctedBadgeName,
+          badge_color: correspondingColor,
+          // ----------------------------
+
           rating: row["Rating"] ? Number(row["Rating"]) : 0,
           reviews: row["Reviews"] ? Number(row["Reviews"]) : 0,
         };
       });
 
       const { error } = await supabase.from("products").upsert(productsToInsert, {
-        onConflict: "id",
+        onConflict: "id", // Assumes you want to update if a product ID is matched
       });
 
       if (error) throw error;
@@ -185,6 +266,9 @@ const ExcelProductImport: React.FC = () => {
           <span className="text-green-400 font-semibold">
             0 = Kilograms, 1 = Pieces, 2 = Liters, 3 = Grams
           </span>
+        </p>
+         <p className="mb-6 text-lg text-yellow-200">
+          Badges (e.g., "Best Seller", "Premium") will be auto-corrected and colors will be set automatically.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">

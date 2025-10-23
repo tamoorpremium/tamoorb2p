@@ -5,6 +5,7 @@ import { Listbox } from "@headlessui/react"
 import { useLocation, Link } from "react-router-dom";
 import { useSearchParams } from 'react-router-dom';
 import { createPortal } from 'react-dom';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Products = () => {
     // All your existing state variables are preserved
@@ -323,32 +324,33 @@ const Products = () => {
     return (
         <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white">
             {/* Hero Section */}
-            <section
-                className={`pt-14 sm:pt-24 sm:pb-12 pb-4 relative`}
-                style={{
-                    backgroundImage: `
-              linear-gradient(to bottom right, rgba(0,0,0,0.7), rgba(250,245,240,0)),
-              url('https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/prodherd%20(1).webp')
-            `,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                }}
-            >
-                <div className="container mx-auto px-4 relative z-10">
-                    <div className="text-center mb-12">
-                        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-neutral-400 mb-6">
-                            Premium <span className="tamoor-gradient font-extrabold font-serif">TAMOOR</span> Collection
-                        </h1>
-                        <p className="text-xl text-neutral-300 max-w-3xl mx-auto leading-relaxed font-serif">
-                            Discover our complete range of luxury dry fruits and nuts, carefully curated for the finest taste experience.
-                        </p>
-                    </div>
-                </div>
-            </section>
+<section
+    // Increased mobile padding by 50% (from pt-4/pb-4 to pt-6/pb-6)
+    className={`pt-6 pb-6 sm:pt-24 sm:pb-12 relative`}
+    style={{
+      backgroundImage: `
+        linear-gradient(to bottom right, rgba(0,0,0,0.7), rgba(250,245,240,0)),
+        url('https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/prodherd%20(1).webp')
+      `,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+    }}
+  >
+    <div className="container mx-auto px-4 relative z-10">
+      <div className="text-center mb-1 sm:mb-12">
+        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-serif text-neutral-400 mb-1.5 sm:mb-6">
+          Premium <span className="tamoor-gradient font-extrabold font-serif">TAMOOR</span> Collection
+        </h1>
+        <p className="text-base sm:text-xl text-neutral-300 max-w-3xl mx-auto leading-relaxed font-serif">
+          Discover our complete range of luxury dry fruits and nuts, carefully curated for the finest taste experience.
+        </p>
+      </div>
+    </div>
+  </section>
 
             {/* Filters & Search - No changes here */}
-            <section className="sticky top-0 lg:top-20 z-40 bg-white/70 backdrop-blur-xl border-b border-white/20 py-6 shadow-md rounded-b-2xl">
+            <section className="sticky top-0 lg:top-20 z-40 bg-white/70 backdrop-blur-xl border-b border-white/20 py-4 sm:py-6 shadow-md rounded-b-2xl">
                 {/* ... all your filter UI is exactly the same ... */}
                  <div className="container mx-auto px-4">
        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-center justify-between">
@@ -392,21 +394,27 @@ const Products = () => {
                )}
 
                <div className="flex items-center space-x-2 flex-wrap glass rounded-full p-1">
-                   <button
-                       onClick={() => setViewMode("grid")}
-                       className={`p-2 rounded-full transition-all duration-300 flex items-center justify-center hover:bg-white/20 ${viewMode === "grid" ? "bg-luxury-gold text-white" : "text-neutral-600"
-                           }`}
-                   >
-                       <Grid className="w-4 h-4 sm:w-5 sm:h-5" />
-                   </button>
-                   <button
-                       onClick={() => setViewMode("list")}
-                       className={`p-2 rounded-full transition-all duration-300 flex items-center justify-center hover:bg-white/20 ${viewMode === "list" ? "bg-luxury-gold text-white" : "text-neutral-600"
-                           }`}
-                   >
-                       <List className="w-4 h-4 sm:w-5 sm:h-5" />
-                   </button>
-               </div>
+                <button
+                    onClick={() => setViewMode("grid")}
+                    className={`p-2 rounded-full transition-all duration-300 flex items-center justify-center hover:bg-white/20 ${
+                        viewMode === "grid"
+                            ? "bg-luxury-gold text-green-700" // <-- CHANGED
+                            : "text-neutral-600"
+                    }`}
+                >
+                    <Grid className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+                <button
+                    onClick={() => setViewMode("list")}
+                    className={`p-2 rounded-full transition-all duration-300 flex items-center justify-center hover:bg-white/20 ${
+                        viewMode === "list"
+                            ? "bg-luxury-gold text-green-700" // <-- CHANGED
+                            : "text-neutral-600"
+                    }`}
+                >
+                    <List className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+            </div>
            </div>
        </div>
 
@@ -523,9 +531,9 @@ const Products = () => {
             </section>
 
             {/* Products Grid */}
-            <section ref={sectionRef} className="py-16">
+            <section ref={sectionRef} className="py-6 sm:py-16">
                 <div className="container mx-auto px-4">
-                    <div className="mb-8 flex items-center justify-between">
+                    <div className="mb-4 sm:mb-8 flex items-center justify-between">
                         <p className="text-neutral-600 font-medium">
                             Showing {(currentPage - 1) * productsPerPage + 1} - {Math.min(currentPage * productsPerPage, totalProducts)} of {totalProducts} products
                         </p>
@@ -567,14 +575,14 @@ const Products = () => {
                                             {/* --- CHANGE 2a: OUT OF STOCK BADGE --- */}
                                             {/* This badge will now appear over the image if the product is out of stock */}
                                             {product.is_in_stock && product.badge && (
-  <div
-    className={`absolute top-1.5 left-1.5 sm:top-6 sm:left-6 ${ // Positioned tighter to the corner on mobile
-      product.badge_color || 'bg-luxury-gold'
-    } text-white px-2 py-0.5 sm:px-4 sm:py-2 rounded-full text-[11px] sm:text-sm font-semibold shadow-lg z-10`} // Smaller padding and font on mobile
-  >
-    {product.badge}
-  </div>
-)}
+                                            <div
+                                                className={`absolute top-1.5 left-1.5 sm:top-6 sm:left-6 ${ // Positioned tighter to the corner on mobile
+                                                product.badge_color || 'bg-luxury-gold'
+                                                } text-white px-2 py-0.5 sm:px-4 sm:py-2 rounded-full text-[11px] sm:text-sm font-semibold shadow-lg z-10`} // Smaller padding and font on mobile
+                                            >
+                                                {product.badge}
+                                            </div>
+                                            )}
 
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -587,10 +595,11 @@ const Products = () => {
                                                     className="p-2 sm:p-3 glass rounded-full hover:bg-white/20 transition-all duration-300"
                                                 >
                                                     <Heart
-                                                        className={`w-4 h-4 sm:w-5 sm:h-5 ${wishlistIds.includes(product.id)
-                                                            ? "text-red-500 fill-red-500"
-                                                            : "text-white hover:text-red-400"
-                                                            }`}
+                                                        className={`w-4 h-4 sm:w-5 sm:h-5 text-red-500 ${ // <-- Red border is now the default
+                                                            wishlistIds.includes(product.id)
+                                                                ? "fill-red-500" // In wishlist: Fill the inside red
+                                                                : "fill-transparent hover:fill-red-500" // Not in wishlist: Inside is transparent, but fills red on hover
+                                                        }`}
                                                     />
                                                 </button>
                                             </div>
@@ -674,62 +683,99 @@ const Products = () => {
                         </div>
                     )}
 
-                    {/* Pagination - No changes here */}
-                    {totalProducts > productsPerPage && (
-                        <div className="mt-4 flex flex-wrap justify-center items-center gap-2">
-                            {/* 'Prev' Button */}
-                            <button
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                            className={`px-3 py-1 rounded-lg border transition-all duration-300 ${
-                                currentPage === 1
-                                ? "bg-neutral-200 text-neutral-500 cursor-default"
-                                : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
-                            }`}
-                            >
-                            Prev
-                            </button>
+                    {/* Pagination */}
+{totalProducts > productsPerPage && (
+    <div className="mt-4 flex flex-wrap justify-center items-center gap-1.5 sm:gap-2">
+        {/* 'Prev' Button (Icon) */}
+        <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`w-9 h-9 flex items-center justify-center rounded-lg border transition-all duration-300 ${ // <-- Made square
+                currentPage === 1
+                    ? "bg-neutral-200 text-neutral-500 cursor-default"
+                    : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
+            }`}
+        >
+            <ChevronLeft className="w-4 h-4" /> {/* <-- Icon instead of text */}
+        </button>
 
-                            {/* Page Number Buttons */}
-                            {Array.from({ length: Math.ceil(totalProducts / productsPerPage) }, (_, i) => {
-                            const page = i + 1;
-                            const totalPages = Math.ceil(totalProducts / productsPerPage);
-                            if (page === 1 || page === totalPages || (page >= currentPage - 2 && page <= currentPage + 2)) {
-                                return (
-                                <button
-                                    key={i}
-                                    onClick={() => handlePageChange(page)}
-                                    disabled={currentPage === page}
-                                    className={`px-4 py-2 rounded-lg border transition-all duration-300 ${
-                                    currentPage === page
-                                        ? "bg-luxury-gold text-white border-luxury-gold cursor-default"
-                                        : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
-                                    }`}
-                                >
-                                    {page}
-                                </button>
-                                );
-                            }
-                            if (page === currentPage - 3 || page === currentPage + 3) {
-                                return <span key={i} className="px-2 text-neutral-400">...</span>;
-                            }
-                            return null;
-                            })}
+        {/* Page Number Buttons */}
+        {Array.from({ length: Math.ceil(totalProducts / productsPerPage) }, (_, i) => {
+            const page = i + 1;
+            const totalPages = Math.ceil(totalProducts / productsPerPage);
 
-                            {/* 'Next' Button */}
-                            <button
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === Math.ceil(totalProducts / productsPerPage)}
-                            className={`px-3 py-1 rounded-lg border transition-all duration-300 ${
-                                currentPage === Math.ceil(totalProducts / productsPerPage)
-                                ? "bg-neutral-200 text-neutral-500 cursor-default"
+            // Responsive Page Logic
+            const showPage =
+                page === 1 || // Always show 1
+                page === totalPages || // Always show last page
+                (page >= currentPage - 1 && page <= currentPage + 1); // Show 3 "middle" pages on mobile
+
+            // These pages will ONLY show on 'sm' screens and up
+            const showPageOnDesktop =
+                (page >= currentPage - 2 && page <= currentPage + 2);
+
+            // Responsive Ellipsis Logic
+            const showEllipsis =
+                page === currentPage - 2 || // Show ... before
+                page === currentPage + 2;   // Show ... after
+
+            // These ellipsis will ONLY show on 'sm' screens and up
+            const showEllipsisOnDesktop =
+                page === currentPage - 3 ||
+                page === currentPage + 3;
+
+            // --- RENDER LOGIC ---
+
+            // 1. Render pages that are always visible or for desktop
+            if (showPage || (showPageOnDesktop)) {
+                return (
+                    <button
+                        key={i}
+                        onClick={() => handlePageChange(page)}
+                        disabled={currentPage === page}
+                        className={`w-9 h-9 flex items-center justify-center rounded-lg border transition-all duration-300 ${ // <-- Made square
+                            currentPage === page
+                                ? "bg-luxury-gold text-white border-luxury-gold cursor-default"
                                 : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
-                            }`}
-                            >
-                            Next
-                            </button>
-                        </div>
-                        )}
+                        } 
+                        ${
+                            // Hide -2 and +2 pages on mobile
+                            !showPage ? "hidden sm:flex" : "flex"
+                        }
+                        `}
+                    >
+                        {page}
+                    </button>
+                );
+            }
+
+            // 2. Render ellipsis for mobile
+            if (showEllipsis) {
+                return <span key={i} className="px-1 text-neutral-400 sm:hidden">...</span>;
+            }
+
+            // 3. Render ellipsis for desktop
+            if (showEllipsisOnDesktop) {
+                return <span key={i} className="px-1 text-neutral-400 hidden sm:inline">...</span>;
+            }
+            
+            return null;
+        })}
+
+        {/* 'Next' Button (Icon) */}
+        <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === Math.ceil(totalProducts / productsPerPage)}
+            className={`w-9 h-9 flex items-center justify-center rounded-lg border transition-all duration-300 ${ // <-- Made square
+                currentPage === Math.ceil(totalProducts / productsPerPage)
+                    ? "bg-neutral-200 text-neutral-500 cursor-default"
+                    : "bg-white text-neutral-700 border-neutral-300 hover:bg-luxury-gold/10"
+            }`}
+        >
+            <ChevronRight className="w-4 h-4" /> {/* <-- Icon instead of text */}
+        </button>
+    </div>
+)}
                 </div>
             </section>
 

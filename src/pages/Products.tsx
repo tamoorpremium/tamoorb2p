@@ -33,6 +33,7 @@ const Products = () => {
     const [cartMessage, setCartMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
     const [categories, setCategories] = useState<any[]>([]);
     const [openParentCategory, setOpenParentCategory] = useState<string | number | null>(null);
+    const [openParentCategories, setOpenParentCategories] = useState<number[]>([]); // Use an array to track multiple open parents
     
     // All your existing functions and hooks are preserved
     const getCategoryIdsToFilter = (selected: string | number) => {
@@ -97,15 +98,17 @@ const Products = () => {
     // 💡 The main fix is right here.
 // Read the URL parameter immediately.
     //const [searchParams] = useSearchParams();
+    // ...
     const categoryIdParam = searchParams.get("categoryId");
 
-    // Initialize the state directly from the URL parameter if it exists.
-    const [selectedCategory, setSelectedCategory] = useState<string | number>(() => {
+    // --- 1. CHANGE: From single state to array state ---
+    const [selectedCategories, setSelectedCategories] = useState<number[]>(() => {
         // We use a function here for lazy initialization.
         if (categoryIdParam) {
-            return Number(categoryIdParam); // Convert the string from the URL to a number
+            // If a categoryId comes from the URL, start with it selected in the array
+            return [Number(categoryIdParam)]; 
         }
-        return "all"; // Otherwise, use the default "all"
+        return []; // Default is now an empty array (meaning "All Products")
     });
 
 
@@ -135,9 +138,94 @@ const Products = () => {
         setCurrentPage(1);
     };
 
-    const handleCategoryChange = (newCategory: string | number) => {
-        setSelectedCategory(newCategory);
+    const handleCategoryChange = (categoryInput: any | "all") => {
+        // Handle the "All Products" button separately
+        if (categoryInput === "all") {
+            setSelectedCategories([]);
+            setCurrentPage(1);
+            return;
+        }
+
+        // --- NEW LOGIC FOR PARENT/CHILD SELECTION ---
+
+        // Find the category object that was clicked (including searching within children)
+        // This assumes your `categories` state is an array of parent categories,
+        // where each parent might have a `children` array.
+        const findCategoryById = (idToFind: number): any | undefined => {
+            for (const parent of categories) {
+                if (parent.id === idToFind) return parent;
+                if (parent.children) {
+                    const child = parent.children.find((ch: any) => ch.id === idToFind);
+                    if (child) return child;
+                }
+            }
+            return undefined; // Should not happen if categoryInput.id is valid
+        };
+
+        const clickedCategory = findCategoryById(categoryInput.id);
+
+        if (!clickedCategory) {
+            console.error("Clicked category not found in state:", categoryInput);
+            return;
+        }
+
+        const categoryId = clickedCategory.id;
+        // Check if the clicked category *itself* has children in the main categories state
+        const parentCategoryData = categories.find(c => c.id === categoryId);
+        const childIds = parentCategoryData?.children?.map((child: any) => child.id) || [];
+        const isParent = childIds.length > 0;
+
+        setSelectedCategories((prevSelected) => {
+            const isCurrentlySelected = prevSelected.includes(categoryId);
+            // Determine the action: should we select (add) or deselect (remove)?
+            // If it's a parent, base the action on the parent's current state.
+            // If it's a child, base the action on the child's current state.
+            const shouldSelect = !isCurrentlySelected;
+
+            let newSelected = [...prevSelected];
+
+            if (isParent) {
+                // It's a parent category
+                const idsToToggle = [categoryId, ...childIds];
+                if (shouldSelect) {
+                    // Add parent and all children (avoid duplicates)
+                    idsToToggle.forEach(id => {
+                        if (!newSelected.includes(id)) {
+                            newSelected.push(id);
+                        }
+                    });
+                } else {
+                    // Remove parent and all children
+                    newSelected = newSelected.filter(id => !idsToToggle.includes(id));
+                }
+            } else {
+                // It's a child category or a category with no children
+                if (isCurrentlySelected) { // Same as !shouldSelect for non-parents
+                    // Remove just this one
+                    newSelected = newSelected.filter((item) => item !== categoryId);
+                } else {
+                    // Add just this one
+                    newSelected.push(categoryId);
+                }
+            }
+
+            return newSelected;
+        });
+
         setCurrentPage(1);
+    };
+
+    const toggleParentCategory = (parentId: number) => {
+        setOpenParentCategories((prevOpen) => {
+            const isOpen = prevOpen.includes(parentId);
+            if (isOpen) {
+                // If it's open, close it by removing the ID
+                return prevOpen.filter((id) => id !== parentId);
+            } else {
+                // Otherwise, open it by adding the ID
+                return [...prevOpen, parentId];
+            }
+        });
     };
 
     const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,83 +239,97 @@ const Products = () => {
     };
 
     const handleClearFilters = () => {
-        setSelectedCategory("all");
-        setSortBy("featured");
-        setPriceRange([0, 10000]);
-        setSearchTerm('');
-        setCurrentPage(1);
+        setSelectedCategories([]); // <-- CHANGED
+        setSortBy("featured");
+        setPriceRange([0, 10000]);
+        setSearchTerm('');
+        setCurrentPage(1);
     };
 
     // --- MAIN MODIFICATION AREA 1 ---
-    useEffect(() => {
-        const fetchProductsAndWishlist = async () => {
-            setLoading(true);
-            try {
-                const categoryIds = getCategoryIdsToFilter(selectedCategory);
+   useEffect(() => {
+        const fetchProductsAndWishlist = async () => {
+            setLoading(true);
+            try {
+                // --- 1. Start building the query by selecting first ---
+                let queryBuilder;
+                if (selectedCategories.length > 0) {
+                    // If categories are selected, SELECT with the inner join
+                    queryBuilder = supabase
+                        .from('products')
+                        .select('*, product_categories!inner(*)', { count: 'exact' })
+                        .in('product_categories.category_id', selectedCategories); // Apply category filter here
+                } else {
+                    // If no categories, just select normally
+                    queryBuilder = supabase
+                        .from('products')
+                        .select('*', { count: 'exact' });
+                }
 
-                let query = supabase
-                    .from('products')
-                    .select('*', { count: 'exact' })
-                    .eq('is_active', true)
-                    .ilike('name', `%${searchTerm}%`)
-                    .gte('price', priceRange[0])
-                    .lte('price', priceRange[1]);
+                // --- 2. Chain ALL other filters and sorting onto the result of the select ---
+                queryBuilder = queryBuilder
+                    .eq('is_active', true)
+                    .ilike('name', `%${searchTerm}%`)
+                    .gte('price', priceRange[0])
+                    .lte('price', priceRange[1]);
 
-                if (selectedCategory !== 'all' && categoryIds.length > 0) {
-                    query = query.in('category_id', categoryIds);
-                }
+                // --- Apply Sorting ---
+                if (sortBy === 'featured') {
+                    queryBuilder = queryBuilder.order('priority', { ascending: true, nullsFirst: false })
+                                              .order('created_at', { ascending: false });
+                } else if (sortBy === 'price-low') {
+                    queryBuilder = queryBuilder.order('price', { ascending: true });
+                } else if (sortBy === 'price-high') {
+                    queryBuilder = queryBuilder.order('price', { ascending: false });
+                } else if (sortBy === 'rating') {
+                    queryBuilder = queryBuilder.order('rating', { ascending: false });
+                } else if (sortBy === 'newest') {
+                    queryBuilder = queryBuilder.order('created_at', { ascending: false });
+                }
 
-                // --- ⬇️ UPDATED SORTING LOGIC ⬇️ ---
-                if (sortBy === 'featured') {
-                    // Sort by priority number first (nulls last), then by newest.
-                    query = query.order('priority', { ascending: true, nullsFirst: false })
-                                .order('created_at', { ascending: false });
-                } else if (sortBy === 'price-low') {
-                    query = query.order('price', { ascending: true });
-                } else if (sortBy === 'price-high') {
-                    query = query.order('price', { ascending: false });
-                } else if (sortBy === 'rating') {
-                    query = query.order('rating', { ascending: false });
-                } else if (sortBy === 'newest') {
-                    query = query.order('created_at', { ascending: false });
-                }
-                // --- ⬆️ END OF UPDATE ⬆️ ---
+                // --- Debug logs (still useful) ---
+                console.log("DEBUG: Fetching products with categories:", selectedCategories);
 
-                const { data: productsData, count, error } = await query.range(
-                    (currentPage - 1) * productsPerPage,
-                    currentPage * productsPerPage - 1
-                );
+                // --- 3. Apply Range and Execute ---
+                const { data: productsData, count, error } = await queryBuilder.range(
+                    (currentPage - 1) * productsPerPage,
+                    currentPage * productsPerPage - 1
+                );
 
-                if (error) {
-                    console.error('Error fetching products:', error.message);
-                    setProducts([]);
-                    setTotalProducts(0);
-                } else {
-                    setProducts(productsData || []);
-                    setTotalProducts(count || 0);
-                }
+                console.log("DEBUG: Supabase response:", { productsData, count, error });
 
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) {
-                    const { data: wishlist } = await supabase
-                        .from('wishlists')
-                        .select('product_id')
-                        .eq('user_id', user.id);
+                if (error) {
+                    console.error('Error fetching products:', error.message);
+                    setProducts([]);
+                    setTotalProducts(0);
+                } else {
+                    setProducts(productsData || []);
+                    setTotalProducts(count || 0);
+                }
 
-                    if (wishlist) {
-                        setWishlistIds(wishlist.map((w) => w.product_id));
-                    }
-                }
-            } catch (err) {
-                console.error('Error fetching data:', err);
-                setProducts([]);
-                setTotalProducts(0);
-            }
-            setLoading(false);
-        };
+                // --- Fetch Wishlist (unchanged) ---
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data: wishlist } = await supabase
+                        .from('wishlists')
+                        .select('product_id')
+                        .eq('user_id', user.id);
 
-        fetchProductsAndWishlist();
-    }, [currentPage, selectedCategory, searchTerm, priceRange, sortBy]);
+                    if (wishlist) {
+                        setWishlistIds(wishlist.map((w) => w.product_id));
+                    }
+                }
+            } catch (err: any) {
+                console.error('Error in fetchProductsAndWishlist:', err.message || err);
+                setProducts([]);
+                setTotalProducts(0);
+            }
+            setLoading(false);
+        };
+
+        fetchProductsAndWishlist();
+        // Dependency array is correct
+    }, [currentPage, selectedCategories, searchTerm, priceRange, sortBy]);
 
     // All your existing handler functions are preserved
     const toggleWishlist = async (productId: number) => {
@@ -264,6 +366,7 @@ const Products = () => {
             setCartMessage({ text: "❌ Failed to add item to cart", type: "error" });
         } else {
             setCartMessage({ text: "✅ Item added to cart successfully!", type: "success" });
+            window.dispatchEvent(new Event('cartUpdated'));
         }
         setTimeout(() => setCartMessage(null), 3000);
     };
@@ -293,6 +396,7 @@ const Products = () => {
             setCartMessage({ text: "❌ Failed to add item to cart", type: "error" });
         } else {
             setCartMessage({ text: "✅ Item added to cart successfully!", type: "success" });
+            window.dispatchEvent(new Event('cartUpdated')); // <-- ADD THIS LINE
         }
         setTimeout(() => setCartMessage(null), 3000);
         setShowQuantityModal(false);
@@ -369,53 +473,56 @@ const Products = () => {
            </div>
 
            {/* Filter & Grid/List */}
-           <div className="flex items-center space-x-2 sm:space-x-4 flex-wrap">
-               <button
-                   onClick={() => setShowFilters(!showFilters)}
-                   className="flex items-center space-x-2 glass px-4 sm:px-6 py-2 sm:py-3 rounded-full hover:bg-white/20 transition-all duration-300 relative text-sm sm:text-base"
-               >
-                   <Filter className="w-4 h-4 sm:w-5 sm:h-5" />
-                   <span className="font-medium">Filters</span>
-
-                   {(selectedCategory !== "all" || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 10000) && (
-                       <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-luxury-gold text-white">
-                           Active
-                       </span>
-                   )}
-               </button>
-
-               {(selectedCategory !== "all" || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 10000) && (
-                   <button
-                       onClick={handleClearFilters}
-                       className="text-sm text-red-500 hover:underline"
-                   >
-                       Clear All
-                   </button>
-               )}
-
-               <div className="flex items-center space-x-2 flex-wrap glass rounded-full p-1">
+            <div className="flex items-center space-x-2 sm:space-x-4 flex-wrap">
                 <button
-                    onClick={() => setViewMode("grid")}
-                    className={`p-2 rounded-full transition-all duration-300 flex items-center justify-center hover:bg-white/20 ${
-                        viewMode === "grid"
-                            ? "bg-luxury-gold text-green-700" // <-- CHANGED
-                            : "text-neutral-600"
-                    }`}
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="flex items-center space-x-2 glass px-4 sm:px-6 py-2 sm:py-3 rounded-full hover:bg-white/20 transition-all duration-300 relative text-sm sm:text-base"
                 >
-                    <Grid className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <Filter className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="font-medium">Filters</span>
+
+                    {/* --- 1. THIS LINE IS UPDATED --- */}
+                    {(selectedCategories.length > 0 || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 10000) && (
+                        <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-luxury-gold text-white">
+                            Active
+                        </span>
+                    )}
                 </button>
-                <button
-                    onClick={() => setViewMode("list")}
-                    className={`p-2 rounded-full transition-all duration-300 flex items-center justify-center hover:bg-white/20 ${
-                        viewMode === "list"
-                            ? "bg-luxury-gold text-green-700" // <-- CHANGED
-                            : "text-neutral-600"
-                    }`}
-                >
-                    <List className="w-4 h-4 sm:w-5 sm:h-5" />
-                </button>
+
+                {/* --- 2. THIS LINE IS ALSO UPDATED --- */}
+                {(selectedCategories.length > 0 || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 10000) && (
+                    <button
+                        onClick={handleClearFilters}
+                        className="text-sm text-red-500 hover:underline"
+                    >
+                        Clear All
+                    </button>
+                )}
+
+                {/* This part was already correct */}
+                <div className="flex items-center space-x-2 flex-wrap glass rounded-full p-1">
+                    <button
+                        onClick={() => setViewMode("grid")}
+                        className={`p-2 rounded-full transition-all duration-300 flex items-center justify-center hover:bg-white/20 ${
+                            viewMode === "grid"
+                                ? "bg-luxury-gold text-green-700"
+                                : "text-neutral-600"
+                        }`}
+                    >
+                        <Grid className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </button>
+                    <button
+                        onClick={() => setViewMode("list")}
+                        className={`p-2 rounded-full transition-all duration-300 flex items-center justify-center hover:bg-white/20 ${
+                            viewMode === "list"
+                                ? "bg-luxury-gold text-green-700"
+                                : "text-neutral-600"
+                        }`}
+                    >
+                        <List className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </button>
+                </div>
             </div>
-           </div>
        </div>
 
        {/* Filter Panel */}
@@ -426,51 +533,90 @@ const Products = () => {
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                        
                        {/* Categories */}
-                       <div className="space-y-4">
-                           <h3 className="font-display font-semibold text-lg pb-2 border-b border-white/20">Categories</h3>
-                           <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
-                               {categories.map((category) => (
-                                   <div key={category.id}>
-                                       <div className="flex items-center justify-between">
-                                           <button
-                                               onClick={() => handleCategoryChange(category.id)}
-                                               className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 text-sm font-medium ${selectedCategory === category.id ? "bg-luxury-gold text-white" : "hover:bg-white/20"
-                                                   }`}
-                                           >
-                                               {category.name}
-                                           </button>
-                                           {category.children?.length > 0 && (
-                                               <button
-                                                   onClick={() =>
-                                                       setOpenParentCategory(
-                                                           openParentCategory === category.id ? null : category.id
-                                                       )
-                                                   }
-                                                   className="ml-2 text-sm text-neutral-400 hover:text-neutral-600 p-1"
-                                               >
-                                                   {openParentCategory === category.id ? "▲" : "▼"}
-                                               </button>
-                                           )}
-                                       </div>
+                       {/* Categories */}
+                        {/* Categories */}
+                        <div className="space-y-4">
+                            <h3 className="font-display font-semibold text-lg pb-2 border-b border-white/20">Categories</h3>
+                            <div className="space-y-1 max-h-64 overflow-y-auto pr-2">
 
-                                       {category.children?.length > 0 && openParentCategory === category.id && (
-                                           <div className="ml-4 mt-1 space-y-1 pl-3 border-l-2 border-luxury-gold/20">
-                                               {category.children.map((child: any) => (
-                                                   <button
-                                                       key={child.id}
-                                                       onClick={() => handleCategoryChange(child.id)}
-                                                       className={`w-full text-left px-3 py-1.5 rounded-lg text-sm transition-all duration-200 ${selectedCategory === child.id ? "bg-luxury-gold text-white" : "hover:bg-white/10"
-                                                           }`}
-                                                   >
-                                                       {child.name}
-                                                   </button>
-                                               ))}
-                                           </div>
-                                       )}
-                                   </div>
-                               ))}
-                           </div>
-                       </div>
+                                {/* Render "All Products" Button (unchanged) */}
+                                {categories.filter(c => c.id === 'all').map((category) => (
+                                    <button
+                                        key={category.id}
+                                        onClick={() => handleCategoryChange("all")}
+                                        className={`w-full text-left px-3 py-1.5 rounded-lg transition-all duration-200 text-sm font-medium ${
+                                            selectedCategories.length === 0 ? "bg-luxury-gold text-white" : "hover:bg-white/20"
+                                        }`}
+                                    >
+                                        {category.name}
+                                    </button>
+                                ))}
+
+                                {/* Map over actual parent/child categories */}
+                                {categories.filter(c => c.id !== 'all').map((category) => (
+                                    <div key={category.id} className="pt-1">
+                                        {/* --- PARENT CATEGORY ROW --- */}
+                                        <div className="flex items-center justify-between">
+                                            {/* Checkbox and Name */}
+                                            <label className="flex-1 flex items-center space-x-3 px-3 py-1.5 rounded-lg hover:bg-white/20 cursor-pointer mr-2"> {/* Added mr-2 */}
+                                                <input
+                                                    type="checkbox"
+                                                    checked={ /* ... checked logic ... */
+                                                        selectedCategories.includes(category.id) ||
+                                                        (category.children?.length > 0 && category.children.every((child: any) => selectedCategories.includes(child.id)))
+                                                    }
+                                                    ref={ /* ... indeterminate ref logic ... */
+                                                        el => {
+                                                            if (el && category.children?.length > 0) {
+                                                                const childIds = category.children.map((child: any) => child.id);
+                                                                const selectedChildrenCount = childIds.filter((id: number) => selectedCategories.includes(id)).length;
+                                                                el.indeterminate = selectedChildrenCount > 0 && selectedChildrenCount < childIds.length && !selectedCategories.includes(category.id);
+                                                            } else if (el) {
+                                                                el.indeterminate = false;
+                                                            }
+                                                        }
+                                                    }
+                                                    onChange={() => handleCategoryChange(category)}
+                                                    className="h-4 w-4 rounded text-luxury-gold focus:ring-luxury-gold border-neutral-300 flex-shrink-0"
+                                                />
+                                                <span className="text-sm font-medium">
+                                                    {category.name}
+                                                </span>
+                                            </label>
+
+                                            {/* --- EXPAND/COLLAPSE BUTTON (Re-added) --- */}
+                                            {category.children?.length > 0 && (
+                                                <button
+                                                    onClick={() => toggleParentCategory(category.id)} // Use new handler
+                                                    className="p-1 text-neutral-400 hover:text-neutral-600 flex-shrink-0" // Added flex-shrink-0
+                                                >
+                                                    {openParentCategories.includes(category.id) ? "▲" : "▼"} {/* Check if ID is in the array */}
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        {/* --- CONDITIONALLY RENDER CHILD CHECKBOXES (Re-added condition) --- */}
+                                        {category.children?.length > 0 && openParentCategories.includes(category.id) && ( // Check if ID is in the array
+                                            <div className="ml-4 mt-1 space-y-0.5 pl-3 border-l-2 border-luxury-gold/20">
+                                                {category.children.map((child: any) => (
+                                                    <label key={child.id} className="flex items-center space-x-3 px-3 py-1 rounded-lg hover:bg-white/10 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedCategories.includes(child.id)}
+                                                            onChange={() => handleCategoryChange(child)}
+                                                            className="h-4 w-4 rounded text-luxury-gold focus:ring-luxury-gold border-neutral-300 flex-shrink-0"
+                                                        />
+                                                        <span className="text-sm">
+                                                            {child.name}
+                                                        </span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
 
                        {/* Price & Sort Column */}
                        <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -841,10 +987,10 @@ const Products = () => {
                                             Custom Weight (Min 50g)
                                         </button>
                                         {selectedWeight === 'custom' && (
-                                            <div className="flex items-center justify-between gap-2 mt-4">
+                                            <div className="flex items-center justify-center gap-2 mt-4">
                                                 <button
                                                     onClick={() => setCustomWeight(Math.max(50, customWeight - 50))}
-                                                    className="p-2 glass rounded-lg hover:bg-white/20"
+                                                    className="p-2 min-w-[60px] glass rounded-lg hover:bg-white/20"
                                                 >
                                                     -
                                                 </button>
@@ -852,13 +998,13 @@ const Products = () => {
                                                     type="number"
                                                     value={customWeight}
                                                     onChange={(e) => setCustomWeight(Math.max(50, parseInt(e.target.value) || 50))}
-                                                    className="flex-1 p-2 glass rounded-lg text-center"
+                                                    className="w-[150px] p-2 glass rounded-lg text-center"
                                                     min="50"
                                                 />
                                                 <span className="text-sm text-neutral-800">grams</span>
                                                 <button
                                                     onClick={() => setCustomWeight(customWeight + 50)}
-                                                    className="p-2 glass rounded-lg hover:bg-white/20"
+                                                    className="p-2 min-w-[60px] glass rounded-lg hover:bg-white/20"
                                                 >
                                                     +
                                                 </button>

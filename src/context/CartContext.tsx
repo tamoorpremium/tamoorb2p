@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '../utils/supabaseClient';
+import { useMemo, useCallback } from 'react';
 
 export interface CartItem {
   id: number;
@@ -104,7 +105,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setPromo(promo);
   };
 
-  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const cartCount = useMemo(() => {
+    return cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  }, [cartItems]);
 
   // Price calculation: fixed piece price vs weighted kilogram price
   const getCartItemPrice = (item: CartItem) => {
@@ -114,7 +117,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const cartTotal = cartItems.reduce((acc, item) => acc + getCartItemPrice(item), 0);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => { // <-- Wrap in useCallback
     const { data } = await supabase.auth.getUser();
     const user = data.user;
     if (!user) {
@@ -133,35 +136,47 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return;
     }
 
+    // ... (rest of your refresh function is perfect) ...
     const formatted = cartData.map((item: any) => {
-      const weightStr = item.weight || 'default';
-      let unitPrice = item.products.price;
-
-      if (item.products.measurement_unit !== 'pieces') {
-        // Extract numeric value from weight string
-        const grams = parseInt(weightStr.replace(/\D/g, ''), 10) || 1000;
-        // Price per gram
-        unitPrice = Math.round((item.products.price / 1000) * grams);
-      }
-
-      return {
-        id: item.product_id,
-        quantity: item.quantity,
-        weight: weightStr,
-        name: item.products.name,
-        price: item.products.price,
-        unit_price: unitPrice,
-        image: item.products.image,
-        measurement_unit: item.products.measurement_unit,
-      };
+        const weightStr = item.weight || 'default';
+        let unitPrice = item.products.price;
+        if (item.products.measurement_unit !== 'pieces') {
+            const grams = parseInt(weightStr.replace(/\D/g, ''), 10) || 1000;
+            unitPrice = Math.round((item.products.price / 1000) * grams);
+        }
+        return {
+            id: item.product_id,
+            quantity: item.quantity,
+            weight: weightStr,
+            name: item.products.name,
+            price: item.products.price,
+            unit_price: unitPrice,
+            image: item.products.image,
+            measurement_unit: item.products.measurement_unit,
+        };
     });
-
     setCartItems(formatted);
-  };
+  }, []);
 
   useEffect(() => {
     refresh();
-  }, []);
+  }, [refresh]); // <-- Make sure to pass 'refresh' here now
+
+  // --- ADD THIS NEW BLOCK ---
+  useEffect(() => {
+    // This listens for the 'cartUpdated' signal from anywhere in the app
+    const handleCartUpdate = () => {
+      console.log('Cart signal received! Refreshing count.');
+      refresh();
+    };
+
+    window.addEventListener('cartUpdated', handleCartUpdate);
+
+    // Clean up the listener
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+    };
+  }, [refresh]);
 
   const addToCart = async (item: Omit<CartItem, 'quantity'>, quantity: number = 1) => {
     const { data } = await supabase.auth.getUser();
@@ -173,20 +188,37 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const standardizedWeight = normalizeWeight(item.weight, item.measurement_unit);
 
-    const { data: existing, error: existingError } = await supabase
-      .from('cart')
-      .select('quantity')
-      .eq('user_id', user.id)
-      .eq('product_id', item.id)
-      .eq('weight', standardizedWeight)
-      .single();
+    // --- OPTIMISTIC UPDATE ---
+    // 1. Check local state first
+    const existingItem = cartItems.find(
+      (ci) => ci.id === item.id && ci.weight === standardizedWeight
+    );
 
-    if (existingError) {
-      console.error('Error fetching existing cart item:', existingError);
+    let newQuantity: number;
+    let updatedCart: CartItem[];
+
+    if (existingItem) {
+      newQuantity = existingItem.quantity + quantity;
+      updatedCart = cartItems.map((ci) =>
+        ci.id === item.id && ci.weight === standardizedWeight
+          ? { ...ci, quantity: newQuantity }
+          : ci
+      );
+    } else {
+      newQuantity = quantity;
+      // Ensure the new item has the correct unit_price
+      const unitPrice = item.unit_price ?? item.price;
+      updatedCart = [
+        ...cartItems,
+        { ...item, quantity: newQuantity, weight: standardizedWeight, unit_price: unitPrice },
+      ];
     }
 
-    const newQuantity = existing ? existing.quantity + quantity : quantity;
+    // 2. Update state *immediately*
+    setCartItems(updatedCart);
+    // --- END OPTIMISTIC UPDATE ---
 
+    // 3. Update database in the background
     const { error } = await supabase.from('cart').upsert({
       user_id: user.id,
       product_id: item.id,
@@ -195,15 +227,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
 
     if (error) {
-      console.error('Error upserting cart item:', error);
-      return;
+      console.error('Error upserting cart item, refreshing to sync:', error);
+      // On error, roll back by refreshing from the database
+      refresh();
     }
-
-    refresh();
+    // DO NOT call refresh() on success
   };
 
   const removeFromCart = async (id: number, weight: string, measurementUnit?: string) => {
-    const normalizedWeight = normalizeWeight(weight, measurementUnit);
     const { data } = await supabase.auth.getUser();
     const user = data.user;
     if (!user) {
@@ -211,6 +242,16 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return;
     }
 
+    const normalizedWeight = normalizeWeight(weight, measurementUnit);
+
+    // --- OPTIMISTIC UPDATE ---
+    const newCartItems = cartItems.filter(
+      (ci) => !(ci.id === id && ci.weight === normalizedWeight)
+    );
+    setCartItems(newCartItems);
+    // --- END OPTIMISTIC UPDATE ---
+
+    // 2. Update database in the background
     const { error } = await supabase
       .from('cart')
       .delete()
@@ -219,11 +260,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       .eq('weight', normalizedWeight);
 
     if (error) {
-      console.error('Error removing from cart:', error);
-      return;
+      console.error('Error removing from cart, refreshing to sync:', error);
+      // On error, roll back by refreshing
+      refresh();
     }
-
-    refresh();
+    // DO NOT call refresh() on success
   };
 
   const updateQuantity = async (
@@ -232,6 +273,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     quantity: number,
     measurementUnit?: string
   ) => {
+    // This will now call your new *optimistic* remove function
     if (quantity <= 0) {
       await removeFromCart(id, weight, measurementUnit);
       return;
@@ -244,29 +286,40 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return;
     }
 
-    // Find exact cart item using exact stored weight
-    const cartItem = cartItems.find(
-      (ci) => ci.id === id && ci.weight === weight
-    );
+    // --- OPTIMISTIC UPDATE ---
+    let itemToUpdate: CartItem | undefined;
+    const newCartItems = cartItems.map((ci) => {
+      // Use the exact 'weight' string from the item, not a normalized one
+      if (ci.id === id && ci.weight === weight) {
+        itemToUpdate = { ...ci, quantity: quantity };
+        return itemToUpdate;
+      }
+      return ci;
+    });
 
-    if (!cartItem) {
-      console.error('Cart item not found!');
-      return;
+    // 1. Update state *immediately*
+    setCartItems(newCartItems);
+    // --- END OPTIMISTIC UPDATE ---
+
+    if (!itemToUpdate) {
+      console.error('Cart item not found for optimistic update!');
+      return; // Should not happen if UI is synced
     }
 
+    // 2. Update database in the background
     const { error } = await supabase
       .from('cart')
-      .update({ quantity, unit_price: cartItem.unit_price })
+      .update({ quantity, unit_price: itemToUpdate.unit_price })
       .eq('user_id', user.id)
       .eq('product_id', id)
-      .eq('weight', weight);
+      .eq('weight', weight); // Use the exact weight
 
     if (error) {
-      console.error('Error updating quantity:', error);
-      return;
+      console.error('Error updating quantity, refreshing to sync:', error);
+      // On error, roll back by refreshing
+      refresh();
     }
-
-    refresh();
+    // DO NOT call refresh() on success
   };
 
   const clearCart = async () => {
@@ -277,16 +330,19 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return;
     }
 
+    // --- OPTIMISTIC UPDATE ---
+    const oldCart = cartItems; // 1. Save old cart for rollback
+    setCartItems([]); // 2. Update state *immediately*
+    // --- END OPTIMISTIC UPDATE ---
+
+    // 3. Update database in the background
     const { error } = await supabase.from('cart').delete().eq('user_id', user.id);
 
     if (error) {
-      console.error(error);
-      return;
+      console.error('Error clearing cart, rolling back:', error);
+      setCartItems(oldCart); // Rollback on error
     }
-
-    setCartItems([]);
-    //setPromo(null);
-    //localStorage.removeItem("cartData");
+    // DO NOT call refresh() on success
   };
 
   // ✅ Restore from localStorage

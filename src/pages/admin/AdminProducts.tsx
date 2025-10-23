@@ -8,7 +8,8 @@ interface Product {
   id: number;
   name: string;
   price: number;
-  category_id: number | null;
+  //category_id: number | null;
+  category_ids?: number[];
   measurement_unit: string;
   is_active: boolean;
   is_in_stock: boolean;
@@ -42,23 +43,63 @@ const AdminProducts: React.FC = () => {
   };
 
   const fetchProducts = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('id, name, price, measurement_unit, category_id, is_active, is_in_stock, stock_quantity, image')
-        .order('name', { ascending: true });
+    setLoading(true);
+    try {
+      // 1. Fetch basic product data (without category_id)
+      const { data: productsData, error: productsError } = await supabase
+        .from('products')
+        // Remove category_id from select
+        .select('id, name, price, measurement_unit, is_active, is_in_stock, stock_quantity, image')
+        .order('name', { ascending: true });
 
-      if (error) throw error;
-      setProducts(data || []);
-    } catch (error) {
-      toast.error('Failed to load products.');
-      setProducts([]);
-      console.error('Error fetching products:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (productsError) throw productsError;
+      if (!productsData) {
+          setProducts([]);
+          setLoading(false);
+          return;
+      }
+
+      // 2. Get IDs of fetched products
+      const productIds = productsData.map(p => p.id);
+
+      // 3. Fetch category links for these products
+      let categoryLinks: { product_id: number; category_id: number }[] = [];
+      if (productIds.length > 0) {
+          const { data: linksData, error: linksError } = await supabase
+              .from('product_categories')
+              .select('product_id, category_id')
+              .in('product_id', productIds);
+
+          if (linksError) {
+              console.error("Failed to fetch category links:", linksError);
+              toast.warn("Could not load category associations for products.");
+              // Continue without category info if links fail
+          } else {
+              categoryLinks = linksData || [];
+          }
+      }
+
+      // 4. Augment product data with category IDs
+      const productsWithCategories = productsData.map(product => {
+          const linkedCategoryIds = categoryLinks
+              .filter(link => link.product_id === product.id)
+              .map(link => link.category_id);
+          return {
+              ...product,
+              category_ids: linkedCategoryIds // Add the category_ids array
+          };
+      });
+
+      setProducts(productsWithCategories);
+
+    } catch (error) {
+      toast.error('Failed to load products.');
+      setProducts([]);
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -128,20 +169,25 @@ const AdminProducts: React.FC = () => {
   };
 
   const filteredProducts = useMemo(() => {
-    return products.filter(product => {
-      const searchMatch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const categoryMatch = !selectedCategoryId || product.category_id === selectedCategoryId;
-      let statusMatch = true;
-      if (statusFilter === 'active') {
-        statusMatch = product.is_active && product.is_in_stock;
-      } else if (statusFilter === 'inactive') {
-        statusMatch = !product.is_active;
-      } else if (statusFilter === 'outOfStock') {
-        statusMatch = product.is_active && !product.is_in_stock;
-      }
-      return searchMatch && categoryMatch && statusMatch;
-    });
-  }, [products, searchTerm, selectedCategoryId, statusFilter]);
+    return products.filter(product => {
+      const searchMatch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // --- UPDATED CATEGORY MATCH LOGIC ---
+      // Check if the product's category_ids array includes the selectedCategoryId
+      const categoryMatch = !selectedCategoryId || (product.category_ids && product.category_ids.includes(selectedCategoryId));
+      // --- END UPDATE ---
+
+      let statusMatch = true;
+      if (statusFilter === 'active') {
+        statusMatch = product.is_active && product.is_in_stock;
+      } else if (statusFilter === 'inactive') {
+        statusMatch = !product.is_active;
+      } else if (statusFilter === 'outOfStock') {
+        statusMatch = product.is_active && !product.is_in_stock;
+      }
+      return searchMatch && categoryMatch && statusMatch;
+    });
+  }, [products, searchTerm, selectedCategoryId, statusFilter]);
   
   // --- UI/JSX Section Completely Redesigned ---
 
@@ -250,7 +296,14 @@ const AdminProducts: React.FC = () => {
                                />
                                <div>
                                    <p className="font-bold text-base text-gray-100">{product.name}</p>
-                                   <p className="text-sm text-gray-400">{product.category_id ? categoriesMap[product.category_id] : 'N/A'}</p>
+                                   {/* Display the name of the first category, if available */}
+                                    <p className="text-sm text-gray-400">
+                                      {(product.category_ids && product.category_ids.length > 0 && categoriesMap[product.category_ids[0]])
+                                        ? categoriesMap[product.category_ids[0]]
+                                        : 'N/A'}
+                                      {/* Optionally indicate if there are more categories */}
+                                      {(product.category_ids && product.category_ids.length > 1) ? ' (+ more)' : ''}
+                                    </p>
                                </div>
                            </div>
                         </td>
@@ -304,7 +357,14 @@ const AdminProducts: React.FC = () => {
                         />
                         <div className="flex-1">
                             <h3 className="text-lg font-bold text-yellow-300">{product.name}</h3>
-                            <p className="text-sm text-gray-400">{product.category_id ? categoriesMap[product.category_id] : 'N/A'}</p>
+                            {/* Display the name of the first category, if available */}
+                            <p className="text-sm text-gray-400">
+                              {(product.category_ids && product.category_ids.length > 0 && categoriesMap[product.category_ids[0]])
+                                ? categoriesMap[product.category_ids[0]]
+                                : 'N/A'}
+                              {/* Optionally indicate if there are more categories */}
+                              {(product.category_ids && product.category_ids.length > 1) ? ' (+ more)' : ''}
+                            </p>
                             <div className="flex items-baseline gap-2 mt-1">
                                 <p className="font-mono text-lg font-bold text-white">₹{product.price.toFixed(2)}</p>
                                 <p className="font-mono text-sm text-gray-400">Stock: {product.stock_quantity}</p>

@@ -22,7 +22,7 @@ interface Product {
   badge?: string;
   badge_color?: string;
   is_in_stock?: boolean;
-  category_id?: number;
+  //category_id?: number;
 }
 
 interface ProductImage {
@@ -94,13 +94,7 @@ const ProductDetails: React.FC = () => {
     setCurrentImageIndex(newIndex);
   };
 
-  // NEW: useEffect to update the selectedImage when the index changes
-  useEffect(() => {
-    if (uniqueImages.length > 0) {
-      setSelectedImage(uniqueImages[currentImageIndex]);
-    }
-  }, [currentImageIndex, uniqueImages]);
-
+  
 
   // NEW: Setup swipe handlers
   const swipeHandlers = useSwipeable({
@@ -111,75 +105,19 @@ const ProductDetails: React.FC = () => {
   });
 
 
-  // Fetch product
-  useEffect(() => {
-    if (!id) return;
-    const fetchProduct = async () => {
-      const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
-      if (error) console.error(error);
-      else setProduct(data);
-    };
-    fetchProduct();
-  }, [id]);
+ 
 
  
 
 // Fetch images
-// Fetch images
-useEffect(() => {
-  if (!id) return;
-  const fetchImages = async () => {
-    const { data, error } = await supabase
-      .from("product_images")
-      .select("*")
-      .eq("product_id", id);
 
-    if (error) {
-      console.error(error);
-    } else if (data.length > 0) {
-      // Sort by sort_order ascending
-      const sortedImages = data.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-
-      // Prefer the primary image as default
-      const primaryImage = sortedImages.find(img => img.is_primary) || sortedImages[0];
-      setSelectedImage(primaryImage.image_url);
-
-      // Set images state
-      setImages(sortedImages);
-    }
-  };
-  fetchImages();
-}, [id]);
 
 
  // ✅ Wishlist states
   const [wishlistIds, setWishlistIds] = useState<number[]>([]);
   const [wishlistMessage, setWishlistMessage] = useState<{ text: string; type: "success" | "remove" } | null>(null);
 
-  useEffect(() => {
-    const fetchProductAndWishlist = async () => {
-      if (!id) return;
-
-      // fetch product
-      const { data: productData, error } = await supabase.from("products").select("*").eq("id", id).single();
-      if (!error) setProduct(productData);
-
-      // fetch wishlist if logged in
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: wishlist } = await supabase
-          .from("wishlists")
-          .select("product_id")
-          .eq("user_id", user.id);
-
-        if (wishlist) {
-          setWishlistIds(wishlist.map((w) => w.product_id));
-        }
-      }
-    };
-
-    fetchProductAndWishlist();
-  }, [id]);
+  
 
   // ✅ Toggle wishlist
   // ✅ CORRECTED LOGIC
@@ -221,62 +159,160 @@ useEffect(() => {
   };
 
   // Fetch reviews
+  // This one hook replaces fetchProduct, fetchImages, fetchProductAndWishlist, and fetchReviews
   useEffect(() => {
     if (!id) return;
-    const fetchReviews = async () => {
-      const { data, error } = await supabase.from("product_reviews").select("*").eq("product_id", id);
-      if (error) console.error(error);
-      else setReviews(data);
+    
+    // Set loading state here if you have one
+    // setLoading(true); 
+
+    const fetchAllData = async () => {
+      try {
+        // 1. Run non-dependent fetches in parallel
+        const [productRes, imagesRes, reviewsRes, userRes] = await Promise.all([
+          supabase.from("products").select("*").eq("id", id).single(),
+          supabase.from("product_images").select("*").eq("product_id", id).order("sort_order"),
+          supabase.from("product_reviews").select("*").eq("product_id", id),
+          supabase.auth.getUser() // Get user info
+        ]);
+
+        // 2. Handle Product
+        if (productRes.error) {
+          console.error("Error fetching product:", productRes.error);
+          setProduct(null);
+          return; // Can't continue without a product
+        }
+        
+        const loadedProduct = productRes.data;
+        setProduct(loadedProduct);
+
+        // 3. Handle Images
+        const loadedImages = imagesRes.data || [];
+        setImages(loadedImages);
+
+        // 4. Set the initial selected image
+        const primaryImg = loadedImages.find(img => img.is_primary) || loadedImages[0];
+        setSelectedImage(primaryImg?.image_url || loadedProduct.image);
+        setCurrentImageIndex(0); // Reset index for new product
+
+        // 5. Handle Reviews
+        if (reviewsRes.data) {
+          setReviews(reviewsRes.data);
+        }
+
+        // 6. Handle Wishlist (if user is logged in)
+        if (userRes.data.user) {
+          const { data: wishlist } = await supabase
+            .from("wishlists")
+            .select("product_id")
+            .eq("user_id", userRes.data.user.id);
+          
+          if (wishlist) {
+            setWishlistIds(wishlist.map((w) => w.product_id));
+          }
+        }
+        
+      } catch (err: any) {
+        console.error("Error fetching product details:", err.message);
+        // Handle error state
+      } finally {
+        // setLoading(false);
+      }
     };
-    fetchReviews();
-  }, [id]);
+
+    fetchAllData();
+  }, [id, navigate]); // Add navigate if you use it in error handling
 
   // Fetch similar products
-  useEffect(() => {
-    if (!product?.category_id) return;
-    const fetchSimilar = async () => {
-      try {
+  // Fetch similar products (UPDATED LOGIC)
+  useEffect(() => {
+    if (!product) return; // Only need the product ID
+
+    const fetchSimilar = async () => {
+      try {
+        // 1. Get the category IDs for the current product
+        const { data: currentProductCategories, error: catsError } = await supabase
+          .from('product_categories')
+          .select('category_id')
+          .eq('product_id', product.id);
+
+        if (catsError) throw catsError;
+        if (!currentProductCategories || currentProductCategories.length === 0) {
+          console.log("Current product has no categories, fetching random fallback.");
+          // If no categories, fetch some random active products (excluding current)
+          let { data: fallback, error: fallbackErr } = await supabase
+              .from('products')
+              .select('*')
+              .eq('is_active', true)
+              .neq('id', product.id)
+              .limit(10);
+          if (fallbackErr) throw fallbackErr;
+          setSimilarProducts(fallback || []);
+          return; // Exit early
+        }
+
+        // 2. Choose one category ID to base similarity on (e.g., the first one)
+        const categoryIdToUse = currentProductCategories[0].category_id;
+
+        // --- Optional: Fetch parent category if needed (like your old logic) ---
+        // You could uncomment this if you prefer showing items from the parent category
+        /*
         const { data: categoryData, error: categoryError } = await supabase
           .from("categories")
           .select("id, parent_id")
-          .eq("id", product.category_id)
+          .eq("id", categoryIdToUse)
           .single();
-        if (categoryError) throw categoryError;
+        if (categoryError) console.warn("Could not fetch category parent:", categoryError.message); // Log warning but continue
+        const finalCategoryId = categoryData?.parent_id || categoryIdToUse;
+        */
+        // --- For simplicity, we'll just use the direct category ID for now ---
+        const finalCategoryId = categoryIdToUse;
 
-        const categoryIdToUse = categoryData?.parent_id || product.category_id;
 
-        let { data: parentProducts, error: parentError } = await supabase
-          .from("products")
-          .select("*")
-          .eq("category_id", categoryIdToUse)
-          .eq('is_active', true)
-          .neq("id", product.id);
-        if (parentError) throw parentError;
+        // 3. Fetch other products in that same category
+        let { data: similarData, error: similarError } = await supabase
+          .from('products')
+          // Select product columns, join with product_categories
+          .select('*, product_categories!inner(category_id)')
+          // Filter by the chosen category ID in the joined table
+          .eq('product_categories.category_id', finalCategoryId)
+          // Ensure products are active
+          .eq('is_active', true)
+          // Exclude the current product itself
+          .neq('id', product.id)
+          // Limit the results
+          .limit(10); // Fetch up to 10 similar
 
-        let finalProducts: Product[] = [];
-        if (parentProducts && parentProducts.length >= 10) {
-          finalProducts = parentProducts.slice(0, 10);
-        } else {
-          const needed = 10 - (parentProducts?.length || 0);
-          let { data: fallbackProducts, error: fallbackError } = await supabase
-            .from("products")
-            .select("*")
-            .eq('is_active', true)
-            .neq("id", product.id)
-            .limit(20);
-          if (fallbackError) throw fallbackError;
+        if (similarError) throw similarError;
 
-          const parentIds = (parentProducts || []).map((p) => p.id);
-          fallbackProducts = (fallbackProducts || []).filter((p) => !parentIds.includes(p.id));
-          finalProducts = [...(parentProducts || []), ...(fallbackProducts.slice(0, needed))];
+        // Fallback if not enough similar found in the same category
+        let finalProducts: Product[] = similarData || [];
+        if (finalProducts.length < 10) {
+           const needed = 10 - finalProducts.length;
+           const existingIds = finalProducts.map(p => p.id).concat(product.id); // Exclude current and already found
+
+           let { data: fallbackProducts, error: fallbackError } = await supabase
+               .from("products")
+               .select("*")
+               .eq('is_active', true)
+               .not('id', 'in', `(${existingIds.join(',')})`) // Exclude multiple IDs
+               .limit(needed); // Fetch only the remaining needed
+           if (fallbackError) console.warn("Fallback similar product fetch failed:", fallbackError.message); // Log warning but continue
+           else if (fallbackProducts) {
+               finalProducts = [...finalProducts, ...fallbackProducts];
+           }
         }
-        setSimilarProducts(finalProducts);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchSimilar();
-  }, [product]);
+
+        setSimilarProducts(finalProducts);
+
+      } catch (err: any) {
+        console.error("Error fetching similar products:", err.message || err);
+        setSimilarProducts([]); // Clear similar products on error
+      }
+    };
+
+    fetchSimilar();
+  }, [product]); // Still depends on the main product loading
 
    useEffect(() => {
           const isModalOpen = showQuantityModal || wishlistMessage || cartMessage;
@@ -327,6 +363,7 @@ useEffect(() => {
 
     if (error) setCartMessage({ text: "❌ Failed to add item to cart", type: "error" });
     else setCartMessage({ text: "✅ Item added to cart successfully!", type: "success" });
+    window.dispatchEvent(new Event('cartUpdated')); // <-- ADD THIS LINE
 
     setTimeout(() => setCartMessage(null), 3000);
     setShowQuantityModal(false);
@@ -478,9 +515,11 @@ useEffect(() => {
           </div>
 
           {/* Price */}
+          {/* Price */}
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-lg sm:text-2xl font-display font-bold tamoor-gradient">
-              ₹{dynamicPrice} / {product.measurement_unit === "kilograms" ? "kg" : "pcs"}
+              {/* --- CHANGE IS HERE --- */}
+              ₹{product.price} / {product.measurement_unit === "kilograms" ? "kg" : "pcs"}
             </span>
 
             {product.original_price && product.original_price > product.price && (
@@ -562,14 +601,6 @@ useEffect(() => {
                       />
 
                     {/* Change justify-center to justify-start */}
-                      <div className="absolute inset-0 flex items-end justify-start p-4 pointer-events-none">
-                        {/* This container now controls the position (bottom-left) */}
-                        <img
-                          src="/tamoorlogo.png" // The path to your logo in the 'public' folder
-                          alt="Tamoor watermark"
-                          className="w-1/4 opacity-50" // Controls size and transparency
-                        />
-                      </div>
                     <h4 className="font-semibold text-lg text-luxury-gold-light">{product.name}</h4>
                     {/* CHANGED: Made description smaller to prevent overflow */}
                     <p className="text-sm text-lime-400">{product.description}</p>
@@ -598,25 +629,44 @@ useEffect(() => {
                     </div>
 
                     {selectedWeight === "custom" && (
-                        <div className="flex items-center gap-2">
-                            <button onClick={() => setCustomWeight(Math.max(50, customWeight - 50))} className="p-2 glass rounded-lg hover:bg-white/20">-</button>
-                            <input
-                                type="number"
-                                min={50}
-                                value={customWeight}
-                                onChange={(e) => setCustomWeight(Math.max(50, parseInt(e.target.value) || 50))}
-                                className="flex-1 p-2 glass rounded-lg text-center"
-                            />
-                            <span className="text-sm">grams</span>
-                            <button onClick={() => setCustomWeight(customWeight + 50)} className="p-2 glass rounded-lg hover:bg-white/20">+</button>
-                        </div>
-                    )}
+                      // REMOVED justify-between, optionally add justify-center
+                      <div className="flex items-center justify-center gap-2"> 
+                          {/* --- Button --- */}
+                          <button 
+                              onClick={() => setCustomWeight(Math.max(50, customWeight - 50))} 
+                              className="p-3 min-w-[60px] glass rounded-lg hover:bg-white/20 text-lg font-semibold" 
+                          >
+                              -
+                          </button>
+                          
+                          {/* --- Input --- */}
+                          <input
+                              type="number"
+                              min={50}
+                              value={customWeight}
+                              onChange={(e) => setCustomWeight(Math.max(50, parseInt(e.target.value) || 50))}
+                              // Added explicit width instead of max-width
+                              className="w-[150px] p-2 glass rounded-lg text-center text-lg font-medium" 
+                          />
+                          
+                          {/* --- Span --- */}
+                          <span className="text-sm text-neutral-900">grams</span> 
+                          
+                          {/* --- Button --- */}
+                          <button 
+                              onClick={() => setCustomWeight(customWeight + 50)} 
+                              className="p-3 min-w-[60px] glass rounded-lg hover:bg-white/20 text-lg font-semibold" 
+                          >
+                              +
+                          </button>
+                      </div>
+                  )}
                 </div>
             </div>
 
             {/* NEW: Footer Section (fixed) */}
             <div className="flex-shrink-0 flex items-center justify-between pt-4 border-t border-white/20 mt-4">
-                <div className="text-2xl font-bold">₹{dynamicPrice}</div>
+                <div className="text-2xl font-bold tamoor-gradient">₹{dynamicPrice}</div>
                 <button
                   onClick={handleAddCart}
                   disabled={!product.is_in_stock}

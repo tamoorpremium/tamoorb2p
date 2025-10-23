@@ -60,25 +60,63 @@ const AdminProductEdit: React.FC = () => {
   // ------------------------------------------------
 
   // useEffect fetchProduct (Keep as is)
-  useEffect(() => {
-    const fetchProduct = async () => {
-      if (!id) {
-        setInitialData({}); return;
-      };
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from("products").select("*").eq("id", parseInt(id)).single();
-        if (error) { toast.error("Failed to load product."); }
-        else {
-          setInitialData(data);
-          await fetchProductImages(parseInt(id));
-        }
-      } catch { toast.error("Unexpected error while loading product."); }
-      finally { setLoading(false); }
-    };
-    fetchProduct();
-  }, [id]);
+  // --- UPDATED: Effect to fetch Product AND its Categories ---
+  useEffect(() => {
+    // Renamed function for clarity
+    const fetchProductAndCategories = async () => {
+      if (!id) {
+        // For a new product, initialize with an empty categories array
+        setInitialData({ category_ids: [] });
+        return;
+      };
+
+      setLoading(true);
+      try {
+        const productId = parseInt(id);
+
+        // Fetch product details (no category_id anymore)
+        const { data: productData, error: productError } = await supabase
+          .from("products")
+          .select("*") // Select all columns except the dropped category_id
+          .eq("id", productId)
+          .single();
+
+        if (productError) {
+          toast.error("Failed to load product.");
+          throw productError; // Stop execution if product fails to load
+        }
+
+        // Fetch associated category IDs
+        const { data: categoryLinks, error: categoryError } = await supabase
+          .from("product_categories")
+          .select("category_id")
+          .eq("product_id", productId);
+
+        if (categoryError) {
+          // Log error but maybe continue, setting categories to empty
+          console.error("Failed to load product categories:", categoryError);
+          toast.warn("Could not load product categories.");
+        }
+
+        // Combine product data with category IDs into the initialData state
+        const categoryIds = categoryLinks ? categoryLinks.map(link => link.category_id) : [];
+        setInitialData({ ...productData, category_ids: categoryIds });
+
+        // Fetch images (can run concurrently or after)
+        await fetchProductImages(productId);
+
+      } catch (err) {
+        console.error("Error loading product/categories:", err);
+        // Ensure initialData is at least an empty object if loading fails completely
+        // Initialize with empty category_ids if creating new or if fetch fails
+        setInitialData({ category_ids: [] });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductAndCategories(); // Call the renamed function
+  }, [id]); // Keep dependency on id
 
   // fetchProductImages (Keep as is)
   const fetchProductImages = async (productId: number) => {
@@ -89,25 +127,83 @@ const AdminProductEdit: React.FC = () => {
   };
 
   // handleSubmit with badge logic (Keep as is)
-  const handleSubmit = async (formData: any) => {
-    setLoading(true);
-    const badgeName = formData.badge || "";
+  // --- UPDATED: handleSubmit for Multi-Category ---
+  const handleSubmit = async (formData: any) => {
+    setLoading(true);
+
+    // Separate category IDs from the rest of the product data
+    // **ASSUMPTION**: Your ProductForm now passes selected categories as an array named `category_ids`
+    const { category_ids, ...productData } = formData;
+    const selectedCategoryIds: number[] = Array.isArray(category_ids) ? category_ids : []; // Ensure it's an array
+
+    // --- Badge Logic (Keep your existing logic here) ---
+    const badgeName = productData.badge || "";
     const normalizedBadge = badgeName.toLowerCase().trim();
     const matchedBadge = badgeMap[normalizedBadge];
-    if (matchedBadge) { formData.badge = matchedBadge.name; formData.badge_color = matchedBadge.color; }
-    else if (badgeName) { formData.badge = badgeName.trim(); formData.badge_color = null; }
-    else { formData.badge = null; formData.badge_color = null; }
-    try {
-      if (id) {
-        const { error } = await supabase.from("products").update(formData).eq("id", parseInt(id));
-        if (error) throw error; toast.success("Product updated successfully!"); navigate("/admin/products");
-      } else {
-        const { data, error } = await supabase.from("products").insert(formData).select().single();
-        if (error) throw error; toast.success("Product created! You can now add images."); navigate(`/admin/products/${data.id}`);
+    if (matchedBadge) {
+        productData.badge = matchedBadge.name;
+        productData.badge_color = matchedBadge.color;
+    } else if (badgeName) {
+        productData.badge = badgeName.trim();
+        productData.badge_color = null;
+    } else {
+        productData.badge = null;
+        productData.badge_color = null;
+    }
+    // --- End Badge Logic ---
+
+    try {
+      let productId: number;
+      let operation: 'updated' | 'created';
+
+      // 1. Save core product data (INSERT or UPDATE)
+      if (id) {
+        productId = parseInt(id);
+        const { error: updateError } = await supabase
+          .from("products").update(productData).eq("id", productId);
+        if (updateError) throw updateError;
+        operation = 'updated';
+      } else {
+        const { data: insertData, error: insertError } = await supabase
+          .from("products").insert(productData).select("id").single();
+        if (insertError || !insertData) throw insertError || new Error("Failed to retrieve new product ID.");
+        productId = insertData.id;
+        operation = 'created';
+      }
+
+      // --- 2. Update Category Links in `product_categories` ---
+      const { error: deleteError } = await supabase
+          .from("product_categories").delete().eq("product_id", productId);
+      if (deleteError) {
+          console.error("Failed to delete old category links:", deleteError);
+          toast.warn("Could not clear old category associations."); // Warn but continue
       }
-    } catch (err: any) { console.error("Save error:", err); toast.error(`Failed to save product: ${err.message || 'Unknown error'}`); }
-    finally { setLoading(false); }
-  };
+
+      if (selectedCategoryIds.length > 0) {
+          const newLinks = selectedCategoryIds.map(catId => ({ product_id: productId, category_id: catId }));
+          const { error: insertLinksError } = await supabase
+              .from("product_categories").insert(newLinks);
+          if (insertLinksError) {
+              throw new Error(`Product saved, but failed to link categories: ${insertLinksError.message}`);
+          }
+      }
+      // --- End Category Link Update ---
+
+      // Success Navigation
+      if (operation === 'updated') {
+        toast.success("Product updated successfully!");
+        navigate("/admin/products");
+      } else { // operation === 'created'
+        toast.success("Product created! You can now add images.");
+        navigate(`/admin/products/${productId}`);
+      }
+    } catch (err: any) {
+      console.error("Save error:", err);
+      toast.error(`Failed to save product/categories: ${err.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // --- REFINED handleUploadImages ---
   const handleUploadImages = async () => {

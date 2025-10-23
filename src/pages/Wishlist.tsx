@@ -22,7 +22,7 @@ const Wishlist = () => {
   // For weight modal reuse from products page
   const [showQuantityModal, setShowQuantityModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [selectedWeight, setSelectedWeight] = useState<number | 'custom'>(500);
+  const [selectedWeight, setSelectedWeight] = useState<number | 'custom'>(1000);
   const [customWeight, setCustomWeight] = useState(50);
 
   // Fetch wishlist on mount
@@ -52,12 +52,12 @@ const Wishlist = () => {
             rating,
             reviews,
             image,
-            category_id,
             badge,
             badge_color,
             description,
             measurement_unit,
-            default_piece_weight
+            default_piece_weight,
+            is_in_stock
           )
         `)
         .eq('user_id', user.id);
@@ -72,6 +72,7 @@ const Wishlist = () => {
           .map(w => {
             // Extract product object safely if it's an array
             const product = Array.isArray(w.products) ? w.products[0] : w.products;
+            if (!product || typeof product !== 'object') return null; // Skip if product data invalid
 
             return {
               id: product.id,
@@ -84,14 +85,14 @@ const Wishlist = () => {
               badge_color: product.badge_color,
               description: product.description,
               image: product.image,
-              category: product.category_id,
               measurement_unit: product.measurement_unit,
               default_piece_weight: product.default_piece_weight,
+              is_in_stock: product.is_in_stock,
               wishlistId: w.id,
             };
-          });
+          }).filter(item => item !== null); // Filter out any nulls from invalid data
 
-        setWishlistItems(formatted);
+        setWishlistItems(formatted as any[]);
       }
       setLoading(false);
     };
@@ -125,7 +126,6 @@ const Wishlist = () => {
             rating,
             reviews,
             image,
-            category_id,
             badge,
             badge_color,
             description,
@@ -139,7 +139,7 @@ const Wishlist = () => {
         // Add a runtime check to make sure product exists and is an object:
         if (!product || typeof product !== 'object') {
           // Handle invalid case (skip)
-          return null;
+          return;
         }
 
         setWishlistItems(prev => [
@@ -155,7 +155,6 @@ const Wishlist = () => {
             badge_color: product.badge_color,
             description: product.description,
             image: product.image,
-            category: product.category_id,
             measurement_unit: product.measurement_unit,
             wishlistId: w.id,
           },
@@ -218,6 +217,7 @@ const Wishlist = () => {
   setWishlistItems(prev => prev.filter(item => item.id !== product.id));
 
   showPopup('🛒 Product moved to cart successfully!', 'success');
+  window.dispatchEvent(new Event('cartUpdated')); // <-- ADD THIS LINE
 };
 
 
@@ -305,7 +305,7 @@ const Wishlist = () => {
 
   setShowQuantityModal(false);
   setSelectedProduct(null);
-  setSelectedWeight(500);
+  setSelectedWeight(1000);
   setCustomWeight(50);
 };
 
@@ -461,10 +461,10 @@ useEffect(() => {
                         Custom Weight (Min 50g)
                       </button>
                       {selectedWeight === 'custom' && (
-                        <div className="mt-4 flex items-center space-x-3">
+                        <div className="mt-4 flex items-center justify-center space-x-3">
                           <button
                             onClick={() => setCustomWeight(Math.max(50, customWeight - 50))}
-                            className="p-2 glass rounded-lg hover:bg-white/20"
+                            className="p-2 min-w-[60px] glass rounded-lg hover:bg-white/20"
                           >
                             -
                           </button>
@@ -472,13 +472,13 @@ useEffect(() => {
                             type="number"
                             value={customWeight}
                             onChange={(e) => setCustomWeight(Math.max(50, parseInt(e.target.value) || 50))}
-                            className="flex-1 p-2 glass rounded-lg text-center"
+                            className="w-[150px] p-2 glass rounded-lg text-center"
                             min="50"
                           />
-                          <span className="text-sm text-neutral-600">grams</span>
+                          <span className="text-sm text-neutral-900">grams</span>
                           <button
                             onClick={() => setCustomWeight(customWeight + 50)}
-                            className="p-2 glass rounded-lg hover:bg-white/20"
+                            className="p-2 min-w-[60px] glass rounded-lg hover:bg-white/20"
                           >
                             +
                           </button>

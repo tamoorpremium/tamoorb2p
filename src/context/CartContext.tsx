@@ -24,6 +24,7 @@ export interface Promo {
   valid_from?: string;
   valid_to?: string;
   first_order_only?: boolean;
+  min_order_amount?: number | null;
 }
 
 interface CartContextType {

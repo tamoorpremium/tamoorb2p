@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Minus, Plus, Trash2, ShoppingBag, Gift, Truck } from 'lucide-react';
 import { useCart, normalizeWeight, Promo } from '../context/CartContext';
 import { supabase } from '../utils/supabaseClient';
 import { toast } from "react-toastify";
 import { useNavigate } from 'react-router-dom';
+import { Info,CheckCircle2, AlertCircle } from 'lucide-react'; // Added Gift, CheckCircle2, AlertCircle
 
 
 const Cart = () => {
@@ -12,6 +13,10 @@ const Cart = () => {
   const navigate = useNavigate();
   // Promo states
   const [promoCode, setPromoCode] = useState('');
+  const [suggestedPromos, setSuggestedPromos] = useState<any[]>([]); // State for suggestions
+  const [loadingPromos, setLoadingPromos] = useState(false); // Loading state for suggestions
+  const [isFirstOrder, setIsFirstOrder] = useState<boolean | null>(null); // Track if user has previous orders (null = loading/unknown)
+  const [loading, setLoading] = useState(false);
   //const [appliedPromo, setAppliedPromo] = useState<any>(null); // full promo object
 
   const getCartItemPrice = (item: { price: number; weight?: string | null; quantity: number; measurement_unit?: string | null }) => {
@@ -92,34 +97,133 @@ const Cart = () => {
 
   useEffect(() => {
     const fetchAndMergeCart = async () => {
+      setLoading(true); // Added loading state for cart fetch
       const { data: { user } } = await supabase.auth.getUser();
       const localCart = getLocalCart();
-      if (user) {
-        const { data: dbCartItems, error } = await supabase.from('cart').select('*').eq('user_id', user.id);
-        if (error) { setCartItems(localCart); return; }
 
+      if (user) {
+        setIsFirstOrder(null); // Reset while fetching
+        // --- ADDED: Fetch order count ---
+        const { count: orderCount, error: orderError } = await supabase
+          .from('orders')
+          .select('*', { count: 'exact', head: true }) // Only count, don't fetch data
+          .eq('user_id', user.id);
+
+        if (orderError) {
+            console.error("Error checking order history:", orderError);
+            // Decide how to handle this - maybe assume not first order?
+            setIsFirstOrder(false); // Safer default
+        } else {
+            setIsFirstOrder(orderCount === 0);
+        }
+        // --- END ADDED ---
+
+        // Fetch DB Cart Items
+        const { data: dbCartItems, error: cartError } = await supabase
+          .from('cart')
+          .select('*')
+          .eq('user_id', user.id);
+
+        if (cartError) {
+          console.error("Error fetching DB cart:", cartError);
+          setCartItems(localCart); // Fallback to local
+          setLoading(false); // Stop loading on error
+          return;
+        }
+
+        // Fetch Product Details for DB Cart Items
         let products: any[] = [];
         if (dbCartItems && dbCartItems.length > 0) {
           const productIds = dbCartItems.map(i => i.product_id);
           const { data: prodData, error: prodErr } = await supabase
             .from('products')
-            .select('id, name, image, price, measurement_unit')
+            .select('id, name, image, price, measurement_unit, is_in_stock, default_piece_weight') // Added is_in_stock, default_piece_weight
             .in('id', productIds);
+
           if (!prodErr) products = prodData || [];
+          else console.error("Error fetching product details for cart:", prodErr);
         }
 
-        const dbWithDetails = dbCartItems.map(cartItem => {
+        // Merge DB Items with Details
+        const dbWithDetails = (dbCartItems || []).map(cartItem => {
           const prod = products.find(p => p.id === cartItem.product_id) || {};
-          return { ...cartItem, ...prod, id: cartItem.product_id };
+          return { ...cartItem, ...prod, id: cartItem.product_id }; // Ensure 'id' is product_id
         });
 
+        // Merge Local and DB Carts
         const mergedCart = mergeCarts(localCart, dbWithDetails);
         setCartItems(mergedCart);
-        localStorage.removeItem('cart');
-      } else setCartItems(localCart);
+        localStorage.removeItem('cart'); // Clear local cart after merge
+
+      } else {
+        // Not logged in
+        setCartItems(localCart);
+        setIsFirstOrder(null); // Can't determine first order status
+      }
+      setLoading(false); // Stop loading after successful fetch/merge
     };
+
     fetchAndMergeCart();
-  }, [setCartItems]);
+  // IMPORTANT: setCartItems dependency might cause infinite loops if not memoized in context.
+  // If you see issues, remove setCartItems or ensure it's stable in useCart.
+  }, [setCartItems]); // Only run once on mount or when auth state changes (implicitly)
+
+  // --- ADDED: Fetch Suggested Promos ---
+  useEffect(() => {
+    const fetchSuggestedPromos = async () => {
+      // Don't fetch if we don't know the first order status yet (for logged-in users)
+      // or if user is not logged in and we cannot check first_order_only promos
+      // Allow fetching even if logged out, but first_order_only won't apply.
+      // if (isFirstOrder === null && (await supabase.auth.getUser()).data.user) return;
+
+      setLoadingPromos(true);
+      const now = new Date().toISOString();
+
+      try {
+        let query = supabase
+          .from('promo_codes')
+          .select('*')
+          .eq('enabled', true)
+          .lte('valid_from', now)
+          .gte('valid_to', now);
+          // We fetch all potentially valid ones and filter client-side for usage limit and first order
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+
+        let potentialPromos = data || [];
+
+        // Client-side filtering
+        potentialPromos = potentialPromos.filter(promo => {
+            // Check usage limit
+            const usageLimitReached = promo.usage_limit !== null && promo.used_count >= promo.usage_limit;
+            if (usageLimitReached) return false;
+
+            // Check first order status ONLY if the user is logged in AND we know their status
+            if (promo.first_order_only && isFirstOrder === false) {
+                 return false; // User has ordered before, cannot use this
+            }
+            // If first_order_only is true and isFirstOrder is true or null (logged out), keep it for now.
+
+            return true;
+        });
+
+        setSuggestedPromos(potentialPromos);
+
+      } catch (error: any) {
+        console.error("Failed to fetch suggested promos:", error);
+        // Optionally show a toast, but maybe better to just show none
+        setSuggestedPromos([]);
+      } finally {
+        setLoadingPromos(false);
+      }
+    };
+
+    fetchSuggestedPromos();
+  // Re-run if first order status changes (after login/order check)
+  }, [isFirstOrder]);
+  // --- END FETCH SUGGESTED PROMOS ---
 
   const handleIncreaseQuantity = (item: any) => {
     updateQuantity(
@@ -146,70 +250,109 @@ const Cart = () => {
   };
 
 
-  const handleApplyPromo = async () => {
-  if (!promoCode.trim()) return;
+  // --- UPDATED: Accepts optional code argument ---
+  const handleApplyPromo = async (codeToApply?: string) => {
+    // Determine the code to use, prioritizing the argument
+    const codeValue = (codeToApply !== undefined ? codeToApply : promoCode).trim().toUpperCase();
 
-  try {
-    const { data: promoData, error } = await supabase
-      .from('promo_codes')
-      .select('*')
-      .ilike('code', promoCode.trim())
-      .single();
-
-    if (error || !promoData) {
-      toast.error("Invalid promo code", { autoClose: 2000 });
-      return;
+    // Check if a valid code string was determined
+    if (!codeValue) {
+        toast.info("Please enter or select a valid promo code.", { autoClose: 2000 });
+        return; // Exit if no code is available
     }
 
-    const now = new Date();
-    if (
-      !promoData.enabled ||
-      new Date(promoData.valid_from) > now ||
-      new Date(promoData.valid_to) < now
-    ) {
-      toast.error("This promo code is not active or expired", { autoClose: 2000 });
-      return;
-    }
+    // Indicate loading state (optional)
+    // setLoadingPromoApply(true);
 
-    if (promoData.usage_limit && promoData.used_count >= promoData.usage_limit) {
-      toast.error("This promo code has reached its usage limit", { autoClose: 2000 });
-      return;
-    }
+    try {
+      const { data: promoData, error } = await supabase
+        .from('promo_codes')
+        .select('*')
+        // Use the determined codeValue
+        .ilike('code', codeValue)
+        .single();
 
-    if (promoData.first_order_only) {
-      const { data: orders } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
-
-      if (orders && orders.length > 0) {
-        toast.error("Promo valid only for first order", { autoClose: 2000 });
+      // Check for errors or no data found
+      if (error || !promoData) {
+        // Handle specific error for not found vs. other DB errors if needed
+        if (error && error.code === 'PGRST116') { // PostgREST code for "טים matched"
+             toast.error(`Promo code "${codeValue}" not found.`, { autoClose: 2000 });
+        } else {
+             toast.error("Invalid or expired promo code.", { autoClose: 2000 });
+             console.error("Promo fetch error:", error); // Log actual error
+        }
+        setPromo(null); // Clear any existing promo
+        // setLoadingPromoApply(false);
         return;
       }
+
+      // --- All Validation Checks ---
+      const now = new Date();
+      if (!promoData.enabled) {
+          toast.error("This promo code is currently disabled.", { autoClose: 2000 }); setPromo(null); return;
+      }
+      if (new Date(promoData.valid_from) > now) {
+          toast.error("This promo code is not yet active.", { autoClose: 2000 }); setPromo(null); return;
+      }
+       if (new Date(promoData.valid_to) < now) {
+          toast.error("This promo code has expired.", { autoClose: 2000 }); setPromo(null); return;
+      }
+       if (promoData.usage_limit !== null && promoData.used_count >= promoData.usage_limit) {
+           toast.error("This promo code has reached its usage limit.", { autoClose: 2000 }); setPromo(null); return;
+       }
+       // Ensure roundedSubtotal is calculated *before* this check runs if needed
+       if (promoData.min_order_amount > roundedSubtotal) {
+           toast.error(`Minimum order amount of ₹${promoData.min_order_amount} required for code "${promoData.code}".`, { autoClose: 3000 });
+           setPromo(null); return;
+       }
+
+      // First Order Check (only if needed and user is logged in)
+      if (promoData.first_order_only) {
+        // Use the isFirstOrder state directly
+        if (isFirstOrder === false) { // Check state ONLY if user is logged in (isFirstOrder won't be false otherwise)
+            toast.error(`Promo "${promoData.code}" is valid only for your first order.`, { autoClose: 2500 });
+            setPromo(null); return;
+        } else if (isFirstOrder === null && (await supabase.auth.getUser()).data.user) {
+             // If logged in but order status is still loading, maybe prevent applying?
+             toast.warn("Verifying first order status, please try again shortly.", { autoClose: 2000 });
+             return; // Or let it apply optimistically and re-validate at checkout
+        } else if (!(await supabase.auth.getUser()).data.user) {
+             // If not logged in, cannot use first order promo
+             toast.error("Please log in to use this first-order promo code.", { autoClose: 2500 });
+             setPromo(null); return;
+        }
+      }
+      // --- End Validation Checks ---
+
+
+      // If all checks pass:
+      const cleanPromo: Promo = { /* ... create cleanPromo object ... */
+         id: promoData.id,
+         code: promoData.code,
+         type: promoData.type,
+         value: promoData.value,
+         used_count: promoData.used_count,
+         usage_limit: promoData.usage_limit,
+         enabled: promoData.enabled,
+         valid_from: promoData.valid_from,
+         valid_to: promoData.valid_to,
+         first_order_only: promoData.first_order_only,
+         min_order_amount: promoData.min_order_amount,
+      };
+
+      setPromo(cleanPromo);
+      setPromoCode(""); // Clear the input field
+      toast.success(`Promo "${cleanPromo.code}" applied!`, { autoClose: 2000 });
+
+    } catch (err: any){
+      console.error("Error applying promo:", err);
+      // More specific error based on Supabase error details if available
+      toast.error(`Failed to apply promo: ${err.message || 'Please try again.'}`, { autoClose: 2500 });
+      setPromo(null);
+    } finally {
+      // setLoadingPromoApply(false);
     }
-
-    // ✅ Only keep the fields you actually use
-    const cleanPromo: Promo = {
-      id: promoData.id,
-      code: promoData.code,
-      type: promoData.type,
-      value: promoData.value,
-      used_count: promoData.used_count,
-      usage_limit: promoData.usage_limit,
-      enabled: promoData.enabled,
-      valid_from: promoData.valid_from,
-      valid_to: promoData.valid_to,
-      first_order_only: promoData.first_order_only,
-    };
-
-    setPromo(cleanPromo);
-    setPromoCode("");
-    toast.success("Promo code applied!", { autoClose: 2000 });
-
-  } catch {
-    toast.error("Failed to apply promo!", { autoClose: 2000 });
-  }
-};
+  };
 
 
 
@@ -348,40 +491,115 @@ const shiptotal = finalTotal + shipping; // ✅ also an integer now
           <div className="lg:w-1/3 lg:order-last">
             <div className="lg:sticky top-28 space-y-6">
               {/* Promo Code */}
+              {/* Promo Code */}
               <div className="luxury-card glass rounded-3xl p-6 sm:p-8">
                 <h3 className="font-display font-semibold text-xl mb-4">Promo Code</h3>
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="text"
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value)}
-                    placeholder="Enter promo code"
-                    className="flex-1 p-3 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
-                  />
-                  <button
-                    onClick={handleApplyPromo}
-                    className="btn-premium text-white px-6 py-3 rounded-xl font-semibold"
-                  >
-                    Apply
-                  </button>
+                  {/* ... Input and Apply Button ... */}
+                   <input
+                     type="text"
+                     value={promoCode}
+                     onChange={(e) => setPromoCode(e.target.value)}
+                     placeholder="Enter promo code"
+                     className="flex-1 p-3 neomorphism-inset rounded-xl focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 text-sm sm:text-base"
+                   />
+                   <button
+                     onClick={() => handleApplyPromo()}
+                     className="btn-premium text-white px-6 py-3 rounded-xl font-semibold"
+                   >
+                     Apply
+                   </button>
                 </div>
                 {promo && (
-                  <div className="flex justify-between items-center text-green-700 mt-3 text-sm">
-                    <span className="font-medium">Discount ({promo.code})</span>
-                    <div className="flex items-center space-x-2">
-                      <span className="font-semibold">-₹{discount}</span>
-                      <button
-                        onClick={() => {
-                          setPromo(null);
-                          toast.info("Promo code removed", { autoClose: 2000 });
-                        }}
-                        className="text-red-500 font-medium px-2 py-1 rounded hover:bg-red-50 transition"
-                      >
-                        Remove
-                      </button>
+                    // ... Applied Promo display ...
+                     <div className="flex justify-between items-center text-green-700 mt-3 text-sm">
+                       <span className="font-medium">Discount ({promo.code})</span>
+                       <div className="flex items-center space-x-2">
+                         <span className="font-semibold">-₹{discount}</span>
+                         <button
+                           onClick={() => {
+                             setPromo(null);
+                             toast.info("Promo code removed", { autoClose: 2000 });
+                           }}
+                           className="text-red-500 font-medium px-2 py-1 rounded hover:bg-red-50 transition"
+                         >
+                           Remove
+                         </button>
+                       </div>
+                     </div>
+                )}
+
+                {/* --- ADDED: Promo Suggestions --- */}
+                {loadingPromos && (
+                    <div className="text-center text-sm text-neutral-500 mt-4 animate-pulse">Loading offers...</div>
+                )}
+                {!loadingPromos && suggestedPromos.length > 0 && (
+                  <div className="mt-5 pt-4 border-t border-white/20 space-y-2">
+                    <h4 className="text-sm font-semibold text-neutral-700 flex items-center gap-1 mb-2">
+                      <Gift size={15} /> Available Offers:
+                    </h4>
+                    {/* Use flex-wrap for better mobile layout */}
+                    <div className="flex flex-wrap gap-2">
+                      {suggestedPromos.map(p => {
+                        const meetsMinOrder = p.min_order_amount <= roundedSubtotal;
+                        const description = p.type === 'percentage' ? `${p.value}% OFF` : `₹${p.value} OFF`;
+                        const minOrderText = p.min_order_amount > 0 ? ` (Min. ₹${p.min_order_amount})` : '';
+                        const firstOrderText = p.first_order_only && isFirstOrder !== false ? ' (First Order)' : '';
+                        const isApplied = promo && promo.code === p.code;
+
+                        return (
+                          <div key={p.id}> {/* Wrap button in div if more complex content needed */}
+                             <button
+                               onClick={() => {
+                                 if (meetsMinOrder) {
+                                   // Directly apply if eligible
+                                   //setPromoCode(p.code); // Set code in state (optional, but can be useful)
+                                   handleApplyPromo(p.code);   // Trigger apply logic immediately
+                                 } else {
+                                   // Optionally, show a message or do nothing
+                                   toast.info(`Add ₹${Math.round(p.min_order_amount - roundedSubtotal)} more to use this code.`, { autoClose: 2500 });
+                                 }
+                               }}
+                               // Tooltip showing more details on hover (desktop)
+                               title={`${description}${minOrderText}${firstOrderText}`}
+                               className={`
+                               flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border
+                               transition-all duration-200 group
+                               ${
+                                 isApplied // Check if this is the currently applied promo
+                                   ? 'bg-violet-200 border-violet-400 text-violet-800 cursor-default' // Lavender style for applied
+                                   : meetsMinOrder // Otherwise, check eligibility
+                                   ? 'bg-green-100/70 border-green-300 text-green-800 hover:bg-green-200 hover:border-green-400 cursor-pointer' // Green for eligible
+                                   : 'bg-gray-100/70 border-gray-300 text-gray-500 cursor-help' // Gray for ineligible
+                               }
+                             `}
+                             disabled={isApplied || (!meetsMinOrder && !isApplied)}
+                            >
+                                {/* --- Conditionally show icon based on applied status first --- */}
+                              {isApplied ? <CheckCircle2 size={12} className="text-violet-600"/> : (meetsMinOrder ? <CheckCircle2 size={12} className="text-green-600"/> : <AlertCircle size={12} className="text-orange-500"/>)}
+                              <span className="font-bold">{p.code}</span>
+                              <span className="hidden sm:inline">- {description}{minOrderText}</span>
+                              {/* --- Show "Applied" text instead of "Tap to Apply" --- */}
+                              {isApplied ? <span className="text-[10px] font-bold">(Applied)</span> : (meetsMinOrder && <span className="opacity-0 group-hover:opacity-100 text-[10px]">(Tap to Apply)</span>)}
+                           </button>
+                             {/* Message for mobile if needed, or rely on tooltip/cursor */}
+                             {!meetsMinOrder && p.min_order_amount > 0 && (
+                                <p className="text-xs text-orange-600 mt-1 pl-1 sm:hidden">
+                                    Add ₹{Math.round(p.min_order_amount - roundedSubtotal)} more.
+                                </p>
+                             )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
+                {!loadingPromos && suggestedPromos.length === 0 && (
+                   <p className="text-xs text-neutral-500 mt-3 text-center">No applicable offers found right now.</p>
+                )}
+                {/* --- END PROMO SUGGESTIONS --- */}
+                {/* --- END PROMO SUGGESTIONS --- */}
+
               </div>
 
               {/* Order Summary */}

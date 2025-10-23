@@ -19,7 +19,7 @@ const Products = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
     const [showQuantityModal, setShowQuantityModal] = useState(false);
-    const [selectedWeight, setSelectedWeight] = useState<number | 'custom'>(500);
+    const [selectedWeight, setSelectedWeight] = useState<number | 'custom'>(1000);
     const [customWeight, setCustomWeight] = useState(50);
     const [quantity, setQuantity] = useState(1);
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -360,7 +360,7 @@ const Products = () => {
             return;
         }
         const weightValue = product.measurement_unit === 'pieces' ? (product.default_piece_weight ? product.default_piece_weight : 'default') : null;
-        const unitPrice = product.measurement_unit === 'kilograms' ? Math.round((product.price / 1000) * (product.default_weight || 500)) : product.price;
+        const unitPrice = product.measurement_unit === 'kilograms' ? Math.round((product.price / 1000) * (product.default_weight || 1000)) : product.price;
         const { error } = await supabase.from("cart").upsert({ user_id: user.id, product_id: product.id, quantity: qty, weight: weightValue, unit_price: unitPrice });
         if (error) {
             setCartMessage({ text: "❌ Failed to add item to cart", type: "error" });
@@ -402,7 +402,7 @@ const Products = () => {
         setShowQuantityModal(false);
         setSelectedProduct(null);
         setQuantity(1);
-        setSelectedWeight(500);
+        setSelectedWeight(1000);
         setCustomWeight(50);
     };
 
@@ -1001,7 +1001,7 @@ const Products = () => {
                                                     className="w-[150px] p-2 glass rounded-lg text-center"
                                                     min="50"
                                                 />
-                                                <span className="text-sm text-neutral-800">grams</span>
+                                                <span className="text-sm text-neutral-900">grams</span>
                                                 <button
                                                     onClick={() => setCustomWeight(customWeight + 50)}
                                                     className="p-2 min-w-[60px] glass rounded-lg hover:bg-white/20"

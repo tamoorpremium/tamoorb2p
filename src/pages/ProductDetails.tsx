@@ -104,7 +104,17 @@ const ProductDetails: React.FC = () => {
     trackMouse: true // Allows dragging on desktop for testing
   });
 
-
+  // --- ADD THIS useEffect BACK ---
+  useEffect(() => {
+    // Update the main selected image whenever the index changes
+    if (uniqueImages.length > 0) {
+      setSelectedImage(uniqueImages[currentImageIndex]);
+    }
+    // Ensure the index doesn't go out of bounds if images change (e.g., product loads)
+    else if (currentImageIndex !== 0) {
+       setCurrentImageIndex(0); // Reset if images disappear
+    }
+  }, [currentImageIndex, uniqueImages]);
  
 
  

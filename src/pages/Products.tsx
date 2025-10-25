@@ -7,7 +7,86 @@ import { useSearchParams } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import godivab from '../assets/proher/godivab.webp';
+import butlers from '../assets/proher/butlers.webp';
+import cadbury from '../assets/proher/cadbury.webp';
+import chocolate from '../assets/proher/choc3.webp';
+import ferrero from '../assets/proher/Ferrero.webp';
+import gifting from '../assets/proher/Gifting.webp';
+import hershey from '../assets/proher/hers.webp';
+import kinder from '../assets/proher/kinder.webp';
+import kunafa from '../assets/proher/kun.webp';
+import lindt from '../assets/proher/Lindt.webp';
+import milka from '../assets/proher/Milka.webp';
+import mrbeast from '../assets/proher/mr.webp';
+import reeses from '../assets/proher/Reese.webp';
+import rhine from '../assets/proher/rhime.webp';
+import toblerone from '../assets/proher/Toblerone.webp';
+import wedel from '../assets/proher/wedel.webp';
+import white from '../assets/proher/whit.webp';
 import { Helmet } from 'react-helmet-async'; // <-- 1. Import Helmet
+
+
+
+    // 1. Define the structure of a single banner
+    interface BannerConfig {
+    image: string;
+    titlePrefix: string;
+    titleHighlight: string;
+    titleSuffix: string;
+    subtitle: string;
+    }
+
+    // 2. Define the map. It MUST have a 'default', and can have any other string key
+    type BannerMap = {
+    default: BannerConfig;
+    [key: string]: BannerConfig; // This line fixes your 'implicit any' error
+    }
+
+    // 3. Now, apply this type to your constant
+    const categoryBanners: BannerMap = {
+    default: {
+        image: "https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/prodherd%20(1).webp",
+        titlePrefix: "Premium",
+        titleHighlight: "TAMOOR",
+        titleSuffix: "Collection",
+        subtitle: "Discover our complete range of luxury dry fruits and nuts..."
+    },
+    "Dry Fruits": { 
+        image: "https://example.com/your-dry-fruits-banner.webp", // <-- UPDATE THIS URL
+        titlePrefix: "Our Finest",
+        titleHighlight: "Dry Fruits",
+        titleSuffix: "",
+        subtitle: "Handpicked and curated for the finest taste experience."
+    },
+    "Godiva": {
+        image: godivab, // <-- UPDATE THIS URL
+        titlePrefix: "Luxurious",
+        titleHighlight: "Chocolates",
+        titleSuffix: "by TAMOOR",
+        subtitle: "Indulge in our decadent, handcrafted chocolate collection."
+    },
+    "Toblerone": {
+        image: toblerone, // <-- UPDATE THIS URL
+        titlePrefix: "Luxurious",
+        titleHighlight: "Chocolates",
+        titleSuffix: "by TAMOOR",
+        subtitle: "Indulge in our decadent, handcrafted chocolate collection."
+    },
+    "Lindt": {
+        image: lindt, // <-- UPDATE THIS URL
+        titlePrefix: "",
+        titleHighlight: "",
+        titleSuffix: "",
+        subtitle: ""
+    },
+    "Chocolates": {
+        image: chocolate, // <-- UPDATE THIS URL
+        titlePrefix: "Luxurious",
+        titleHighlight: "Chocolates",
+        titleSuffix: "by TAMOOR",
+        subtitle: "Indulge in our decadent, handcrafted chocolate collection."
+    },
+    };
 
 const Products = () => {
     // All your existing state variables are preserved
@@ -70,50 +149,6 @@ const Products = () => {
             return [parent.id, ...parent.children.map((ch: any) => ch.id)];
         }
         return [selected];
-    };
-
-    
-
-    
-
-    // 1. Define the structure of a single banner
-    interface BannerConfig {
-    image: string;
-    titlePrefix: string;
-    titleHighlight: string;
-    titleSuffix: string;
-    subtitle: string;
-    }
-
-    // 2. Define the map. It MUST have a 'default', and can have any other string key
-    type BannerMap = {
-    default: BannerConfig;
-    [key: string]: BannerConfig; // This line fixes your 'implicit any' error
-    }
-
-    // 3. Now, apply this type to your constant
-    const categoryBanners: BannerMap = {
-    default: {
-        image: "https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/prodherd%20(1).webp",
-        titlePrefix: "Premium",
-        titleHighlight: "TAMOOR",
-        titleSuffix: "Collection",
-        subtitle: "Discover our complete range of luxury dry fruits and nuts..."
-    },
-    "Dry Fruits": { 
-        image: "https://example.com/your-dry-fruits-banner.webp", // <-- UPDATE THIS URL
-        titlePrefix: "Our Finest",
-        titleHighlight: "Dry Fruits",
-        titleSuffix: "",
-        subtitle: "Handpicked and curated for the finest taste experience."
-    },
-    "Chocolates": {
-        image: godivab, // <-- UPDATE THIS URL
-        titlePrefix: "Luxurious",
-        titleHighlight: "Chocolates",
-        titleSuffix: "by TAMOOR",
-        subtitle: "Indulge in our decadent, handcrafted chocolate collection."
-    }
     };
 
     // 4. Then define your state (as shown in Fix 1)
@@ -398,90 +433,103 @@ const Products = () => {
         return 'Discover and shop TAMOOR\'s wide collection of premium dry fruits, nuts, almonds, dates, chocolates, and more. Freshness delivered India-wide from Bangalore & Kolar.'; // Default description
     }, [selectedCategories, categories]);
 
-    // --- MAIN MODIFICATION AREA 1 ---
-   useEffect(() => {
-        const fetchProductsAndWishlist = async () => {
-            setLoading(true);
-            try {
-                // --- 1. Start building the query by selecting first ---
-                let queryBuilder;
-                if (selectedCategories.length > 0) {
-                    // If categories are selected, SELECT with the inner join
-                    queryBuilder = supabase
-                        .from('products')
-                        .select('*, product_categories!inner(*)', { count: 'exact' })
-                        .in('product_categories.category_id', selectedCategories); // Apply category filter here
-                } else {
-                    // If no categories, just select normally
-                    queryBuilder = supabase
-                        .from('products')
-                        .select('*', { count: 'exact' });
-                }
+   // --- CORRECTED useEffect hook for fetching products (combining approaches) ---
+  useEffect(() => {
+    const fetchProductsAndWishlist = async () => {
+      setLoading(true);
+      try {
+        let queryBuilder;
 
-                // --- 2. Chain ALL other filters and sorting onto the result of the select ---
-                queryBuilder = queryBuilder
-                    .eq('is_active', true)
-                    .ilike('name', `%${searchTerm}%`)
-                    .gte('price', priceRange[0])
-                    .lte('price', priceRange[1]);
+        // --- 1. Set up the base query based on whether category filter is active ---
+        if (selectedCategories.length > 0) {
+          // *** FILTERING BY CATEGORY: Use INNER JOIN syntax ***
+          console.log("Fetching WITH category filter:", selectedCategories);
+          queryBuilder = supabase
+            .from('products')
+            // Select product columns AND force inner join for filtering
+            .select('*, product_categories!inner(category_id)', { count: 'exact' })
+            // Apply the category filter on the joined table
+            .in('product_categories.category_id', selectedCategories);
+        } else {
+          // *** NOT FILTERING BY CATEGORY: Use LEFT JOIN syntax to get category IDs ***
+          console.log("Fetching WITHOUT category filter (getting category IDs)");
+          queryBuilder = supabase
+            .from('products')
+            // Select product columns AND related category IDs (optional join)
+            .select(`
+              *,
+              product_categories ( category_id )
+            `, { count: 'exact' });
+        }
 
-                // --- Apply Sorting ---
-                if (sortBy === 'featured') {
-                    queryBuilder = queryBuilder.order('priority', { ascending: true, nullsFirst: false })
-                                              .order('created_at', { ascending: false });
-                } else if (sortBy === 'price-low') {
-                    queryBuilder = queryBuilder.order('price', { ascending: true });
-                } else if (sortBy === 'price-high') {
-                    queryBuilder = queryBuilder.order('price', { ascending: false });
-                } else if (sortBy === 'rating') {
-                    queryBuilder = queryBuilder.order('rating', { ascending: false });
-                } else if (sortBy === 'newest') {
-                    queryBuilder = queryBuilder.order('created_at', { ascending: false });
-                }
+        // --- 2. Chain ALL OTHER filters onto the established queryBuilder ---
+        queryBuilder = queryBuilder
+          .eq('is_active', true) // Filter active products
+          .ilike('name', `%${searchTerm}%`) // Filter by search term
+          .gte('price', priceRange[0]) // Filter by min price
+          .lte('price', priceRange[1]); // Filter by max price
 
-                // --- Debug logs (still useful) ---
-                console.log("DEBUG: Fetching products with categories:", selectedCategories);
+        // --- 3. Apply Sorting ---
+        if (sortBy === 'featured') {
+          queryBuilder = queryBuilder.order('priority', { ascending: true, nullsFirst: false })
+                                     .order('created_at', { ascending: false });
+        } else if (sortBy === 'price-low') {
+          queryBuilder = queryBuilder.order('price', { ascending: true });
+        } else if (sortBy === 'price-high') {
+          queryBuilder = queryBuilder.order('price', { ascending: false });
+        } else if (sortBy === 'rating') {
+          queryBuilder = queryBuilder.order('rating', { ascending: false });
+        } else if (sortBy === 'newest') {
+          queryBuilder = queryBuilder.order('created_at', { ascending: false });
+        }
 
-                // --- 3. Apply Range and Execute ---
-                const { data: productsData, count, error } = await queryBuilder.range(
-                    (currentPage - 1) * productsPerPage,
-                    currentPage * productsPerPage - 1
-                );
+        // --- 4. Apply Range and Execute ---
+        console.log("DEBUG: Executing query for page", currentPage);
+        const { data: productsData, count, error } = await queryBuilder.range(
+          (currentPage - 1) * productsPerPage,
+          currentPage * productsPerPage - 1
+        );
 
-                console.log("DEBUG: Supabase response:", { productsData, count, error });
+        console.log("DEBUG: Supabase response:", { productsData, count, error });
 
-                if (error) {
-                    console.error('Error fetching products:', error.message);
-                    setProducts([]);
-                    setTotalProducts(0);
-                } else {
-                    setProducts(productsData || []);
-                    setTotalProducts(count || 0);
-                }
+        if (error) {
+          console.error('Error fetching products:', error.message);
+          // Check specifically for PostgREST filtering error if join syntax was wrong
+          if (error.code === '42P01' || error.message.includes("relation") || error.message.includes("does not exist")) {
+             console.error("Potential issue with Supabase join/filter syntax.");
+          }
+          setProducts([]);
+          setTotalProducts(0);
+        } else {
+          // Data should now have categories when needed (either via inner or left join)
+          console.log("Fetched Products Data Sample:", productsData ? productsData[0] : 'No data');
+          setProducts(productsData || []);
+          setTotalProducts(count || 0);
+        }
 
-                // --- Fetch Wishlist (unchanged) ---
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) {
-                    const { data: wishlist } = await supabase
-                        .from('wishlists')
-                        .select('product_id')
-                        .eq('user_id', user.id);
+        // --- Fetch Wishlist (Remains the same) ---
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: wishlist } = await supabase
+            .from('wishlists')
+            .select('product_id')
+            .eq('user_id', user.id);
+          if (wishlist) {
+            setWishlistIds(wishlist.map((w) => w.product_id));
+          }
+        }
 
-                    if (wishlist) {
-                        setWishlistIds(wishlist.map((w) => w.product_id));
-                    }
-                }
-            } catch (err: any) {
-                console.error('Error in fetchProductsAndWishlist:', err.message || err);
-                setProducts([]);
-                setTotalProducts(0);
-            }
-            setLoading(false);
-        };
+      } catch (err: any) {
+        console.error('Error in fetchProductsAndWishlist:', err.message || err);
+        setProducts([]);
+        setTotalProducts(0);
+      }
+      setLoading(false);
+    };
 
-        fetchProductsAndWishlist();
-        // Dependency array is correct
-    }, [currentPage, selectedCategories, searchTerm, priceRange, sortBy]);
+    fetchProductsAndWishlist();
+    // Dependency array remains the same
+  }, [currentPage, selectedCategories, searchTerm, priceRange, sortBy, productsPerPage]);
 
     // All your existing handler functions are preserved
     const toggleWishlist = async (productId: number) => {
@@ -561,45 +609,270 @@ const Products = () => {
         setCustomWeight(50);
     };
 
+/*
+useEffect(() => {
+    // Don't run if categories haven't loaded
+    if (categories.length === 0) return;
 
-    useEffect(() => {
-  // Don't run if the master category list isn't loaded yet
-  if (categories.length === 0) return;
+    // 1. Handle case with no selection -> Default banner
+    if (selectedCategories.length === 0) {
+      setCurrentBanner(categoryBanners.default);
+      return; // Exit early
+    }
 
-  if (selectedCategories.length === 0) {
-    // No filter selected, show the default
-    setCurrentBanner(categoryBanners.default);
-  } else {
-    // A filter IS selected. Let's find the banner for the first selected category.
-    // We prioritize the first one in the list.
+    // A category IS selected, get the first one
     const firstSelectedId = selectedCategories[0];
-    
-    // Find the full category object (including its name) from your `categories` state
-    let foundCategory = null;
-    for (const parent of categories) {
-      if (parent.id === firstSelectedId) {
-        foundCategory = parent;
-        break;
-      }
-      if (parent.children) {
-        // If a child is selected, we'll use the PARENT's banner
-        const child = parent.children.find((c: any) => c.id === firstSelectedId);
-        if (child) {
-            foundCategory = parent; 
-            break;
+
+    // Helper function to find the exact category (parent or child) by ID
+    const findExactCategoryById = (idToFind: number): any | null => {
+      for (const parent of categories) {
+        // Check if it's the parent itself
+        if (parent.id === idToFind) {
+          return parent;
+        }
+        // Check if it's one of the children
+        if (parent.children) {
+          const child = parent.children.find((c: any) => c.id === idToFind);
+          if (child) {
+            return child; // Return the actual child object
+          }
         }
       }
+      return null; // Category not found
+    };
+
+     // Helper function to find the parent category given a child ID
+     const findParentCategory = (childId: number): any | null => {
+         for (const parent of categories) {
+             // Check if this parent contains the childId in its children array
+             if (parent.children && parent.children.some((c: any) => c.id === childId)) {
+                 return parent; // Return the parent object
+             }
+         }
+         return null; // No parent found (or it's a top-level category)
+     };
+
+    // Find the actual selected category object (could be parent or child)
+    const exactCategory = findExactCategoryById(firstSelectedId);
+
+    let bannerToSet = categoryBanners.default; // Start with the default
+
+    if (exactCategory) {
+      // Priority 1: Check for a banner matching the exact category's name
+      if (categoryBanners[exactCategory.name]) {
+        bannerToSet = categoryBanners[exactCategory.name];
+        console.log(`Banner found for exact category: ${exactCategory.name}`);
+      } else {
+        // Priority 2: If no exact match, find the parent
+        const parentCategory = findParentCategory(firstSelectedId);
+        if (parentCategory && categoryBanners[parentCategory.name]) {
+          // Use the parent's banner if it exists
+          bannerToSet = categoryBanners[parentCategory.name];
+          console.log(`No exact banner for ${exactCategory.name}, using parent banner: ${parentCategory.name}`);
+        } else {
+             console.log(`No banner found for ${exactCategory.name} or its parent, using default.`);
+             // If no parent banner either, it remains the default set above
+        }
+      }
+    } else {
+         console.log(`Selected category ID ${firstSelectedId} not found, using default banner.`);
+         // Category ID wasn't found in our list, use default
     }
 
-    // Check if we found a category AND it has an entry in our banner map
-    if (foundCategory && categoryBanners[foundCategory.name]) {
-      setCurrentBanner(categoryBanners[foundCategory.name]);
-    } else {
-      // The selected category doesn't have a special banner, so just show default
-      setCurrentBanner(categoryBanners.default);
+    // Set the determined banner
+    setCurrentBanner(bannerToSet);
+
+  // Add categoryBanners as a dependency since the logic reads from it
+  }, [selectedCategories, categories, categoryBanners]);
+
+  */
+
+  // --- NEW Banner Logic based on Current Page Products ---
+  // --- Refactored Banner Logic (Prioritizing Child Categories) ---
+
+// --- FINAL Combined Banner Logic (Replaces both maps and the old effect) ---
+  useEffect(() => {
+    // Don't run if categories haven't loaded
+    if (categories.length === 0) {
+       // If categories aren't loaded, just ensure default
+       if (currentBanner.image !== categoryBanners.default.image) {
+          setCurrentBanner(categoryBanners.default);
+       }
+       return;
     }
-  }
-}, [selectedCategories, categories]); // Re-run when filters or the category list change
+
+    let bannerToSet = categoryBanners.default; // Start with default
+    let bannerSet = false;
+
+    // --- LOGIC 1: Handle FILTER-BASED selection (FAST) ---
+    if (selectedCategories.length > 0) {
+      console.log("Running FAST banner logic (filter selected)");
+      const firstSelectedId = selectedCategories[0];
+
+      // Helper function to find the exact category (parent or child) by ID
+      const findExactCategoryById = (idToFind: number): any | null => {
+        for (const parent of categories) {
+          if (parent.id === idToFind) return parent;
+          if (parent.children) {
+            const child = parent.children.find((c: any) => c.id === idToFind);
+            if (child) return child;
+          }
+        }
+        return null;
+      };
+
+      // Helper function to find the parent category given a child ID
+      const findParentCategory = (childId: number): any | null => {
+        for (const parent of categories) {
+          if (parent.children && parent.children.some((c: any) => c.id === childId)) {
+            return parent;
+          }
+        }
+        return null;
+      };
+
+      const exactCategory = findExactCategoryById(firstSelectedId);
+
+      if (exactCategory) {
+        // Priority 1: Check for a banner matching the exact category's name
+        if (categoryBanners[exactCategory.name]) {
+          bannerToSet = categoryBanners[exactCategory.name];
+          bannerSet = true;
+          console.log(`Filter logic: Setting banner for exact category: ${exactCategory.name}`);
+        } else {
+          // Priority 2: If no exact match, find the parent
+          const parentCategory = findParentCategory(firstSelectedId);
+          if (parentCategory && categoryBanners[parentCategory.name]) {
+            bannerToSet = categoryBanners[parentCategory.name];
+            bannerSet = true;
+            console.log(`Filter logic: No exact banner, setting for parent: ${parentCategory.name}`);
+          }
+        }
+      }
+    } 
+    // --- LOGIC 2: Handle PAGE-CONTENT analysis (SLOWER) ---
+    else if (!loading && products.length > 0) {
+      // Only run this if NOT loading and products exist
+      console.log("Running SLOW banner logic (no filter, analyzing products)");
+
+      // --- Build maps *inside* this branch, only when needed ---
+      const categoryIdToParentIdMap: Record<number, number | null> = {};
+      const categoryIdToObjectMap: Record<number, any> = {};
+      
+      const addCategoryToMap = (category: any) => {
+        if (category && typeof category.id === 'number') {
+            categoryIdToObjectMap[category.id] = category;
+            if (category.children) {
+                category.children.forEach(addCategoryToMap);
+            }
+        }
+      };
+      categories.forEach(parent => {
+          if (!parent.parent_id) {
+              categoryIdToParentIdMap[parent.id] = null; // <-- CORRECTED
+              if (parent.children) {
+                  parent.children.forEach((child: any) => {
+                      if (child && typeof child.id === 'number') {
+                          categoryIdToParentIdMap[child.id] = parent.id;
+                      }
+                  });
+              }
+          }
+          addCategoryToMap(parent); // Build object map at the same time
+      });
+      // --- End map building ---
+
+      const specificCategoryCounts: Record<number, number> = {};
+      const parentCategoryCounts: Record<number, number> = {};
+
+      products.forEach(product => {
+        if (Array.isArray(product.product_categories)) {
+          product.product_categories.forEach((catRelation: { category_id: number }) => {
+            const specificCatId = catRelation?.category_id;
+            if (typeof specificCatId === 'number') {
+              specificCategoryCounts[specificCatId] = (specificCategoryCounts[specificCatId] || 0) + 1;
+              const parentId = categoryIdToParentIdMap[specificCatId];
+              if (parentId !== undefined) {
+                const idToCount = parentId === null ? specificCatId : parentId;
+                parentCategoryCounts[idToCount] = (parentCategoryCounts[idToCount] || 0) + 1;
+              }
+            }
+          });
+        }
+      });
+
+      console.log("Page Specific Category Counts:", specificCategoryCounts);
+      console.log("Page Parent Category Counts:", parentCategoryCounts);
+      
+      let dominantParentId: number | null = null;
+      let maxParentCount = 0;
+      for (const categoryIdStr in parentCategoryCounts) {
+          const categoryId = parseInt(categoryIdStr, 10);
+          const count = parentCategoryCounts[categoryId];
+          if (count > maxParentCount) {
+              maxParentCount = count;
+              dominantParentId = categoryId;
+          } else if (count === maxParentCount) {
+              dominantParentId = null;
+          }
+      }
+
+      if (dominantParentId !== null && (maxParentCount / products.length) > 0.5) {
+          const dominantParentCategory = categoryIdToObjectMap[dominantParentId];
+          console.log(`Dominant Parent Category: ${dominantParentCategory?.name || dominantParentId}`);
+
+          let mostFrequentSpecificIdInGroup: number | null = null;
+          let maxSpecificCountInGroup = 0;
+
+          for (const specificIdStr in specificCategoryCounts) {
+              const specificId = parseInt(specificIdStr, 10);
+              if (specificId === 41) continue; // Skip "Imported"
+              
+              const count = specificCategoryCounts[specificId];
+              const parentIdForSpecific = categoryIdToParentIdMap[specificId];
+
+              if (parentIdForSpecific === dominantParentId || specificId === dominantParentId) {
+                  if (count > maxSpecificCountInGroup) {
+                      maxSpecificCountInGroup = count;
+                      mostFrequentSpecificIdInGroup = specificId;
+                  } else if (count === maxSpecificCountInGroup) {
+                      mostFrequentSpecificIdInGroup = null;
+                  }
+              }
+          }
+          console.log("Most frequent specific ID (excluding 41) in group:", mostFrequentSpecificIdInGroup);
+
+          const chosenSpecificId: number | null = mostFrequentSpecificIdInGroup;
+
+          if (chosenSpecificId !== null) {
+              const chosenCategory = categoryIdToObjectMap[chosenSpecificId];
+              if (chosenCategory && categoryBanners[chosenCategory.name]) {
+                  bannerToSet = categoryBanners[chosenCategory.name];
+                  bannerSet = true;
+                  console.log(`Content logic: Setting banner for subcategory: ${chosenCategory.name}`);
+              }
+          }
+          
+          if (!bannerSet && dominantParentCategory && categoryBanners[dominantParentCategory.name]) {
+              bannerToSet = categoryBanners[dominantParentCategory.name];
+              bannerSet = true;
+              console.log(`Content logic: Setting banner for parent: ${dominantParentCategory.name}`);
+          }
+      } else {
+          console.log("Content logic: No dominance, using default.");
+      }
+    }
+    // --- End Logic 2 ---
+
+    // Final check to prevent re-renders
+    if (currentBanner.image !== bannerToSet.image) {
+      console.log("Banner needs update. Old:", currentBanner.titleHighlight, "New:", bannerToSet.titleHighlight);
+      setCurrentBanner(bannerToSet);
+    }
+
+  // This combined effect now correctly depends on all inputs
+  }, [selectedCategories, products, categories, loading, currentBanner, categoryBanners]);
+  // --- End Refactored Banner Logic ---
 
     useEffect(() => {
         if (!sectionRef.current || loading) return;

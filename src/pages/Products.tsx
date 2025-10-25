@@ -922,7 +922,7 @@ useEffect(() => {
             {/* Hero Section */}
             <section
             // Added transition-all for a smooth image change
-            className={`pt-6 pb-6 sm:pt-24 sm:pb-12 relative transition-all duration-500`}
+            className={`pt-6 pb-6 sm:pt-24 sm:pb-12 relative transition-all duration-500 min-h-[190px] lg:min-h-[400px]`}
             style={{
                 backgroundImage: `
                 linear-gradient(to bottom right, rgba(0,0,0,0.7), rgba(250,245,240,0)),

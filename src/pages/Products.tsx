@@ -1,21 +1,37 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Search, Filter, Grid, List, Star, Heart, Eye, ShoppingCart, X } from 'lucide-react';
 import { supabase } from '../utils/supabaseClient';
 import { Listbox } from "@headlessui/react"
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link , useNavigate } from "react-router-dom";
 import { useSearchParams } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import godivab from '../assets/proher/godivab.webp';
+import { Helmet } from 'react-helmet-async'; // <-- 1. Import Helmet
 
 const Products = () => {
     // All your existing state variables are preserved
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState(() => {
+        return sessionStorage.getItem('tamoor_searchTerm') || '';
+    });
     //const [selectedCategory, setSelectedCategory] = useState<string | number>("all");
-    const [priceRange, setPriceRange] = useState([0, 10000]);
-    const [sortBy, setSortBy] = useState('featured');
-    const [viewMode, setViewMode] = useState('grid');
+    const [priceRange, setPriceRange] = useState(() => {
+        const saved = sessionStorage.getItem('tamoor_priceRange');
+        try {
+            // Parse the saved JSON, or default
+            return saved ? JSON.parse(saved) : [0, 10000];
+        } catch (e) {
+            return [0, 10000];
+        }
+    });
+    const [sortBy, setSortBy] = useState(() => {
+        return sessionStorage.getItem('tamoor_sortBy') || 'featured';
+    });
+    const [viewMode, setViewMode] = useState(() => {
+        return sessionStorage.getItem('tamoor_viewMode') || 'grid';
+    });
     const [showFilters, setShowFilters] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
     const [showQuantityModal, setShowQuantityModal] = useState(false);
@@ -33,7 +49,18 @@ const Products = () => {
     const [cartMessage, setCartMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
     const [categories, setCategories] = useState<any[]>([]);
     const [openParentCategory, setOpenParentCategory] = useState<string | number | null>(null);
-    const [openParentCategories, setOpenParentCategories] = useState<number[]>([]); // Use an array to track multiple open parents
+    const [openParentCategories, setOpenParentCategories] = useState<number[]>(() => {
+        const saved = sessionStorage.getItem('tamoor_openParentCategories');
+        try {
+            // Parse the saved JSON, or default to an empty array
+            return saved ? JSON.parse(saved) : [];
+        } catch (e) {
+            return [];
+        }
+    });
+
+    const navigate = useNavigate();
+    
     
     // All your existing functions and hooks are preserved
     const getCategoryIdsToFilter = (selected: string | number) => {
@@ -44,6 +71,54 @@ const Products = () => {
         }
         return [selected];
     };
+
+    
+
+    
+
+    // 1. Define the structure of a single banner
+    interface BannerConfig {
+    image: string;
+    titlePrefix: string;
+    titleHighlight: string;
+    titleSuffix: string;
+    subtitle: string;
+    }
+
+    // 2. Define the map. It MUST have a 'default', and can have any other string key
+    type BannerMap = {
+    default: BannerConfig;
+    [key: string]: BannerConfig; // This line fixes your 'implicit any' error
+    }
+
+    // 3. Now, apply this type to your constant
+    const categoryBanners: BannerMap = {
+    default: {
+        image: "https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/prodherd%20(1).webp",
+        titlePrefix: "Premium",
+        titleHighlight: "TAMOOR",
+        titleSuffix: "Collection",
+        subtitle: "Discover our complete range of luxury dry fruits and nuts..."
+    },
+    "Dry Fruits": { 
+        image: "https://example.com/your-dry-fruits-banner.webp", // <-- UPDATE THIS URL
+        titlePrefix: "Our Finest",
+        titleHighlight: "Dry Fruits",
+        titleSuffix: "",
+        subtitle: "Handpicked and curated for the finest taste experience."
+    },
+    "Chocolates": {
+        image: godivab, // <-- UPDATE THIS URL
+        titlePrefix: "Luxurious",
+        titleHighlight: "Chocolates",
+        titleSuffix: "by TAMOOR",
+        subtitle: "Indulge in our decadent, handcrafted chocolate collection."
+    }
+    };
+
+    // 4. Then define your state (as shown in Fix 1)
+    const [currentBanner, setCurrentBanner] = useState(categoryBanners.default);
+    
 
     useEffect(() => {
         const isModalOpen = showQuantityModal || wishlistMessage || cartMessage;
@@ -103,12 +178,20 @@ const Products = () => {
 
     // --- 1. CHANGE: From single state to array state ---
     const [selectedCategories, setSelectedCategories] = useState<number[]>(() => {
-        // We use a function here for lazy initialization.
+        // 1. Priority: A new category ID from the URL
         if (categoryIdParam) {
-            // If a categoryId comes from the URL, start with it selected in the array
             return [Number(categoryIdParam)]; 
         }
-        return []; // Default is now an empty array (meaning "All Products")
+        
+        // 2. Priority: User's last saved session
+        const saved = sessionStorage.getItem('tamoor_selectedCategories');
+        try {
+            return saved ? JSON.parse(saved) : [];
+        } catch (e) {
+            return [];
+        }
+        
+        // 3. Default: Empty array (All Products)
     });
 
 
@@ -239,12 +322,81 @@ const Products = () => {
     };
 
     const handleClearFilters = () => {
-        setSelectedCategories([]); // <-- CHANGED
-        setSortBy("featured");
-        setPriceRange([0, 10000]);
-        setSearchTerm('');
-        setCurrentPage(1);
+        // --- MODIFICATION 3: Add resets for new tracked states ---
+        setSelectedCategories([]);
+        setSortBy("featured");
+        setPriceRange([0, 10000]);
+        setSearchTerm('');
+        setViewMode('grid'); // Reset view mode
+        setOpenParentCategories([]); // Reset open categories
+        // --- END OF MODIFICATION 3 ---
+        
+        setCurrentPage(1);
     };
+
+    useEffect(() => {
+        sessionStorage.setItem('tamoor_searchTerm', searchTerm);
+    }, [searchTerm]);
+
+    useEffect(() => {
+        // We must stringify arrays
+        sessionStorage.setItem('tamoor_priceRange', JSON.stringify(priceRange));
+    }, [priceRange]);
+
+    useEffect(() => {
+        sessionStorage.setItem('tamoor_sortBy', sortBy);
+    }, [sortBy]);
+
+    useEffect(() => {
+        sessionStorage.setItem('tamoor_viewMode', viewMode);
+    }, [viewMode]);
+
+    useEffect(() => {
+        // We must stringify arrays
+        sessionStorage.setItem('tamoor_selectedCategories', JSON.stringify(selectedCategories));
+    }, [selectedCategories]);
+
+    useEffect(() => {
+        // We must stringify arrays
+        sessionStorage.setItem('tamoor_openParentCategories', JSON.stringify(openParentCategories));
+    }, [openParentCategories]);
+
+    
+    const pageTitle = useMemo(() => {
+        if (selectedCategories.length > 0 && categories.length > 0) {
+            // Try to find the name of the first selected category
+            let firstCatName = 'Products'; // Default if not found
+            for (const parent of categories) {
+                if (parent.id === selectedCategories[0]) {
+                    firstCatName = parent.name;
+                    break;
+                }
+                if (parent.children) {
+                    const child = parent.children.find((c: any) => c.id === selectedCategories[0]);
+                    if (child) {
+                        firstCatName = child.name; // Use child name if child is selected
+                        break;
+                    }
+                }
+            }
+             // Ensure "All Products" isn't used in title
+            if (firstCatName === "All Products") firstCatName = 'Dry Fruits & Nuts';
+            return `Shop Premium ${firstCatName} Online | TAMOOR`;
+        }
+        return 'Shop Premium Dry Fruits, Nuts & Chocolates Online | TAMOOR'; // Default title
+    }, [selectedCategories, categories]);
+
+    const pageDescription = useMemo(() => {
+         if (selectedCategories.length > 0 && categories.length > 0) {
+            // You could create more specific descriptions here too
+             let firstCatName = 'selected items';
+             // (Similar logic as pageTitle to find the category name)
+             for (const parent of categories) { /* ... find name ... */ if(parent.id === selectedCategories[0]){firstCatName = parent.name; break;} if(parent.children){ const child = parent.children.find((c:any) => c.id === selectedCategories[0]); if(child){firstCatName = child.name; break;}} }
+              if (firstCatName === "All Products") firstCatName = 'premium dry fruits, nuts, and chocolates';
+             return `Explore and buy the finest ${firstCatName} online at TAMOOR. Premium quality, delivered across India from Bangalore & Kolar.`;
+         }
+        return 'Discover and shop TAMOOR\'s wide collection of premium dry fruits, nuts, almonds, dates, chocolates, and more. Freshness delivered India-wide from Bangalore & Kolar.'; // Default description
+    }, [selectedCategories, categories]);
 
     // --- MAIN MODIFICATION AREA 1 ---
    useEffect(() => {
@@ -335,7 +487,8 @@ const Products = () => {
     const toggleWishlist = async (productId: number) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-            window.location.href = "/auth?message=loginRequired&redirect=/products";
+            //window.location.href = "/auth?message=loginRequired&redirect=/products";
+            navigate("/auth?message=loginRequired&redirect=/products");
             return;
         }
         const isInWishlist = wishlistIds.includes(productId);
@@ -356,7 +509,8 @@ const Products = () => {
     const handleAddCartDirect = async (product: any, qty: number) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-            window.location.href = "/auth?message=loginRequired&redirect=/products";
+            //window.location.href = "/auth?message=loginRequired&redirect=/products";
+            navigate("/auth?message=loginRequired&redirect=/products");
             return;
         }
         const weightValue = product.measurement_unit === 'pieces' ? (product.default_piece_weight ? product.default_piece_weight : 'default') : null;
@@ -386,7 +540,8 @@ const Products = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
             localStorage.setItem("pendingProduct", JSON.stringify({ id: selectedProduct.id, quantity: qty, weight, name: selectedProduct.name, price: selectedProduct.price, image: selectedProduct.image }));
-            window.location.href = "/auth?message=loginRequired&redirect=/products";
+            //window.location.href = "/auth?message=loginRequired&redirect=/products";
+            navigate("/auth?message=loginRequired&redirect=/products");
             return;
         }
         console.log('Upserting cart item with weight:', weight);
@@ -405,6 +560,46 @@ const Products = () => {
         setSelectedWeight(1000);
         setCustomWeight(50);
     };
+
+
+    useEffect(() => {
+  // Don't run if the master category list isn't loaded yet
+  if (categories.length === 0) return;
+
+  if (selectedCategories.length === 0) {
+    // No filter selected, show the default
+    setCurrentBanner(categoryBanners.default);
+  } else {
+    // A filter IS selected. Let's find the banner for the first selected category.
+    // We prioritize the first one in the list.
+    const firstSelectedId = selectedCategories[0];
+    
+    // Find the full category object (including its name) from your `categories` state
+    let foundCategory = null;
+    for (const parent of categories) {
+      if (parent.id === firstSelectedId) {
+        foundCategory = parent;
+        break;
+      }
+      if (parent.children) {
+        // If a child is selected, we'll use the PARENT's banner
+        const child = parent.children.find((c: any) => c.id === firstSelectedId);
+        if (child) {
+            foundCategory = parent; 
+            break;
+        }
+      }
+    }
+
+    // Check if we found a category AND it has an entry in our banner map
+    if (foundCategory && categoryBanners[foundCategory.name]) {
+      setCurrentBanner(categoryBanners[foundCategory.name]);
+    } else {
+      // The selected category doesn't have a special banner, so just show default
+      setCurrentBanner(categoryBanners.default);
+    }
+  }
+}, [selectedCategories, categories]); // Re-run when filters or the category list change
 
     useEffect(() => {
         if (!sectionRef.current || loading) return;
@@ -426,32 +621,62 @@ const Products = () => {
 
     // The entire JSX structure and all its functionality is preserved below.
     return (
+        <> {/* <-- Use a Fragment to wrap Helmet and your div */}
+            {/* --- 2. Add Helmet Component --- */}
+            <Helmet>
+                <title>{pageTitle}</title>
+                <meta name="description" content={pageDescription} />
+                <link rel="canonical" href="https://www.tamoor.in/products" /> {/* Canonical for the main products page */}
+
+                {/* Open Graph Tags */}
+                <meta property="og:title" content={pageTitle} />
+                <meta property="og:description" content={pageDescription} />
+                <meta property="og:url" content="https://www.tamoor.in/products" />
+                <meta property="og:image" content="https://www.tamoor.in/tamoor-og-products.jpg" /> {/* Create a specific OG image for the products page */}
+                <meta property="og:type" content="website" />
+                <meta property="og:site_name" content="TAMOOR" />
+
+
+                {/* Twitter Card Tags */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={pageTitle} />
+                <meta name="twitter:description" content={pageDescription} />
+                <meta name="twitter:image" content="https://www.tamoor.in/tamoor-twitter-products.jpg" /> {/* Create a specific Twitter image */}
+            </Helmet>
+            {/* --- End Helmet Component --- */}
         <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white">
             {/* Hero Section */}
-<section
-    // Increased mobile padding by 50% (from pt-4/pb-4 to pt-6/pb-6)
-    className={`pt-6 pb-6 sm:pt-24 sm:pb-12 relative`}
-    style={{
-      backgroundImage: `
-        linear-gradient(to bottom right, rgba(0,0,0,0.7), rgba(250,245,240,0)),
-        url('https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/prodherd%20(1).webp')
-      `,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-    }}
-  >
-    <div className="container mx-auto px-4 relative z-10">
-      <div className="text-center mb-1 sm:mb-12">
-        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-serif text-neutral-400 mb-1.5 sm:mb-6">
-          Premium <span className="tamoor-gradient font-extrabold font-serif">TAMOOR</span> Collection
-        </h1>
-        <p className="text-base sm:text-xl text-neutral-300 max-w-3xl mx-auto leading-relaxed font-serif">
-          Discover our complete range of luxury dry fruits and nuts, carefully curated for the finest taste experience.
-        </p>
-      </div>
-    </div>
-  </section>
+            {/* Hero Section */}
+            <section
+            // Added transition-all for a smooth image change
+            className={`pt-6 pb-6 sm:pt-24 sm:pb-12 relative transition-all duration-500`}
+            style={{
+                backgroundImage: `
+                linear-gradient(to bottom right, rgba(0,0,0,0.7), rgba(250,245,240,0)),
+                url('${currentBanner.image}')
+                `, // <-- USES STATE
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+            }}
+            >
+            <div className="container mx-auto px-4 relative z-10">
+                <div className="text-center mb-1 sm:mb-12">
+                <h1 className="text-2xl sm:text-4xl lg:text-5xl font-serif text-neutral-400 mb-1.5 sm:mb-6">
+                    {/* USES STATE */}
+                    {currentBanner.titlePrefix}{' '}
+                    <span className="tamoor-gradient font-extrabold font-serif">
+                    {currentBanner.titleHighlight}
+                    </span>
+                    {' '}{currentBanner.titleSuffix}
+                </h1>
+                <p className="text-base sm:text-xl text-neutral-300 max-w-3xl mx-auto leading-relaxed font-serif">
+                    {/* USES STATE */}
+                    {currentBanner.subtitle}
+                </p>
+                </div>
+            </div>
+            </section>
 
             {/* Filters & Search - No changes here */}
             <section className="sticky top-0 lg:top-20 z-40 bg-white/70 backdrop-blur-xl border-b border-white/20 py-4 sm:py-6 shadow-md rounded-b-2xl">
@@ -1056,6 +1281,7 @@ const Products = () => {
                  document.getElementById('modal-root')!
             )}
         </div>
+        </>
     );
 };
 

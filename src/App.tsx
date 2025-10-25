@@ -49,6 +49,7 @@ import SizeQualityGuide from './pages/SizeQualityGuide';
 import FaqSupport from './pages/FaqSupport';
 import BlogRecipesExpanded from './pages/BlogRecipes';
 import ExcelProductImport from "./pages/admin/ExcelProductImport";
+import { HelmetProvider } from 'react-helmet-async';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -126,6 +127,7 @@ function App() {
 
       {/* The rest of your app will render once the animation is done OR if it was skipped */}
       {!showAnimation && !loading && (
+        <HelmetProvider>
         <CartProvider>
           <Router>
             <ToastContainer
@@ -211,6 +213,7 @@ function App() {
             </FancyPageTransition>
           </Router>
         </CartProvider>
+        </HelmetProvider>
       )}
     </>
   );

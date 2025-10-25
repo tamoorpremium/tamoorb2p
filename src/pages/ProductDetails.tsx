@@ -359,7 +359,8 @@ const ProductDetails: React.FC = () => {
         "pendingProduct",
         JSON.stringify({ id: product.id, quantity: qty, weight, name: product.name, price: product.price, image: product.image })
       );
-      window.location.href = "/auth?message=loginRequired&redirect=/products";
+      //window.location.href = "/auth?message=loginRequired&redirect=/products";
+      navigate("/auth?message=loginRequired&redirect=/products");
       return;
     }
 

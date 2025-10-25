@@ -20,11 +20,20 @@ interface Product {
 const AdminProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categoriesMap, setCategoriesMap] = useState<Record<number, string>>({});
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number>(0);
+  const [searchTerm, setSearchTerm] = useState(() => {
+    // Read the saved search term, or default to ''
+    return sessionStorage.getItem('adminProducts_searchTerm') || '';
+  });
+  const [selectedCategoryId, setSelectedCategoryId] = useState(() => {
+    // Read the saved category ID, or default to 0
+    return Number(sessionStorage.getItem('adminProducts_category')) || 0;
+  });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState(() => {
+    // Read the saved status filter, or default to 'all'
+    return sessionStorage.getItem('adminProducts_status') || 'all';
+  });
 
   // --- All your data-fetching and update logic remains unchanged ---
 
@@ -100,6 +109,23 @@ const AdminProducts: React.FC = () => {
       setLoading(false);
     }
   };
+
+
+  // Save searchTerm when it changes
+  useEffect(() => {
+    sessionStorage.setItem('adminProducts_searchTerm', searchTerm);
+  }, [searchTerm]);
+
+  // Save selectedCategoryId when it changes
+  useEffect(() => {
+    // We save it as a string, but that's fine.
+    sessionStorage.setItem('adminProducts_category', String(selectedCategoryId));
+  }, [selectedCategoryId]);
+
+  // Save statusFilter when it changes
+  useEffect(() => {
+    sessionStorage.setItem('adminProducts_status', statusFilter);
+  }, [statusFilter]);
 
   useEffect(() => {
     fetchCategories();

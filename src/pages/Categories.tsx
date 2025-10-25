@@ -115,6 +115,7 @@ import strawberry from "../assets/categories/straw.webp";
 import cherry from "../assets/categories/cherry.webp";
 import chikki from "../assets/categories/chikki.webp";
 import mouth from "../assets/categories/mukhwa.webp";
+import { Helmet } from 'react-helmet-async'; // <-- 1. Import Helmet
 
 
 
@@ -257,6 +258,16 @@ const Categories = () => {
   const getSubcategories = (parentId: number) =>
     categories.filter((cat) => cat.parent_id === parentId);
 
+  // --- SEO Logic ---
+  const activeParent = parents.find(p => p.id === activeParentId);
+  const pageTitle = activeParent
+    ? `Explore ${activeParent.name} | TAMOOR Categories`
+    : 'Explore All Categories | TAMOOR Premium Dry Fruits & Nuts';
+  const pageDescription = activeParent
+    ? `Browse all subcategories under ${activeParent.name} at TAMOOR. Find premium ${activeParent.name.toLowerCase()} like ${getSubcategories(activeParent.id).slice(0, 3).map(s => s.name).join(', ')} online.`
+    : 'Discover TAMOOR\'s wide range of product categories, including premium nuts, dried fruits, chocolates, gift hampers, and more. Shop online from Bangalore & Kolar.';
+  // --- End SEO Logic ---
+
   if (!activeParentId) {
     return (
       <div className="flex justify-center items-center h-screen bg-white">
@@ -268,6 +279,29 @@ const Categories = () => {
   const activeSubcategories = getSubcategories(activeParentId);
 
   return (
+    <> {/* <-- Wrap in Fragment */}
+      {/* --- 2. Add Helmet --- */}
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <link rel="canonical" href="https://www.tamoor.in/categories" /> {/* Canonical for the main categories page */}
+
+        {/* Open Graph Tags */}
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:url" content="https://www.tamoor.in/categories" />
+        <meta property="og:image" content="https://www.tamoor.in/tamoor-og-categories.jpg" /> {/* Create a specific OG image for categories */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="TAMOOR" />
+
+
+        {/* Twitter Card Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content="https://www.tamoor.in/tamoor-twitter-categories.jpg" /> {/* Create a specific Twitter image */}
+      </Helmet>
+      {/* --- End Helmet --- */}
     <section className="bg-white min-h-screen">
       <div className="container mx-auto px-4 pt-12 sm:pt-16">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-neutral-800 mb-8 text-center">
@@ -333,6 +367,7 @@ const Categories = () => {
         </div>
       </div>
     </section>
+    </>
   );
 };
 

@@ -182,17 +182,30 @@ const AdminProducts: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    const confirmed = true;
-    if (!confirmed) return;
-    try {
-      const { error } = await supabase.from('products').delete().eq('id', id);
-      if (error) throw error;
-      setProducts((prev) => prev.filter((p) => p.id !== id));
-      toast.success('Product deleted successfully.');
-    } catch {
-      toast.error('Failed to delete product.');
-    }
-  };
+    // 1. Find the product to get its name for the prompt
+    const productToDelete = products.find(p => p.id === id);
+    const productName = productToDelete ? productToDelete.name : 'this product';
+
+    // 2. Use window.confirm to show a confirmation dialog
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${productName}"?\n\nThis action cannot be undone.`
+    );
+
+    // 3. If the user clicks "Cancel", stop the function
+    if (!confirmed) return;
+
+    try {
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) throw error;
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      // 4. Improved success toast
+      toast.success(`"${productName}" deleted successfully.`);
+    } catch (error) { // It's good practice to log the error
+      console.error('Failed to delete product:', error);
+      // 5. Improved error toast
+      toast.error(`Failed to delete "${productName}".`);
+    }
+  };
 
   const filteredProducts = useMemo(() => {
     return products.filter(product => {

@@ -39,6 +39,8 @@ const AdminProductEdit: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const formRef = useRef<HTMLFormElement>(null);
+
   const [initialData, setInitialData] = useState<any>(null);
   const [loading, setLoading] = useState(false); // For form saving/loading product
   const [productImages, setProductImages] = useState<ProductImage[]>([]);
@@ -58,6 +60,33 @@ const AdminProductEdit: React.FC = () => {
     };
   }, [selectedFiles]);
   // ------------------------------------------------
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check for Shift + S
+      if (event.shiftKey && event.key === 'S') {
+        event.preventDefault(); // Prevent browser's "Save As" dialog
+        
+        // Prevent submission if already loading
+        if (loading || uploading) {
+          toast.warn("Please wait, an operation is already in progress.");
+          return;
+        }
+
+        // Find the form and trigger its submit event
+        // .requestSubmit() is better than .submit() as it fires the 'submit' event
+        formRef.current?.requestSubmit();
+      }
+    };
+
+    // Add the event listener to the whole document
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Clean up the listener when the component unmounts
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [loading, uploading]); // Re-run if loading state changes
 
   // useEffect fetchProduct (Keep as is)
   // --- UPDATED: Effect to fetch Product AND its Categories ---
@@ -379,6 +408,7 @@ const AdminProductEdit: React.FC = () => {
               <h2 className="text-xl font-bold text-yellow-300 mb-4 border-b border-yellow-400/10 pb-2">Product Details</h2>
               {initialData !== null && (
                  <ProductForm
+                 ref={formRef}
                  initialData={initialData}
                  onSubmit={handleSubmit}
                  loading={loading || uploading}

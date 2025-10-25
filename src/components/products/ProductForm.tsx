@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo , forwardRef} from 'react';
 import { supabase } from '../../utils/supabaseClient';
 import { X } from 'lucide-react'; // Import the X icon
 
@@ -25,7 +25,8 @@ const badgeOptions = [
   { label: 'Best Seller', colorClass: 'bg-gradient-to-r from-green-500 to-emerald-500' },
 ];
 
-const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loading }) => {
+const ProductForm = forwardRef<HTMLFormElement, ProductFormProps>(
+  ({ initialData, onSubmit, loading }, ref) => { // 'ref' is now the second argument
   // --- 1. STATE CHANGES ---
   const [formData, setFormData] = useState({
     name: '',
@@ -194,7 +195,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loadin
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 p-6 bg-white/10 backdrop-blur-lg rounded-3xl shadow-xl max-w-4xl mx-auto">
+    <form ref={ref} onSubmit={handleSubmit} className="space-y-6 p-6 bg-white/10 backdrop-blur-lg rounded-3xl shadow-xl max-w-4xl mx-auto">
 
       <h2 className="text-2xl font-bold text-gray-900 mb-4">Product Details</h2>
 
@@ -354,6 +355,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loadin
 
     </form>
   );
-};
+});
 
 export default ProductForm;

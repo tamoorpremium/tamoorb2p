@@ -115,6 +115,17 @@ import strawberry from "../assets/categories/straw.webp";
 import cherry from "../assets/categories/cherry.webp";
 import chikki from "../assets/categories/chikki.webp";
 import mouth from "../assets/categories/mukhwa.webp";
+import toble from "../assets/categories/tobcat.webp";
+import cadbury from "../assets/categories/cadcat.webp";
+import godiva from "../assets/categories/godcat.webp";
+import lindt from "../assets/categories/lindtcat.webp";
+import whit from "../assets/categories/whitcat.webp";
+import rhine from "../assets/categories/rhinecat2.webp";
+import beast from "../assets/categories/beastcat.webp";
+import kinder from "../assets/categories/kincat.webp";
+import ferrero from "../assets/categories/fercat.webp";
+import milka from "../assets/categories/milkacat.webp";
+import hershey from "../assets/categories/herscat.webp";
 import { Helmet } from 'react-helmet-async'; // <-- 1. Import Helmet
 
 
@@ -185,6 +196,18 @@ const subcategoryImages: Record<string, string> = {
   "luxury-chocolate-gift-packs": giftc,
   "imported-chocolates": importedc,
   "sugarfree-chocolates": sugarc,
+  "godiva" : godiva,
+  "toblerone" : toble,
+  "lindt" : lindt,
+  "mr-beast" : beast,
+  "cadbury" : cadbury,
+  "milka" : milka,
+  "ferrero-rocher" : ferrero,
+  "kinder-joy" : kinder,
+  "hersheys" : hershey,
+  "whittakers" : whit,
+  "rhine-valley" : rhine,
+
 
   // Gift Hampers
   "birthday-hampers": birham,

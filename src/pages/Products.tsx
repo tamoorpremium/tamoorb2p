@@ -79,6 +79,97 @@ import { Helmet } from 'react-helmet-async'; // <-- 1. Import Helmet
         titleSuffix: "",
         subtitle: ""
     },
+    "Cadbury": {
+        image: cadbury, // <-- UPDATE THIS URL
+        titlePrefix: "",
+        titleHighlight: "",
+        titleSuffix: "",
+        subtitle: ""
+    },
+    "Ferrero Rocher": {
+        image: ferrero, // <-- UPDATE THIS URL
+        titlePrefix: "",
+        titleHighlight: "",
+        titleSuffix: "",
+        subtitle: ""
+    },
+    "Premium Gift Hampers": {
+        image: gifting, // <-- UPDATE THIS URL
+        titlePrefix: "",
+        titleHighlight: "",
+        titleSuffix: "",
+        subtitle: ""
+    },
+    "Hershey's": {
+        image: hershey, // <-- UPDATE THIS URL
+        titlePrefix: "",
+        titleHighlight: "",
+        titleSuffix: "",
+        subtitle: ""
+    },
+    "Kinder joy": {
+        image: kinder, // <-- UPDATE THIS URL
+        titlePrefix: "",
+        titleHighlight: "",
+        titleSuffix: "",
+        subtitle: ""
+    },
+    "Mr Beast": {
+        image: mrbeast, // <-- UPDATE THIS URL
+        titlePrefix: "",
+        titleHighlight: "",
+        titleSuffix: "",
+        subtitle: ""
+    },
+    "Milka": {
+        image: milka, // <-- UPDATE THIS URL
+        titlePrefix: "",
+        titleHighlight: "",
+        titleSuffix: "",
+        subtitle: ""
+    },
+    "Whittakers": {
+        image: white, // <-- UPDATE THIS URL
+        titlePrefix: "",
+        titleHighlight: "",
+        titleSuffix: "",
+        subtitle: ""
+    },
+    "Rhine Valley": {
+        image: rhine, // <-- UPDATE THIS URL
+        titlePrefix: "",
+        titleHighlight: "",
+        titleSuffix: "",
+        subtitle: ""
+    },
+    "Butlers": {
+        image: butlers, // <-- UPDATE THIS URL
+        titlePrefix: "",
+        titleHighlight: "",
+        titleSuffix: "",
+        subtitle: ""
+    },
+    "Kunafa": {
+        image: kunafa, // <-- UPDATE THIS URL
+        titlePrefix: "",
+        titleHighlight: "",
+        titleSuffix: "",
+        subtitle: ""
+    },
+    "Wedel": {
+        image: wedel, // <-- UPDATE THIS URL
+        titlePrefix: "",
+        titleHighlight: "",
+        titleSuffix: "",
+        subtitle: ""
+    },
+    "Reeses": {
+        image: reeses, // <-- UPDATE THIS URL
+        titlePrefix: "",
+        titleHighlight: "",
+        titleSuffix: "",
+        subtitle: ""
+    },
     "Chocolates": {
         image: chocolate, // <-- UPDATE THIS URL
         titlePrefix: "Luxurious",

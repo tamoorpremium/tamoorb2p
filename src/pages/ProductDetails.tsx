@@ -439,7 +439,7 @@ const ProductDetails: React.FC = () => {
             {/* Change justify-center to justify-start */}
             <div className="absolute inset-0 flex items-end justify-start pointer-events-none">
               <img
-                src="src\assets\logo\tamoorlogo.png"
+                src="/tamoorlogo.png"
                 alt="Tamoor watermark"
                 // 👇 KEY CHANGES HERE 👇
                 // 1. Removed opacity-100 to keep it as a watermark

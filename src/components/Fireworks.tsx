@@ -6,7 +6,7 @@ const Fireworks: React.FC = () => {
 
   useEffect(() => {
     // --- START: Auto-disable code ---
-    const launchEndDate = new Date('2025-10-20T00:00:00'); // Set your end date
+    const launchEndDate = new Date('2025-11-20T00:00:00'); // Set your end date
     const currentDate = new Date();
     if (currentDate > launchEndDate) return;
     // --- END: Auto-disable code ---

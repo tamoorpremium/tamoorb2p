@@ -126,6 +126,21 @@ import kinder from "../assets/categories/kincat.webp";
 import ferrero from "../assets/categories/fercat.webp";
 import milka from "../assets/categories/milkacat.webp";
 import hershey from "../assets/categories/herscat.webp";
+import raf from "../assets/categories/raf.webp";
+import wedel from "../assets/categories/wedel.jpg";
+import neu from "../assets/categories/Neuhaus Chocolate.webp";
+import cng from "../assets/categories/candiesgums.webp";
+import cnb from "../assets/categories/Import.webp";
+import sns from "../assets/categories/Sauces_and_Spreads.webp";
+import cocoa from "../assets/categories/Cocoa.webp";
+import kunafa from "../assets/categories/Lindt_Kunafa.jpg";
+import coffee from "../assets/categories/DavidoffFineCreama.webp";
+import flower from "../assets/categories/floral.jpeg";
+import contain from "../assets/categories/cantain.jpeg";
+import nature from "../assets/categories/nature.jpeg";
+import premium from "../assets/categories/premium.jpeg";
+import fest from "../assets/categories/fest.jpeg";
+import toy from "../assets/categories/toy.jpeg";
 import { Helmet } from 'react-helmet-async'; // <-- 1. Import Helmet
 
 
@@ -207,6 +222,24 @@ const subcategoryImages: Record<string, string> = {
   "hersheys" : hershey,
   "whittakers" : whit,
   "rhine-valley" : rhine,
+  "raffaello" : raf,
+  "wedel" : wedel,
+  "neuhaus" : neu,
+  "cookies-and-biscuits" : cnb,
+  "sauces-and-spreads" : sns,
+  "cocoa-melts" : cocoa,
+  "kunafa-chocolates" : kunafa,
+  "coffee" : coffee,
+  "candies-gums-and-mints" : cng,
+
+  //candles
+
+  "floral-candles" : flower,
+  "container-candles" : contain,
+  "toy-candles" : toy,
+  "premium-candles" : premium,
+  "festive-candles" : fest,
+  "nature-shape" : nature,
 
 
   // Gift Hampers

@@ -1,4 +1,5 @@
 // src/pages/OrderTracking.tsx
+//<p><strong className="font-semibold">Txn ID:</strong> {order.payment.transaction_id}</p>
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../utils/supabaseClient";
@@ -355,7 +356,6 @@ const OrderTracking: React.FC = () => {
               <div className="space-y-2 text-sm sm:text-base">
                 <p><strong className="font-semibold">Method:</strong> {order.payment.payment_method}</p>
                 <p><strong className="font-semibold">Status:</strong> {order.payment.payment_status}</p>
-                <p><strong className="font-semibold">Txn ID:</strong> {order.payment.transaction_id}</p>
                 <p><strong className="font-semibold">Amount:</strong> ₹{order.payment.amount.toFixed(2)}</p>
               </div>
             </div>

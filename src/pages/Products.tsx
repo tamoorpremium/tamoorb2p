@@ -1351,9 +1351,7 @@ useEffect(() => {
                                                 <h3 className="font-display font-semibold text-sm sm:text-xl text-neutral-800 group-hover:text-luxury-gold transition-colors duration-300">
                                                     {product.name}
                                                 </h3>
-                                                <p className="hidden sm:block text-neutral-600 text-sm font-medium">
-                                                    {product.description}
-                                                </p>
+                                                
                                                 <div className="flex items-center text-[10px] sm:text-sm">
                                                     <div className="flex items-center space-x-0.5 sm:space-x-1">
                                                         {[...Array(5)].map((_, i) => (
@@ -1373,7 +1371,7 @@ useEffect(() => {
                                                 <div className="flex items-center gap-3 flex-wrap">
                                                     <span className="text-lg sm:text-2xl font-display font-bold tamoor-gradient">
                                                         ₹{product.price} /{" "}
-                                                        {product.measurement_unit === "kilograms" ? "kg" : "pcs"}
+                                                        {product.measurement_unit === "kilograms" ? "kg" : "pc"}
                                                     </span>
                                                     <span className="text-sm sm:text-lg text-neutral-400 line-through font-medium">
                                                         ₹{product.original_price}

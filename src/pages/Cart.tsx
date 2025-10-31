@@ -5,6 +5,7 @@ import { supabase } from '../utils/supabaseClient';
 import { toast } from "react-toastify";
 import { useNavigate } from 'react-router-dom';
 import { Info,CheckCircle2, AlertCircle } from 'lucide-react'; // Added Gift, CheckCircle2, AlertCircle
+import { Link } from 'react-router-dom';
 
 
 const Cart = () => {
@@ -460,9 +461,12 @@ const shiptotal = finalTotal + shipping; // ✅ also an integer now
               <p className="text-base sm:text-xl text-neutral-600 mb-8 font-medium">
                 Discover our premium collection of luxury dry fruits and nuts
               </p>
-              <button className="btn-premium text-white px-8 sm:px-10 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg">
+              <Link
+                to="/products?page=1"
+                className="btn-premium text-white px-8 sm:px-10 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg"
+              >
                 Start Shopping
-              </button>
+              </Link>
             </div>
           </div>
         </div>

@@ -79,6 +79,10 @@ const OrderConfirmation = () => {
     );
   }
 
+  const placementDate = new Date(orderDetails.placed_at);
+  const estimatedDeliveryDate = new Date(placementDate);
+  estimatedDeliveryDate.setDate(placementDate.getDate() + 5);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-luxury-cream to-white pt-24 sm:pt-32 relative overflow-hidden">
       
@@ -183,7 +187,7 @@ const OrderConfirmation = () => {
                         Estimated Delivery
                     </h3>
                     <p className="text-neutral-600 font-medium text-sm sm:text-base">
-                        {new Date(orderDetails.placed_at).toLocaleDateString()}
+                      {estimatedDeliveryDate.toLocaleDateString()}
                     </p>
                     <p className="text-xs sm:text-sm text-neutral-500">5-7 business days</p>
                     </div>
@@ -231,17 +235,21 @@ const OrderConfirmation = () => {
                 })}
                 </div>
                 <button
-                className={`w-full sm:w-auto btn-premium text-white py-3 sm:py-4 rounded-full font-semibold text-sm sm:text-lg mt-6 flex items-center justify-center group ${
-                    orderDetails?.tracking_url ? '' : 'opacity-50 cursor-not-allowed'
-                }`}
-                disabled={!orderDetails?.tracking_url}
-                onClick={() => {
-                    if (orderDetails?.tracking_url) window.open(orderDetails.tracking_url, '_blank');
-                }}
-                >
-                <Truck className="w-5 h-5 mr-2 sm:mr-3 group-hover:translate-x-1 transition-transform duration-300" />
-                Track Your Order
-                </button>
+                    className={`w-full sm:w-auto btn-premium text-white py-3 sm:py-4 rounded-full font-semibold text-sm sm:text-lg mt-6 flex items-center justify-center group ${
+                      !orderDetails?.id ? 'opacity-50 cursor-not-allowed' : '' // Check for orderDetails.id
+                    }`}
+                    disabled={!orderDetails?.id} // Disable if no order ID
+                    onClick={() => {
+                      if (orderDetails?.id) {
+                        // Construct the new URL with the order ID
+                        const trackingUrl = `https://www.tamoor.in/order-tracking/${orderDetails.id}`;
+                        window.open(trackingUrl, '_blank');
+                      }
+                    }}
+                  >
+                    <Truck className="w-5 h-5 mr-2 sm:mr-3 group-hover:translate-x-1 transition-transform duration-300" />
+                    Track Your Order
+                  </button>
             </div>
 
             {/* Support & Email */}

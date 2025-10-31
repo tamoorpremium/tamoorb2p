@@ -712,21 +712,10 @@ const calculateItemPrice = (item: CartItem) => {
 
 
 const handleAddressSelect = (id: number) => {
-  setSelectedAddressId(id);
-  const addr = savedAddresses.find(a => a.id === id);
-  if (addr) {
-    setFormData(prev => ({
-      ...prev,
-      fullName: addr.full_name,
-      email: addr.email,
-      phone: addr.phone,
-      address: addr.address,
-      city: addr.city,
-      state: addr.state,
-      pincode: addr.pincode
-    }));
-    setAddingNewAddress(false);
-  }
+  setSelectedAddressId(id);
+  setAddingNewAddress(false);
+  // Clear the error instantly when the user makes a selection
+  setAddressError(''); 
 };
 
 const handleNewAddressChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -812,21 +801,48 @@ const handleSaveNewAddress = async () => {
 
 
 
-  const handleNextStep = () => {
-  // Check for address selection only when on Step 1
+ const handleNextStep = () => {
+    // --- Logic for Step 1 ---
     if (currentStep === 1) {
       if (!selectedAddressId) {
         setAddressError('Please select or add a delivery address to continue.');
-        return; // Stop the function from proceeding
+        return; // Stop here if nothing is selected
       }
-      setAddressError(''); // Clear error if address is selected
-    }
 
-    if (currentStep < 4) {
+      // Find the address that matches the selected ID
+      const selectedAddr = savedAddresses.find(a => a.id === selectedAddressId);
+
+      if (selectedAddr) {
+        // --- THIS IS THE FIX ---
+        // Populate formData *and* set the next step in the SAME handler.
+        // React will batch these updates together.
+        setFormData(prev => ({
+          ...prev,
+          fullName: selectedAddr.full_name,
+          email: selectedAddr.email,
+          phone: selectedAddr.phone,
+          countryCode: selectedAddr.country_code || '+91', // Ensure country code is copied
+          address: selectedAddr.address,
+          city: selectedAddr.city,
+          state: selectedAddr.state,
+          pincode: selectedAddr.pincode
+        }));
+        
+        setAddressError('');
+        setCurrentStep(currentStep + 1); // Move to next step
+
+      } else {
+        // This is a safety catch in case selectedAddressId is set
+        // but the address isn't found in the state (e.g., a state sync issue).
+        setAddressError('Address details are missing. Please select or add an address again.');
+        return;
+      }
+      
+    // --- Logic for Steps 2 & 3 ---
+    } else if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
-
   const handlePrevStep = () => {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };

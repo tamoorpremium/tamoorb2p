@@ -49,6 +49,8 @@ import SizeQualityGuide from './pages/SizeQualityGuide';
 import FaqSupport from './pages/FaqSupport';
 import BlogRecipesExpanded from './pages/BlogRecipes';
 import ExcelProductImport from "./pages/admin/ExcelProductImport";
+import PaymentFailed from './pages/PaymentFailed';
+import PaymentPending from './pages/PaymentPending';
 import { HelmetProvider } from 'react-helmet-async';
 
 function App() {
@@ -167,6 +169,8 @@ function App() {
                   <Route path="/size-quality" element={<SizeQualityGuide />} />
                   <Route path="/faq" element={<FaqSupport />} />
                   <Route path="/blog" element={<BlogRecipesExpanded />} />
+                  <Route path="/payment-failed" element={<PaymentFailed />} /> 
+                  <Route path="/payment-pending" element={<PaymentPending />} />
 
                   {/* Protected user routes */}
                   <Route

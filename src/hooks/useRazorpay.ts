@@ -2,6 +2,13 @@ import { useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useCart } from "../context/CartContext";
 
+// Define interface for window with Razorpay
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 interface FormData {
   fullName: string;
   email: string;
@@ -18,10 +25,13 @@ interface FormData {
   nameOnCard: string;
 }
 
+// Ensure CartItem includes all properties sent to the edge function
 interface CartItem {
   id: number;
   quantity: number;
-  price: number;
+  price: number; // This should be the unit price
+  weight: string; // Added this as it's in your edge function
+  // Add any other properties your cart_items array contains
 }
 
 
@@ -118,19 +128,18 @@ export const useRazorpay = (
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-        amount: displayTotal,
-  subtotal,
-  discount,
-  delivery_fee,
-  promo_code: promoCode,
-        user_id: userId,
-        address: addressObj,
-        delivery_option: formData.deliveryOption,
-        payment_method: formData.paymentMethod,
-        payment_details: paymentDetails,
-        cart_items: cartItems,
-      }),
-
+          amount: displayTotal,
+          subtotal,
+          discount,
+          delivery_fee,
+          promo_code: promoCode,
+          user_id: userId,
+          address: addressObj,
+          delivery_option: formData.deliveryOption,
+          payment_method: formData.paymentMethod,
+          payment_details: paymentDetails,
+          cart_items: cartItems,
+        }),
       });
       console.log('[useRazorpay] 📡 Backend create-order request sent.');
 
@@ -145,6 +154,9 @@ export const useRazorpay = (
       }
 
       console.log('[useRazorpay] ✅ Order created. Opening Razorpay checkout...');
+      
+      // --- THIS IS THE UPDATED OPTIONS OBJECT ---
+      
       const options = {
         key: 'rzp_test_RA3gvGsfTCGIZB', // replace with live key in prod
         amount: data.amount,
@@ -153,14 +165,22 @@ export const useRazorpay = (
         name: 'Tamoor Premium Dry Fruits',
         description: 'Order Payment',
         prefill: { name: formData.fullName, email: formData.email, contact: formData.phone },
-        theme: { color: '#39FF14' },
+        theme: { color: '#BFA05B' }, // Changed to a luxury gold color
+
+        /**
+         * ✅ SUCCESS HANDLER
+         * This fires when payment is successful on Razorpay's end.
+         */
         handler: async (response: any) => {
           console.log('[useRazorpay] 🎯 Razorpay payment handler triggered with response:', response);
+          setIsProcessing(true); // Keep processing true during verification
+          
           const verifyToken = await getAccessToken();
           if (!verifyToken) {
             console.error('[useRazorpay] ❌ Session expired during payment verification.');
-            setRpErrorMsg('Session expired during payment verification.');
-            setIsProcessing(false);
+            // This is a critical error: payment made but verification might fail.
+            // Redirect to a pending page so user knows we got the payment but need to confirm.
+            navigate(`/payment-pending?orderId=${data.internal_order_id}&error=${encodeURIComponent('Session expired after payment.')}`);
             return;
           }
 
@@ -177,10 +197,11 @@ export const useRazorpay = (
           console.log('[useRazorpay] 📩 Verify payment response:', verifyData);
 
           if (verifyData.success) {
-            console.log('[useRazorpay] ✅ Payment verified successfully. Updating status to paid...');
-            await updateOrderStatus(data.internal_order_id, 'paid');
+            console.log('[useRazorpay] ✅ Payment verified successfully.');
+            // Status is updated in the edge function.
+            
             // 🔑 Reset promo + checkoutData after success
-            localStorage.removeItem("checkoutData");
+            localStorage.removeItem("cartData"); // Use your key 'cartData'
             setPromo(null);
 
             // Trigger confirmation email
@@ -189,7 +210,7 @@ export const useRazorpay = (
                 body: JSON.stringify({
                   orderId: data.internal_order_id,
                   email: "tamoorpremium@gmail.com", // TESTING EMAIL
-                  // email: formData.email, // Uncomment in production to send to actual customer
+                  // email: formData.email, // Uncomment in production
                 }),
               });
 
@@ -203,18 +224,48 @@ export const useRazorpay = (
             navigate(`/order-confirmation?orderId=${data.internal_order_id}`);
           } else {
             console.error('[useRazorpay] ❌ Payment verification failed:', verifyData.error);
-            setRpErrorMsg(`Payment verification failed: ${verifyData.error}`);
+            // This is also a critical error. Payment made, but verification failed.
+            navigate(`/payment-pending?orderId=${data.internal_order_id}&error=${encodeURIComponent(verifyData.error || 'Verification failed.')}`);
           }
           setIsProcessing(false);
         },
-        modal: {
-          ondismiss: () => {
-            console.warn('[useRazorpay] ⚠️ Payment modal dismissed by user.');
-            setRpErrorMsg('Payment cancelled.');
+
+        /**
+         * ✅ NEW: FAILURE HANDLER
+         * This fires when the payment fails (e.g., bank decline, wrong CVV).
+         */
+        events: {
+          'payment.failed': async (response: any) => {
+            console.error('[useRazorpay] ❌ Payment failed:', response.error);
+            
+            // Mark the internal order as 'failed'
+            await updateOrderStatus(data.internal_order_id, 'failed');
+            
             setIsProcessing(false);
+            const errorMsg = encodeURIComponent(response.error.description || 'Payment was declined.');
+            navigate(`/payment-failed?error=${errorMsg}&orderId=${data.internal_order_id}`);
+          }
+        },
+
+        /**
+         * ✅ MODIFIED: DISMISS HANDLER
+         * This fires when the user closes the modal without completing payment.
+         */
+        modal: {
+          ondismiss: async () => {
+            console.warn('[useRazorpay] ⚠️ Payment modal dismissed by user.');
+            
+            // Mark the internal order as 'cancelled'
+            await updateOrderStatus(data.internal_order_id, 'cancelled');
+
+            setIsProcessing(false);
+            // Redirect to the failed page with a 'cancelled' message
+            navigate(`/payment-failed?error=${encodeURIComponent('Payment was cancelled.')}&orderId=${data.internal_order_id}`);
           },
         },
       };
+      
+      // --- END OF UPDATED OPTIONS ---
 
       const rzp = new (window as any).Razorpay(options);
       rzp.open();

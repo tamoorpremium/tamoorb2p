@@ -280,7 +280,7 @@ const OrderConfirmation = () => {
 
                 <button
                     className="w-full p-3 sm:p-4 text-left hover:bg-white/20 rounded-xl transition-all duration-300 group"
-                    onClick={() => navigate('/products')}
+                    onClick={() => navigate('/products?reset=true')}
                 >
                     <div className="flex items-center justify-between">
                     <span className="font-medium text-neutral-700 text-sm sm:text-base">Continue Shopping</span>

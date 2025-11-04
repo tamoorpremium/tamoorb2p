@@ -105,7 +105,7 @@ const Hero = () => {
             
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 pt-4">
               <Link 
-                to="/products"
+                to="/products?reset=true"
                 className="btn-premium text-white px-6 sm:px-10 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg flex items-center justify-center group"
               >
                 Explore Collection

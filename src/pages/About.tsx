@@ -128,7 +128,7 @@ const About = () => {
 
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                to="/products"
+                to="/products?reset=true"
                 className="btn-premium text-white px-8 py-4 rounded-full font-semibold text-lg relative overflow-hidden"
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-luxury-gold to-luxury-gold-light animate-pulse opacity-20"></span>
@@ -311,7 +311,7 @@ const About = () => {
           <p className="text-lg md:text-xl text-neutral-300 mb-8 max-w-2xl mx-auto">
             Experience the difference that passion, quality, and dedication make. Start your premium dry fruits journey with us today.
           </p>
-          <Link to="/products" className="btn-premium text-white px-8 py-4 rounded-full font-semibold text-lg inline-block relative overflow-hidden">
+          <Link to="/products?reset=true" className="btn-premium text-white px-8 py-4 rounded-full font-semibold text-lg inline-block relative overflow-hidden">
             <span className="absolute inset-0 bg-gradient-to-r from-luxury-gold to-luxury-gold-light animate-pulse opacity-20"></span>
             <span className="relative z-10">Shop Premium Collection</span>
           </Link>

@@ -462,7 +462,7 @@ const shiptotal = finalTotal + shipping; // ✅ also an integer now
                 Discover our premium collection of luxury dry fruits and nuts
               </p>
               <Link
-                to="/products?page=1"
+                to="/products?reset=true"
                 className="btn-premium text-white px-8 sm:px-10 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg"
               >
                 Start Shopping

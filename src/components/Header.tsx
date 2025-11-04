@@ -40,7 +40,7 @@ type SearchResultItem = {
 // --- Navigation Data ---
 const NAV_LINKS = [
   { name: "Home", href: "/" },
-  { name: "Products", href: "/products" },
+  { name: "Products", href: "/products?reset=true" },
   { name: "Categories", href: "/categories" },
   { name: "About", href: "/about" },
   { name: "Contact", href: "/contact" },

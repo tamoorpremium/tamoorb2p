@@ -59,56 +59,56 @@ const NewPromoPage = () => {
       mobileImg: heroMobile, // 750x1100
       desktopImg: heroDesktop, // 1800x800
       alt: 'Shop our new collection',
-      link: '/products' // From original code
+      link: '/products?reset=true' // From original code
     },
     {
       id: 2,
       mobileImg: herom1, // TODO: Add your 750x1100 image
       desktopImg: heroD2, // TODO: Add your 1800x800 image
       alt: 'Promotion 2',
-      link: '/products'
+      link: '/products?reset=true'
     },
     {
       id: 3,
       mobileImg: herom2, // TODO: Add your 750x1100 image
       desktopImg: heroD3, // TODO: Add your 1800x800 image
       alt: 'Promotion 3',
-      link: '/products'
+      link: '/products?reset=true'
     },
     {
       id: 4,
       mobileImg: herom3, // TODO: Add your 750x1100 image
       desktopImg: heroD4, // TODO: Add your 1800x800 image
       alt: 'Promotion 4',
-      link: '/products'
+      link: '/products?reset=true'
     },
     {
       id: 5,
       mobileImg: herom4, // TODO: Add your 750x1100 image
       desktopImg: heroD5, // TODO: Add your 1800x800 image
       alt: 'Promotion 4',
-      link: '/products'
+      link: '/products?reset=true'
      },{
       id: 6,
       mobileImg: herom5, // TODO: Add your 750x1100 image
       desktopImg: heroD6, // TODO: Add your 1800x800 image
       alt: 'Promotion 4',
-      link: '/products'
+      link: '/products?reset=true'
     },
   ];
 
   // A simple array for the brand data, just like in your other components
   const topBrands = [
-    { name: 'Lindt', img: brand1, link: '/products' },
-    { name: 'Rhine Valley', img: brand2, link: '/products' },
-    { name: 'Mr.Beast', img: brand3, link: '/products' },
-    { name: 'Whittakers', img: brand4, link: '/products' },
-    { name: 'Venchi', img: brand5, link: '/products' },
-    { name: 'Neuhaus', img: brand6, link: '/products' },
-    { name: 'Neuhaus', img: brand7, link: '/products' },
-    { name: 'Neuhaus', img: brand8, link: '/products' },
-    { name: 'Neuhaus', img: brand9, link: '/products' },
-    { name: 'Neuhaus', img: brand10, link: '/products' },
+    { name: 'Lindt', img: brand1, link: '/products?reset=true' },
+    { name: 'Rhine Valley', img: brand2, link: '/products?reset=true' },
+    { name: 'Mr.Beast', img: brand3, link: '/products?reset=true' },
+    { name: 'Whittakers', img: brand4, link: '/products?reset=true' },
+    { name: 'Venchi', img: brand5, link: '/products?reset=true' },
+    { name: 'Neuhaus', img: brand6, link: '/products?reset=true' },
+    { name: 'Neuhaus', img: brand7, link: '/products?reset=true' },
+    { name: 'Neuhaus', img: brand8, link: '/products?reset=true' },
+    { name: 'Neuhaus', img: brand9, link: '/products?reset=true' },
+    { name: 'Neuhaus', img: brand10, link: '/products?reset=true' },
   ];
 
   // === NEW "TOP PICKS" SLIDES DATA ===

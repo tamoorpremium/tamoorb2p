@@ -212,8 +212,7 @@ const Products = () => {
     const [productsPerPage] = useState(20);
     const [totalProducts, setTotalProducts] = useState(0);
     const [searchParams, setSearchParams] = useSearchParams();
-    const initialPage = parseInt(searchParams.get('page') || '1', 10);
-    const [currentPage, setCurrentPage] = useState(initialPage);
+    const currentPage = parseInt(searchParams.get('page') || '1', 10);
     const [wishlistIds, setWishlistIds] = useState<number[]>([]);
     const [wishlistMessage, setWishlistMessage] = useState<{ text: string; type: 'success' | 'remove' } | null>(null);
     const [cartMessage, setCartMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
@@ -328,30 +327,32 @@ const Products = () => {
         { label: '1 kg', value: 1000 }
     ];
 
-    useEffect(() => {
-        setSearchParams({ page: currentPage.toString() });
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth',
-        });
-    }, [currentPage, setSearchParams]);
 
     const handlePageChange = (page: number) => {
         const totalPages = Math.ceil(totalProducts / productsPerPage);
         const newPage = Math.max(1, Math.min(page, totalPages));
-        setCurrentPage(newPage);
+        setSearchParams(prev => {
+            prev.set('page', newPage.toString());
+            return prev;
+        });
     };
 
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(event.target.value);
-        setCurrentPage(1);
+        setSearchParams(prev => {
+            prev.set('page', '1');
+            return prev;
+        });
     };
 
     const handleCategoryChange = (categoryInput: any | "all") => {
         // Handle the "All Products" button separately
         if (categoryInput === "all") {
             setSelectedCategories([]);
-            setCurrentPage(1);
+            setSearchParams(prev => {
+                prev.set('page', '1');
+                return prev;
+            });
             return;
         }
 
@@ -421,7 +422,10 @@ const Products = () => {
             return newSelected;
         });
 
-        setCurrentPage(1);
+        setSearchParams(prev => {
+            prev.set('page', '1');
+            return prev;
+        });
     };
 
     const toggleParentCategory = (parentId: number) => {
@@ -439,12 +443,18 @@ const Products = () => {
 
     const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setPriceRange([priceRange[0], parseInt(event.target.value)]);
-        setCurrentPage(1);
+        setSearchParams(prev => {
+            prev.set('page', '1');
+            return prev;
+        });
     };
 
     const handleSortByChange = (newSort: string) => {
         setSortBy(newSort);
-        setCurrentPage(1);
+        setSearchParams(prev => {
+            prev.set('page', '1');
+            return prev;
+        });
     };
 
     const handleClearFilters = () => {
@@ -457,7 +467,10 @@ const Products = () => {
         setOpenParentCategories([]); // Reset open categories
         // --- END OF MODIFICATION 3 ---
         
-        setCurrentPage(1);
+        setSearchParams(prev => {
+            prev.set('page', '1');
+            return prev;
+        });
     };
 
     useEffect(() => {
@@ -616,6 +629,10 @@ const Products = () => {
         setTotalProducts(0);
       }
       setLoading(false);
+      window.scrollTo({
+            top: 0,
+            behavior: 'smooth',
+        });
     };
 
     fetchProductsAndWishlist();

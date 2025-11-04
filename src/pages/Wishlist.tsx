@@ -167,7 +167,7 @@ const Wishlist = () => {
   const moveProductFromWishlistToCart = async (product: any, weight: string) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    window.location.href = "/auth?message=loginRequired&redirect=/wishlist";
+    navigate("/auth?message=loginRequired&redirect=/wishlist");
     return;
   }
 
@@ -225,7 +225,7 @@ const Wishlist = () => {
   const handleWishlistAddToCart = async (product: any) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      window.location.href = "/auth?message=loginRequired&redirect=/wishlist";
+      navigate("/auth?message=loginRequired&redirect=/wishlist");
       return;
     }
 

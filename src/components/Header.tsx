@@ -282,14 +282,19 @@ const TopBar: React.FC<TopBarProps> = React.memo(() => {
 });
 
 const DesktopNav: React.FC = () => (
-    <nav className="flex items-center space-x-8">
-        {NAV_LINKS.map(item => (
-            <a key={item.name} href={item.href} className="text-neutral-800 text-sm lg:text-base font-bold transition-all duration-300 relative group whitespace-nowrap hover:text-luxury-gold">
-                {item.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-luxury-gold to-luxury-gold-light transition-all duration-300 group-hover:w-full"></span>
-            </a>
-        ))}
-    </nav>
+    <nav className="flex items-center space-x-8">
+        {NAV_LINKS.map(item => (
+          // --- FIX: Change 'a' to 'Link' and 'href' to 'to' ---
+            <Link 
+             key={item.name} 
+             to={item.href} // <-- Use 'to'
+             className="text-neutral-800 text-sm lg:text-base font-bold transition-all duration-300 relative group whitespace-nowrap hover:text-luxury-gold"
+          >
+                {item.name}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-luxury-gold to-luxury-gold-light transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+        ))}
+    </nav>
 );
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ isMenuOpen, setIsMenuOpen }) => {

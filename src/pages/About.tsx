@@ -65,7 +65,7 @@ const About = () => {
     {
       name: 'Firaz Mustaqim',
       role: 'Founder',
-      image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/firaz.jpg',
+      image: 'https://bvnjxbbwxsibslembmty.supabase.co/storage/v1/object/public/product-images/firaz1.jpeg',
       description: 'Visionary entrepreneur with extensive experience in AI.'
     },
     {
@@ -259,8 +259,8 @@ const About = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {team.map((member, index) => (
               <div key={index} className="animate-on-scroll opacity-0 luxury-card neomorphism rounded-3xl overflow-hidden group">
-                <div className="relative overflow-hidden">
-                  <img src={member.image} alt={`${member.name}, ${member.role}`} className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500" />
+                <div className="relative overflow-hidden aspect-w-4 aspect-h-5">
+                  <img src={member.image} alt={`${member.name}, ${member.role}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4 gap-4">
                     <a href="#" className="text-white hover:text-luxury-gold"><Linkedin size={20} /></a>
                     <a href="#" className="text-white hover:text-luxury-gold"><Twitter size={20} /></a>

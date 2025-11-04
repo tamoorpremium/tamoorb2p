@@ -76,6 +76,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",

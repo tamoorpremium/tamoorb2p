@@ -75,6 +75,22 @@ async function fulfillOrder(supabase: any, order: any, paymentEntity: any) {
       console.log(`[webhook-fulfill] Payment record inserted for order ${internal_order_id} ✅`);
     }
 
+    // ⬇️ ADD THIS NEW BLOCK ⬇️
+    if (order && order.user_id) {
+      console.log(`[webhook-fulfill] 🧹 Clearing cart for user: ${order.user_id}`);
+      const { error: cartClearError } = await supabase
+        .from("cart")
+        .delete()
+        .eq("user_id", order.user_id);
+        
+      if (cartClearError) {
+        console.error(`[webhook-fulfill] Failed to clear cart: ${cartClearError.message}`);
+      } else {
+        console.log(`[webhook-fulfill] Cart cleared successfully ✅`);
+      }
+    }
+    // ⬆️ END OF NEW BLOCK ⬆️
+
     // c. Update promo usage
     if (order.promo_code) {
       console.log(`[webhook-fulfill] Incrementing promo usage for: ${order.promo_code}`);

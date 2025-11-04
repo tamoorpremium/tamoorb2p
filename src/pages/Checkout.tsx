@@ -1105,6 +1105,11 @@ const handleSaveNewAddress = async () => {
               {currentStep === 4 && (
                 <div className="animate-slide-up space-y-4 sm:space-y-6">
                   <h2 className="text-2xl sm:text-3xl font-display font-bold text-neutral-800">Payment Method</h2>
+                  {/* --- NEW NOTE ADDED HERE --- */}
+                  <p className="text-sm font-medium text-green-700 bg-green-50 p-3 rounded-lg text-center">
+                    🎁 Note: Get 3% extra off on UPI/CARD Payments! 
+                  </p>
+                  {/* --- END OF NEW NOTE --- */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                     {[{ id: 'card', name: 'Credit/Debit Card', icon: '💳' }, { id: 'upi', name: 'UPI Payment', icon: '📱' }, { id: 'cod', name: 'Cash on Delivery', icon: '💰' }].map((method) => (
                       <button key={method.id} type="button" onClick={() => setFormData(prev => ({ ...prev, paymentMethod: method.id }))} className={`glass rounded-2xl p-4 sm:p-6 w-full cursor-pointer text-center transition-all duration-300 outline-none focus:outline-none focus:ring-2 focus:ring-luxury-gold/50 ${formData.paymentMethod === method.id ? 'ring-2 ring-luxury-gold bg-luxury-gold/10 shadow-lg' : 'hover:shadow-md bg-white/10'}`}>

@@ -1,6 +1,6 @@
 // supabase/functions/handle-razorpay-webhook/index.ts
 
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.181.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -57,7 +57,7 @@ async function fulfillOrder(supabase: any, order: any, paymentEntity: any) {
       {
         order_id: internal_order_id,
         payment_method: "razorpay_webhook", // Note the method
-        payment_status: "Success ✅",
+        payment_status: "Success",
         transaction_id: razorpay_payment_id,
         amount: order.total,
         user_id: order.user_id,
@@ -71,7 +71,6 @@ async function fulfillOrder(supabase: any, order: any, paymentEntity: any) {
     ]);
     if (paymentInsertError) {
       console.error("[webhook-fulfill] Failed to insert payment:", paymentInsertError);
-      // Don't throw, just log. The order is paid, which is the main thing.
     } else {
       console.log(`[webhook-fulfill] Payment record inserted for order ${internal_order_id} ✅`);
     }
@@ -91,7 +90,7 @@ async function fulfillOrder(supabase: any, order: any, paymentEntity: any) {
 
     // d. Create shipment
     console.log(`[webhook-fulfill] Triggering shipment creation for order: ${internal_order_id}`);
-    const response = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/create-shipment`, {
+    const shipmentResponse = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/create-shipment`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -99,24 +98,47 @@ async function fulfillOrder(supabase: any, order: any, paymentEntity: any) {
       },
       body: JSON.stringify({ order_id: internal_order_id })
     });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("[webhook-fulfill] Failed to trigger shipment:", errText);
+    if (!shipmentResponse.ok) {
+        const errText = await shipmentResponse.text();
+        console.error("[webhook-fulfill] Failed to trigger shipment:", errText);
     } else {
       console.log(`[webhook-fulfill] Shipment triggered successfully for order ${internal_order_id} ✅`);
     }
 
+    // --- ⬇️ STEP 5: (ADDED) SEND CONFIRMATION EMAIL ⬇️ ---
+    
+    // Check if email exists in the address JSON (fetched by the 'serve' function)
+    if (order.address && order.address.email) {
+      console.log(`[webhook-fulfill] Sending confirmation email to: ${order.address.email}`);
+      try {
+        const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
+          body: JSON.stringify({
+            orderId: internal_order_id,
+            email: order.address.email, // Send to the actual customer
+          }),
+        });
+
+        if (emailError) {
+            throw emailError;
+        }
+
+        console.log(`[webhook-fulfill] Confirmation email triggered for order ${internal_order_id} ✅`);
+      } catch (emailError) {
+        console.error(`[webhook-fulfill] ❌ Failed to send confirmation email:`, emailError);
+      }
+    } else {
+      console.warn(`[webhook-fulfill] ⚠️ No email found in order.address for order ${internal_order_id}. Cannot send email.`);
+    }
+    // --- ⬆️ END OF ADDED BLOCK ⬆️ ---
+
     return true;
 
   } catch (error) {
-    // --- ✅ THIS IS THE FIX ---
     let errorMessage = "An unknown error occurred during fulfillment";
     if (error instanceof Error) {
       errorMessage = error.message;
     }
     console.error(`[webhook-fulfill] CRITICAL ERROR fulfilling order ${internal_order_id}:`, errorMessage, error);
-    // --- END OF FIX ---
     return false;
   }
 }
@@ -125,7 +147,6 @@ async function fulfillOrder(supabase: any, order: any, paymentEntity: any) {
 /**
  * 3. The main server function
  */
-// ✅ *** THIS IS THE FIX: Added 'req: Request' ***
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
@@ -164,11 +185,14 @@ serve(async (req: Request) => {
 
       // 6. Find the internal order using the 'gateway_order_id'
       console.log(`[webhook] 🔍 Searching for order with gateway_order_id: ${razorpayOrderId}`);
+      
+      // --- ⬇️ MODIFIED: Added 'address' to the select query ⬇️ ---
       const { data: order, error: findError } = await supabase
         .from("orders")
-        .select("id, status, total, user_id, promo_code") // Select all fields needed for fulfillment
+        .select("id, status, total, user_id, promo_code, address") // Select all fields needed for fulfillment
         .eq("gateway_order_id", razorpayOrderId)
         .single();
+      // --- ⬆️ END OF MODIFICATION ⬆️ ---
 
       if (findError || !order) {
         console.error(`[webhook] ❌ Order not found for gateway_order_id: ${razorpayOrderId}`, findError);
@@ -190,13 +214,11 @@ serve(async (req: Request) => {
     return new Response("Webhook received", { status: 200, headers: corsHeaders });
 
   } catch (error) {
-    // --- ✅ THIS IS THE SECOND FIX ---
     let errorMessage = "Internal Server Error";
     if (error instanceof Error) {
       errorMessage = error.message;
     }
     console.error("[webhook] 💥 Internal Server Error:", errorMessage, error);
-    // --- END OF FIX ---
     return new Response(JSON.stringify({ error: "Internal Server Error", details: errorMessage }), { status: 500 });
   }
 });

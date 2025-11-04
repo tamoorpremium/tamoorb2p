@@ -243,6 +243,40 @@ const Products = () => {
 
     // 4. Then define your state (as shown in Fix 1)
     const [currentBanner, setCurrentBanner] = useState(categoryBanners.default);
+
+        useEffect(() => {
+        // Check if the 'reset' param is present in the URL
+        const isReset = searchParams.get('reset') === 'true';
+        
+        if (isReset) {
+            console.log("Reset flag detected. Clearing all filters and storage.");
+            
+            // 1. Clear all session storage items
+            sessionStorage.removeItem('tamoor_searchTerm');
+            sessionStorage.removeItem('tamoor_priceRange');
+            sessionStorage.removeItem('tamoor_sortBy');
+            sessionStorage.removeItem('tamoor_selectedCategories');
+            sessionStorage.removeItem('tamoor_openParentCategories');
+            
+            // 2. Reset all state variables to their defaults
+            // (This is the same logic from your handleClearFilters function)
+            setSelectedCategories([]);
+            setSortBy("featured");
+            setPriceRange([0, 10000]);
+            setSearchTerm('');
+            setViewMode('grid');
+            setOpenParentCategories([]);
+            
+            // 3. Update the URL: Set page to 1 and remove the 'reset' param.
+            // We use 'replace: true' so this reset action
+            // doesn't stay in the browser's back-button history.
+            setSearchParams({ page: '1' }, { replace: true });
+        }
+    // We only want this effect to run when searchParams changes.
+    // The state setters will trigger a re-render, but on that
+    // new render, 'isReset' will be false, so the 'if' block won't run again.
+    }, [searchParams, setSearchParams]); 
+    // --- END OF NEW useEffect BLOCK ---
     
 
     useEffect(() => {
@@ -284,39 +318,7 @@ const Products = () => {
     }, []);
 
 
-    useEffect(() => {
-        // Check if the 'reset' param is present in the URL
-        const isReset = searchParams.get('reset') === 'true';
-        
-        if (isReset) {
-            console.log("Reset flag detected. Clearing all filters and storage.");
-            
-            // 1. Clear all session storage items
-            sessionStorage.removeItem('tamoor_searchTerm');
-            sessionStorage.removeItem('tamoor_priceRange');
-            sessionStorage.removeItem('tamoor_sortBy');
-            sessionStorage.removeItem('tamoor_selectedCategories');
-            sessionStorage.removeItem('tamoor_openParentCategories');
-            
-            // 2. Reset all state variables to their defaults
-            // (This is the same logic from your handleClearFilters function)
-            setSelectedCategories([]);
-            setSortBy("featured");
-            setPriceRange([0, 10000]);
-            setSearchTerm('');
-            setViewMode('grid');
-            setOpenParentCategories([]);
-            
-            // 3. Update the URL: Set page to 1 and remove the 'reset' param.
-            // We use 'replace: true' so this reset action
-            // doesn't stay in the browser's back-button history.
-            setSearchParams({ page: '1' }, { replace: true });
-        }
-    // We only want this effect to run when searchParams changes.
-    // The state setters will trigger a re-render, but on that
-    // new render, 'isReset' will be false, so the 'if' block won't run again.
-    }, [searchParams, setSearchParams]); 
-    // --- END OF NEW useEffect BLOCK ---
+
 
     {/*
     const location = useLocation();
@@ -1130,16 +1132,23 @@ useEffect(() => {
                     )}
                 </button>
 
-                {/* --- 2. THIS LINE IS ALSO UPDATED --- */}
-                {(selectedCategories.length > 0 || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 10000) && (
-                    <button
-                        onClick={handleClearFilters}
-                        className="text-sm text-red-500 hover:underline"
-                    >
-                        Clear All
-                    </button>
-                )}
-
+               {/* --- 2. THIS LINE IS ALSO UPDATED --- */}
+                {(selectedCategories.length > 0 || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 10000) && (
+                    <> {/* We use a Fragment here to group the note and the button together */}
+                        
+                        {/* This is the new visible note */}
+                        <p className="text-xs italic text-neutral-500 mb-2">
+                            Note: Please clear filter if needed
+                        </p>
+                        
+                        <button
+                            onClick={handleClearFilters}
+                            className="text-sm text-red-600 hover:underline"
+                      >
+                            Clear All
+                        </button>
+                    </>
+                )}
                 {/* This part was already correct */}
                 <div className="flex items-center space-x-2 flex-wrap glass rounded-full p-1">
                     <button

@@ -45,7 +45,7 @@
 
 
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from '../utils/supabaseClient';
 import almonds from "../assets/categories/almondcat.webp";
 import cashews from "../assets/categories/cashewcat.webp";
@@ -275,64 +275,95 @@ const subcategoryBadges: Record<string, string> = {
 };
 
 const Categories = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [activeParentId, setActiveParentId] = useState<number | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  // const [activeParentId, setActiveParentId] = useState<number | null>(null); // <-- 1. REMOVED
+  const [searchParams, setSearchParams] = useSearchParams(); // <-- 1. ADDED
 
-  const navigate = useNavigate();
-  const contentRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("*")
-        .order("id", { ascending: true });
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order("id", { ascending: true });
 
-      if (error) {
-        console.log(error);
-      } else {
-        const fetchedCategories = data || [];
-        setCategories(fetchedCategories);
-        const firstParent = fetchedCategories.find(cat => cat.parent_id === null);
-        if (firstParent) {
-          setActiveParentId(firstParent.id);
-        }
-      }
-    };
-    fetchCategories();
-  }, []);
+      if (error) {
+        console.log(error);
+      } else {
+        const fetchedCategories = data || [];
+        setCategories(fetchedCategories);
+        // --- 2. REMOVED logic that set default state ---
+        // const firstParent = fetchedCategories.find(cat => cat.parent_id === null);
+        // if (firstParent) {
+        //   setActiveParentId(firstParent.id);
+        // }
+      }
+    };
+    fetchCategories();
+  }, []); // This effect fetches data ONLY once.
 
-  useEffect(() => {
-    if (contentRef.current) {
-      contentRef.current.classList.remove('animate-fade-in');
-      void contentRef.current.offsetWidth;
-      contentRef.current.classList.add('animate-fade-in');
-    }
-  }, [activeParentId]);
+  // --- 3. ADDED new useEffect to sync URL ---
+  useEffect(() => {
+    // Don't do anything until categories are loaded
+    if (categories.length === 0) return;
 
-  const parents = categories.filter((cat) => cat.parent_id === null);
-  const getSubcategories = (parentId: number) =>
-    categories.filter((cat) => cat.parent_id === parentId);
+    const allParents = categories.filter(cat => cat.parent_id === null);
+    if (allParents.length === 0) return; // No parents, nothing to do
 
-  // --- SEO Logic ---
-  const activeParent = parents.find(p => p.id === activeParentId);
-  const pageTitle = activeParent
-    ? `Explore ${activeParent.name} | TAMOOR Categories`
-    : 'Explore All Categories | TAMOOR Premium Dry Fruits & Nuts';
-  const pageDescription = activeParent
-    ? `Browse all subcategories under ${activeParent.name} at TAMOOR. Find premium ${activeParent.name.toLowerCase()} like ${getSubcategories(activeParent.id).slice(0, 3).map(s => s.name).join(', ')} online.`
-    : 'Discover TAMOOR\'s wide range of product categories, including premium nuts, dried fruits, chocolates, gift hampers, and more. Shop online from Bangalore & Kolar.';
-  // --- End SEO Logic ---
+    const currentTab = searchParams.get('tab');
+    const isValidTab = allParents.some(p => p.slug === currentTab);
 
-  if (!activeParentId) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-white">
-        <div className="w-16 h-16 border-4 border-luxury-gold border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+    // If no tab is set, or the tab is invalid, set it to the first parent's slug
+    if (!currentTab || !isValidTab) {
+      // Use replace: true so this doesn't create a new history entry
+      setSearchParams({ tab: allParents[0].slug }, { replace: true });
+    }
+  // This effect runs when categories load, or if the user messes with the URL
+  }, [categories, searchParams, setSearchParams]);
 
-  const activeSubcategories = getSubcategories(activeParentId);
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.classList.remove('animate-fade-in');
+      void contentRef.current.offsetWidth;
+      contentRef.current.classList.add('animate-fade-in');
+    }
+  }, [searchParams]); // <-- 4. CHANGED dependency from activeParentId
+
+  // --- 5. DERIVED STATE: Get active tab from URL ---
+  const parents = categories.filter((cat) => cat.parent_id === null);
+  const activeTabSlug = searchParams.get('tab');
+  
+  // Find the parent that matches the slug, or fall back to the first parent
+  const activeParent = parents.find(p => p.slug === activeTabSlug) || 
+                      (parents.length > 0 ? parents[0] : null);
+                      
+  const activeParentId = activeParent ? activeParent.id : null;
+  // --- END DERIVED STATE ---
+
+  const getSubcategories = (parentId: number) =>
+    categories.filter((cat) => cat.parent_id === parentId);
+
+  // --- SEO Logic ---
+  // const activeParent = parents.find(p => p.id === activeParentId); // <-- 5. REMOVED (now derived above)
+  const pageTitle = activeParent
+    ? `Explore ${activeParent.name} | TAMOOR Categories`
+    : 'Explore All Categories | TAMOOR Premium Dry Fruits & Nuts';
+  const pageDescription = activeParent && activeParentId // <-- 5. ADDED check
+    ? `Browse all subcategories under ${activeParent.name} at TAMOOR. Find premium ${activeParent.name.toLowerCase()} like ${getSubcategories(activeParentId).slice(0, 3).map(s => s.name).join(', ')} online.`
+    : 'Discover TAMOOR\'s wide range of product categories, including premium nuts, dried fruits, chocolates, gift hampers, and more. Shop online from Bangalore & Kolar.';
+  // --- End SEO Logic ---
+
+  if (!activeParent) { // <-- 6. CHANGED check from activeParentId to activeParent
+    return (
+      <div className="flex justify-center items-center h-screen bg-white">
+        <div className="w-16 h-16 border-4 border-luxury-gold border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  const activeSubcategories = activeParentId ? getSubcategories(activeParentId) : []; // <-- 7. ADDED check
 
   return (
     <> {/* <-- Wrap in Fragment */}
@@ -369,10 +400,10 @@ const Categories = () => {
             {parents.map((parent) => (
               <button
                 key={parent.id}
-                onClick={() => setActiveParentId(parent.id)}
+                onClick={() => setSearchParams({ tab: parent.slug })}
                 className={`
                   flex-shrink-0 px-5 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 ease-in-out
-                  ${activeParentId === parent.id
+                  ${activeParent.id === parent.id
                     ? 'bg-gradient-to-r from-luxury-gold to-luxury-gold-light text-white shadow-lg'
                     : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                   }

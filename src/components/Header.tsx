@@ -338,7 +338,7 @@ const IconSet: React.FC<IconSetProps> = ({ isMenuOpen, setIsMenuOpen, isSearchOp
             ))}
             <button className="lg:hidden p-2 hover:bg-luxury-gold/10 rounded-full transition-all duration-300" onClick={handleMenuToggle} aria-expanded={isMenuOpen}>
                 <span className="sr-only">{isMenuOpen ? "Close menu" : "Open menu"}</span>
-                {isMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
+                {isMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
             </button>
         </div>
     );

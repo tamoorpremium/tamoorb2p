@@ -1132,23 +1132,15 @@ useEffect(() => {
                     )}
                 </button>
 
-               {/* --- 2. THIS LINE IS ALSO UPDATED --- */}
-                {(selectedCategories.length > 0 || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 10000) && (
-                    <> {/* We use a Fragment here to group the note and the button together */}
-                        
-                        {/* This is the new visible note */}
-                        <p className="text-xs italic text-neutral-500 mb-2">
-                            Note: Please clear filter if needed
-                        </p>
-                        
-                        <button
-                            onClick={handleClearFilters}
-                            className="text-sm text-red-600 hover:underline"
-                      >
-                            Clear All
-                        </button>
-                    </>
-                )}
+                {/* --- 2. THIS LINE IS ALSO UPDATED --- */}
+                {(selectedCategories.length > 0 || sortBy !== "featured" || priceRange[0] !== 0 || priceRange[1] !== 10000) && (
+                    <button
+                        onClick={handleClearFilters}
+                        className="text-sm text-red-600 hover:underline"
+                    >
+                        Clear All
+                    </button>
+                )}
                 {/* This part was already correct */}
                 <div className="flex items-center space-x-2 flex-wrap glass rounded-full p-1">
                     <button

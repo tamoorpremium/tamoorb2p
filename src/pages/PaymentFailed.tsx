@@ -26,7 +26,7 @@ const PaymentFailed = () => {
           </div>
 
           <h1 className="text-4xl sm:text-5xl font-display font-bold text-neutral-800 mb-4">
-            Payment Failed
+            Payment Failed!
           </h1>
           
           <p className="text-lg sm:text-xl text-neutral-600 mb-6 font-medium">

@@ -158,7 +158,7 @@ export const useRazorpay = (
       // --- THIS IS THE UPDATED OPTIONS OBJECT ---
       
       const options = {
-        key: 'rzp_test_RA3gvGsfTCGIZB', // replace with live key in prod
+        key: 'rzp_live_RbBT0gx8Z5jxDt', // replace with live key in prod
         amount: data.amount,
         currency: data.currency,
         order_id: data.razorpay_order_id,

@@ -23,12 +23,12 @@ const Categories = () => {
                 card.classList.add('animate-slide-up');
                 card.classList.remove('opacity-0');
                 card.classList.add('opacity-100');
-              }, index * 150);
+              }, index * 200);
             });
           }
         });
       },
-      { threshold: 0.2 }
+      { threshold: 0.3 }
     );
 
     if (sectionRef.current) {
